@@ -41,18 +41,18 @@ export const TicketDetail: FC<TicketDetailProps> = ({
     if (!response.trim()) return;
 
     const newMessage: Message = {
-      id: createMessageId(Date.now().toString()),
+      id: createMessageId(`msg_${Date.now()}`),
       sender: createAgentId("agent-1"), // This should be the actual agent ID
       message: response,
       timestamp: new Date()
     };
 
     // Create a new ticket object with the updated conversation
-    const updatedTicket: Ticket = {
-      ...(ticket as UnwrapReadonly<Ticket>),
+    const updatedTicket = {
+      ...ticket,
       conversation: [...ticket.conversation, newMessage],
       lastUpdated: new Date()
-    };
+    } as UnwrapReadonly<Ticket>;
 
     setActiveTicket(updatedTicket);
     setResponse("");
@@ -152,7 +152,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
               >
                 <div
                   className={`max-w-[80%] rounded-lg p-4 ${
-                    isCustomerMessage && message.sender === "System"
+                    isCustomerMessage && message.sender.toString().startsWith('system_')
                       ? "bg-gray-100 text-gray-600 text-sm"
                       : isCustomerMessage
                       ? "bg-blue-100"

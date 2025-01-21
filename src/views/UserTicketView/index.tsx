@@ -5,10 +5,10 @@ import { type TicketFormData, TicketPriority } from "@/types";
 
 export function UserTicketView() {
   const [showSuccess, setShowSuccess] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<TicketFormData>({
     title: "",
     description: "",
-    priority: "Medium",
+    priority: TicketPriority.MEDIUM,
   });
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +36,7 @@ export function UserTicketView() {
                 setFormData({
                   title: "",
                   description: "",
-                  priority: "Medium",
+                  priority: TicketPriority.MEDIUM,
                 });
               }}
             >

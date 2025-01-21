@@ -17,6 +17,10 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket }) 
     }
   };
 
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleString();
+  };
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-xl font-semibold mb-4">Ticket Queue</h2>
@@ -39,7 +43,7 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket }) 
             <div className="mt-2 flex items-center text-sm text-gray-500">
               <span>Ticket #{ticket.number}</span>
               <span className="mx-2">•</span>
-              <span>{ticket.time}</span>
+              <span>{formatDate(ticket.createdAt)}</span>
               {ticket.assignedTo && (
                 <>
                   <span className="mx-2">•</span>

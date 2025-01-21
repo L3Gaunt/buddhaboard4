@@ -12,6 +12,7 @@ import {
   type Agent,
   type AgentId,
   type ViewType, 
+  type Customer,
   Views, 
   TicketPriority, 
   TicketStatus,
@@ -19,7 +20,8 @@ import {
   AgentRole,
   createTicketId,
   createAgentId,
-  createMessageId
+  createMessageId,
+  createCustomerId
 } from '@/types';
 
 export default function App() {
@@ -39,6 +41,26 @@ export default function App() {
   const agent2Id = createAgentId("agent_2");
   const agent3Id = createAgentId("agent_3");
   const agent4Id = createAgentId("agent_4");
+  const customerId = createCustomerId("customer_1");
+  const systemId = createCustomerId("system_1");
+
+  // Create a customer for the active ticket
+  const customer: Customer = {
+    id: customerId,
+    email: "customer@example.com",
+    name: "John Customer",
+    createdAt: new Date(Date.now() - 86400000), // 1 day ago
+    phone: "+1234567890",
+    company: "Example Corp",
+    avatar: "JC",
+    metadata: {
+      lastLogin: new Date(Date.now() - 3600000), // 1 hour ago
+      preferences: {
+        language: "en",
+        notifications: true
+      }
+    }
+  };
 
   const agents: Agent[] = [
     {
@@ -92,13 +114,13 @@ export default function App() {
       conversation: [
         {
           id: createMessageId("conv_1"),
-          sender: "Customer",
+          sender: customerId,
           message: "Hi, I can't log into my account after resetting my password. The new password isn't working.",
           timestamp: new Date(Date.now() - 7200000),
         },
         {
           id: createMessageId("conv_2"),
-          sender: "System",
+          sender: systemId,
           message: "Password reset request processed",
           timestamp: new Date(Date.now() - 5400000),
         },
@@ -123,7 +145,7 @@ export default function App() {
       conversation: [
         {
           id: createMessageId("conv_4"),
-          sender: "Customer",
+          sender: customerId,
           message: "Would love to see a dark mode option in the app!",
           timestamp: new Date(Date.now() - 10800000),
         },
@@ -255,12 +277,14 @@ export default function App() {
               setShowReassignModal={setShowReassignModal}
               response={response}
               setResponse={setResponse}
+              customer={customer}
+              customerTickets={tickets}
             />
           ) : (
             <TicketQueue tickets={tickets} setActiveTicket={setActiveTicket} />
           ))}
         {currentView === Views.DASHBOARD && <DashboardView />}
-        {currentView === Views.AGENTS && <AgentsView />}
+        {currentView === Views.AGENTS && <AgentsView agents={agents} />}
         {currentView === Views.CHAT && <ChatView />}
       </Layout>
     </>

@@ -1,35 +1,12 @@
 import type { FC } from 'react';
 import { Button } from "@/components/ui/button";
-import { type Agent, AgentStatus, AgentRole, createAgentId } from '@/types';
+import { type Agent, AgentStatus, AgentRole } from '@/types';
 
-export const AgentsView: FC = () => {
-  const agents: Agent[] = [
-    {
-      id: createAgentId("agent_1"),
-      name: "John Doe",
-      role: AgentRole.AGENT,
-      status: AgentStatus.ONLINE,
-      avatar: "",
-      email: "john.doe@example.com"
-    },
-    {
-      id: createAgentId("agent_2"),
-      name: "Jane Smith",
-      role: AgentRole.SUPERVISOR,
-      status: AgentStatus.BUSY,
-      avatar: "",
-      email: "jane.smith@example.com"
-    },
-    {
-      id: createAgentId("agent_3"),
-      name: "Mike Johnson",
-      role: AgentRole.ADMIN,
-      status: AgentStatus.AWAY,
-      avatar: "",
-      email: "mike.johnson@example.com"
-    }
-  ];
+interface AgentsViewProps {
+  agents: Agent[];
+}
 
+export const AgentsView: FC<AgentsViewProps> = ({ agents }) => {
   const getStatusStyle = (status: AgentStatus) => {
     switch (status) {
       case AgentStatus.ONLINE:
