@@ -2,32 +2,7 @@ import type { FC } from 'react';
 import { ArrowLeft, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "../../RichTextEditor";
-
-interface Ticket {
-  id: number;
-  title: string;
-  description: string;
-  priority: string;
-  number: string;
-  time: string;
-  conversation: Array<{
-    sender: string;
-    message: string;
-    time: string;
-  }>;
-}
-
-interface TicketDetailProps {
-  ticket: Ticket;
-  setActiveTicket: (ticket: Ticket | null) => void;
-  ticketPriority: string;
-  setTicketPriority: (priority: string) => void;
-  ticketStatus: string;
-  setTicketStatus: (status: string) => void;
-  setShowReassignModal: (show: boolean) => void;
-  response: string;
-  setResponse: (response: string) => void;
-}
+import { type Ticket, type TicketDetailProps } from '@/types';
 
 export const TicketDetail: FC<TicketDetailProps> = ({
   ticket,

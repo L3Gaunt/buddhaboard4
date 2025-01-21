@@ -7,30 +7,10 @@ import { TicketDetail } from "./views/TicketsView/TicketDetail";
 import { DashboardView } from "./views/DashboardView";
 import { AgentsView } from "./views/AgentsView";
 import { ChatView } from "./views/ChatView";
-
-interface Ticket {
-  id: number;
-  title: string;
-  description: string;
-  priority: string;
-  number: string;
-  time: string;
-  conversation: Array<{
-    sender: string;
-    message: string;
-    time: string;
-  }>;
-}
-
-const views = {
-  TICKETS: "tickets",
-  DASHBOARD: "dashboard",
-  AGENTS: "agents",
-  CHAT: "chat",
-};
+import { type Ticket, type Agent, type ViewType, Views } from '@/types';
 
 export function App() {
-  const [currentView, setCurrentView] = useState(views.TICKETS);
+  const [currentView, setCurrentView] = useState<ViewType>(Views.TICKETS);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -40,7 +20,8 @@ export function App() {
   const [ticketStatus, setTicketStatus] = useState("Open");
   const [showReassignModal, setShowReassignModal] = useState(false);
   const [assignedAgent, setAssignedAgent] = useState("John Doe");
-  const agents = [
+
+  const agents: Agent[] = [
     {
       name: "John Doe",
       role: "Senior Support Agent",
@@ -66,7 +47,8 @@ export function App() {
       avatar: "SW",
     },
   ];
-  const tickets = [
+
+  const tickets: Ticket[] = [
     {
       id: 1,
       title: "Cannot access account after password reset",
@@ -110,6 +92,7 @@ export function App() {
       ],
     },
   ];
+
   return (
     <>
       {showSettings && (
@@ -216,10 +199,10 @@ export function App() {
         setIsMobileMenuOpen={setIsMobileMenuOpen}
         setShowSettings={setShowSettings}
       >
-        {currentView === views.TICKETS && !activeTicket && (
+        {currentView === Views.TICKETS && !activeTicket && (
           <TicketQueue tickets={tickets} setActiveTicket={setActiveTicket} />
         )}
-        {currentView === views.TICKETS && activeTicket && (
+        {currentView === Views.TICKETS && activeTicket && (
           <TicketDetail
             ticket={activeTicket}
             setActiveTicket={setActiveTicket}
@@ -232,9 +215,9 @@ export function App() {
             setResponse={setResponse}
           />
         )}
-        {currentView === views.DASHBOARD && <DashboardView />}
-        {currentView === views.AGENTS && <AgentsView />}
-        {currentView === views.CHAT && <ChatView />}
+        {currentView === Views.DASHBOARD && <DashboardView />}
+        {currentView === Views.AGENTS && <AgentsView />}
+        {currentView === Views.CHAT && <ChatView />}
       </Layout>
     </>
   );

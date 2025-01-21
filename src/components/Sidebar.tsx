@@ -1,19 +1,7 @@
 import type { FC } from 'react';
 import { Inbox, BarChart3, Users, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const views = {
-  TICKETS: "tickets",
-  DASHBOARD: "dashboard",
-  AGENTS: "agents",
-  CHAT: "chat",
-};
-
-interface SidebarProps {
-  currentView: string;
-  setCurrentView: (view: string) => void;
-  isMobileMenuOpen: boolean;
-}
+import { type SidebarProps, Views } from '@/types';
 
 const Sidebar: FC<SidebarProps> = ({ currentView, setCurrentView, isMobileMenuOpen }) => {
   return (
@@ -25,33 +13,33 @@ const Sidebar: FC<SidebarProps> = ({ currentView, setCurrentView, isMobileMenuOp
       </div>
       <nav className="p-4 space-y-2">
         <Button
-          variant={currentView === views.TICKETS ? "secondary" : "ghost"}
+          variant={currentView === Views.TICKETS ? "secondary" : "ghost"}
           className="w-full justify-start"
-          onClick={() => setCurrentView(views.TICKETS)}
+          onClick={() => setCurrentView(Views.TICKETS)}
         >
           <Inbox className="mr-2 h-4 w-4" />
           Tickets
         </Button>
         <Button
-          variant={currentView === views.DASHBOARD ? "secondary" : "ghost"}
+          variant={currentView === Views.DASHBOARD ? "secondary" : "ghost"}
           className="w-full justify-start"
-          onClick={() => setCurrentView(views.DASHBOARD)}
+          onClick={() => setCurrentView(Views.DASHBOARD)}
         >
           <BarChart3 className="mr-2 h-4 w-4" />
           Dashboard
         </Button>
         <Button
-          variant={currentView === views.AGENTS ? "secondary" : "ghost"}
+          variant={currentView === Views.AGENTS ? "secondary" : "ghost"}
           className="w-full justify-start"
-          onClick={() => setCurrentView(views.AGENTS)}
+          onClick={() => setCurrentView(Views.AGENTS)}
         >
           <Users className="mr-2 h-4 w-4" />
           Agents
         </Button>
         <Button
-          variant={currentView === views.CHAT ? "secondary" : "ghost"}
+          variant={currentView === Views.CHAT ? "secondary" : "ghost"}
           className="w-full justify-start"
-          onClick={() => setCurrentView(views.CHAT)}
+          onClick={() => setCurrentView(Views.CHAT)}
         >
           <MessageSquare className="mr-2 h-4 w-4" />
           Live Chat

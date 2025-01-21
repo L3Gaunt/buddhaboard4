@@ -1,23 +1,5 @@
 import type { FC } from 'react';
-
-interface Ticket {
-  id: number;
-  title: string;
-  description: string;
-  priority: string;
-  number: string;
-  time: string;
-  conversation: Array<{
-    sender: string;
-    message: string;
-    time: string;
-  }>;
-}
-
-interface TicketQueueProps {
-  tickets: Ticket[];
-  setActiveTicket: (ticket: Ticket | null) => void;
-}
+import { type Ticket, type TicketQueueProps } from '@/types';
 
 export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket }) => {
   return (
