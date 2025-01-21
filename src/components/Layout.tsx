@@ -2,15 +2,22 @@ import React from "react";
 import { Bell, Settings, Globe, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "./Sidebar";
-export function Layout({
-  children,
-  showSettings,
-  setShowSettings,
+
+interface LayoutProps {
+  currentView: string;
+  setCurrentView: (view: string) => void;
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (isOpen: boolean) => void;
+  children: React.ReactNode;
+}
+
+export default function Layout({
   currentView,
   setCurrentView,
   isMobileMenuOpen,
   setIsMobileMenuOpen,
-}) {
+  children
+}: LayoutProps) {
   return (
     <div className="flex h-screen w-full bg-gray-50">
       <Sidebar

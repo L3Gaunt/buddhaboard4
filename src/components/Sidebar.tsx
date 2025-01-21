@@ -1,13 +1,21 @@
-import React from "react";
+import type { FC } from 'react';
 import { Inbox, BarChart3, Users, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
 const views = {
   TICKETS: "tickets",
   DASHBOARD: "dashboard",
   AGENTS: "agents",
   CHAT: "chat",
 };
-export function Sidebar({ currentView, setCurrentView, isMobileMenuOpen }) {
+
+interface SidebarProps {
+  currentView: string;
+  setCurrentView: (view: string) => void;
+  isMobileMenuOpen: boolean;
+}
+
+const Sidebar: FC<SidebarProps> = ({ currentView, setCurrentView, isMobileMenuOpen }) => {
   return (
     <div
       className={`${isMobileMenuOpen ? "block" : "hidden"} md:block fixed md:relative z-40 w-64 h-full bg-white border-r border-gray-200`}
@@ -51,4 +59,6 @@ export function Sidebar({ currentView, setCurrentView, isMobileMenuOpen }) {
       </nav>
     </div>
   );
-}
+};
+
+export default Sidebar;
