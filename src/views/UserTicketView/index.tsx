@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { type TicketFormData, TicketPriority } from "@/types";
 
 export function UserTicketView() {
   const [showSuccess, setShowSuccess] = useState(false);
@@ -113,16 +114,16 @@ export function UserTicketView() {
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  priority: e.target.value,
+                  priority: e.target.value as TicketPriority,
                 })
               }
             >
-              <option value="Low">Low - General inquiry or minor issue</option>
-              <option value="Medium">
+              <option value={TicketPriority.LOW}>Low - General inquiry or minor issue</option>
+              <option value={TicketPriority.MEDIUM}>
                 Medium - Issue affecting functionality
               </option>
-              <option value="High">High - Serious issue affecting work</option>
-              <option value="Urgent">
+              <option value={TicketPriority.HIGH}>High - Serious issue affecting work</option>
+              <option value={TicketPriority.URGENT}>
                 Urgent - Critical issue affecting business
               </option>
             </select>

@@ -55,11 +55,34 @@ export type AgentRole = typeof AgentRole[keyof typeof AgentRole];
 export type TicketId = number & { readonly brand: unique symbol };
 export type AgentId = string & { readonly brand: unique symbol };
 export type MessageId = string & { readonly brand: unique symbol };
+export type CustomerId = string & { readonly brand: unique symbol };
 
 // Utility functions to create branded types
 export const createTicketId = (id: number): TicketId => id as TicketId;
 export const createAgentId = (id: string): AgentId => id as AgentId;
 export const createMessageId = (id: string): MessageId => id as MessageId;
+export const createCustomerId = (id: string): CustomerId => id as CustomerId;
+
+/**
+ * Represents a customer in the system
+ */
+export interface Customer {
+  id: CustomerId;
+  email: string;
+  name: string;
+  createdAt: Date;
+  avatar?: string;
+  phone?: string;
+  company?: string;
+  metadata?: {
+    lastLogin?: Date;
+    preferences?: {
+      language?: string;
+      notifications?: boolean;
+    };
+    [key: string]: unknown;
+  };
+}
 
 /**
  * Represents a support ticket in the system
@@ -83,7 +106,7 @@ export interface Ticket {
  */
 export interface Message {
   id: MessageId;
-  sender: AgentId | string; // Can be agent ID or customer email/name
+  sender: AgentId | CustomerId; // Can be either an agent or customer
   message: string;
   timestamp: Date;
   attachments?: Array<{
@@ -132,14 +155,22 @@ export const Views = {
   DASHBOARD: "dashboard",
   AGENTS: "agents",
   CHAT: "chat",
+  CUSTOMER_PROFILE: "customer_profile",
 } as const;
 
 export type ViewType = typeof Views[keyof typeof Views];
 
 // Utility type for making all properties in an object readonly
-type DeepReadonly<T> = {
-  readonly [P in keyof T]: T[P] extends object ? DeepReadonly<T[P]> : T[P];
-};
+export type DeepReadonly<T> = T extends (infer U)[]
+  ? ReadonlyArray<DeepReadonly<U>>
+  : T extends Function
+  ? T
+  : T extends object
+  ? { readonly [P in keyof T]: DeepReadonly<T[P]> }
+  : T;
+
+// Special handling for branded types
+export type UnwrapReadonly<T> = T extends DeepReadonly<infer U> ? U : T;
 
 /**
  * Props for the Sidebar component
@@ -183,6 +214,8 @@ export interface TicketDetailProps {
   readonly setShowReassignModal: (show: boolean) => void;
   readonly response: string;
   readonly setResponse: (response: string) => void;
+  readonly customer: DeepReadonly<Customer>;
+  readonly customerTickets: ReadonlyArray<Ticket>;
 }
 
 /**
@@ -194,4 +227,20 @@ export interface RichTextEditorProps {
   readonly placeholder?: string;
   readonly readOnly?: boolean;
   readonly maxLength?: number;
+}
+
+/**
+ * Props for the CustomerProfile components
+ */
+export interface CustomerProfileProps {
+  readonly customer: DeepReadonly<Customer>;
+  readonly customerTickets: ReadonlyArray<Ticket>;
+  readonly onClose: () => void;
+  readonly isExpanded?: boolean;
+  readonly onTicketSelect?: (ticket: Ticket) => void;
+}
+
+export interface CustomerTicketListProps {
+  readonly tickets: ReadonlyArray<Ticket>;
+  readonly onTicketSelect: (ticket: Ticket) => void;
 } 

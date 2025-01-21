@@ -9,7 +9,8 @@ import { AgentsView } from "./views/AgentsView";
 import { ChatView } from "./views/ChatView";
 import { 
   type Ticket, 
-  type Agent, 
+  type Agent,
+  type AgentId,
   type ViewType, 
   Views, 
   TicketPriority, 
@@ -31,7 +32,7 @@ export default function App() {
   const [ticketPriority, setTicketPriority] = useState<TicketPriority>(TicketPriority.MEDIUM);
   const [ticketStatus, setTicketStatus] = useState<TicketStatus>(TicketStatus.OPEN);
   const [showReassignModal, setShowReassignModal] = useState(false);
-  const [assignedAgent, setAssignedAgent] = useState<string>("John Doe");
+  const [assignedAgent, setAssignedAgent] = useState<AgentId>(createAgentId("agent_1"));
 
   // Create IDs once and reuse them
   const agent1Id = createAgentId("agent_1");
@@ -186,7 +187,7 @@ export default function App() {
               <p className="text-sm text-gray-500">
                 Current agent:{" "}
                 <span className="font-medium text-gray-900">
-                  {assignedAgent}
+                  {agents.find(a => a.id === assignedAgent)?.name}
                 </span>
               </p>
             </div>
@@ -196,10 +197,10 @@ export default function App() {
                   <div
                     key={agent.id}
                     className={`p-3 rounded-lg border hover:bg-gray-50 cursor-pointer flex items-center justify-between ${
-                      assignedAgent === agent.name ? "border-blue-500 bg-blue-50" : ""
+                      assignedAgent === agent.id ? "border-blue-500 bg-blue-50" : ""
                     }`}
                     onClick={() => {
-                      setAssignedAgent(agent.name);
+                      setAssignedAgent(agent.id);
                       setShowReassignModal(false);
                     }}
                   >
@@ -224,7 +225,7 @@ export default function App() {
                       >
                         {agent.status}
                       </span>
-                      {assignedAgent === agent.name && (
+                      {assignedAgent === agent.id && (
                         <Check className="h-5 w-5 text-blue-500" />
                       )}
                     </div>

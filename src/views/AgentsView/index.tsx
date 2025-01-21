@@ -1,11 +1,11 @@
 import type { FC } from 'react';
 import { Button } from "@/components/ui/button";
-import { type Agent, AgentStatus, AgentRole } from '@/types';
+import { type Agent, AgentStatus, AgentRole, createAgentId } from '@/types';
 
 export const AgentsView: FC = () => {
   const agents: Agent[] = [
     {
-      id: "1",
+      id: createAgentId("agent_1"),
       name: "John Doe",
       role: AgentRole.AGENT,
       status: AgentStatus.ONLINE,
@@ -13,7 +13,7 @@ export const AgentsView: FC = () => {
       email: "john.doe@example.com"
     },
     {
-      id: "2",
+      id: createAgentId("agent_2"),
       name: "Jane Smith",
       role: AgentRole.SUPERVISOR,
       status: AgentStatus.BUSY,
@@ -21,7 +21,7 @@ export const AgentsView: FC = () => {
       email: "jane.smith@example.com"
     },
     {
-      id: "3",
+      id: createAgentId("agent_3"),
       name: "Mike Johnson",
       role: AgentRole.ADMIN,
       status: AgentStatus.AWAY,
