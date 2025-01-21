@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { Send, X } from "lucide-react";
+import { useState } from "react";
+import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
 export function UserTicketView() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [formData, setFormData] = useState({
@@ -8,7 +9,7 @@ export function UserTicketView() {
     description: "",
     priority: "Medium",
   });
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Here you would typically send the data to your backend
     console.log("Submitting ticket:", formData);

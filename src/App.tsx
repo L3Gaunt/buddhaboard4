@@ -1,22 +1,38 @@
-import React, { useState } from "react";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, XCircle, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Layout } from "./components/Layout";
+import Layout from "./components/Layout";
 import { TicketQueue } from "./views/TicketsView/TicketQueue";
 import { TicketDetail } from "./views/TicketsView/TicketDetail";
 import { DashboardView } from "./views/DashboardView";
 import { AgentsView } from "./views/AgentsView";
 import { ChatView } from "./views/ChatView";
+
+interface Ticket {
+  id: number;
+  title: string;
+  description: string;
+  priority: string;
+  number: string;
+  time: string;
+  conversation: Array<{
+    sender: string;
+    message: string;
+    time: string;
+  }>;
+}
+
 const views = {
   TICKETS: "tickets",
   DASHBOARD: "dashboard",
   AGENTS: "agents",
   CHAT: "chat",
 };
+
 export function App() {
   const [currentView, setCurrentView] = useState(views.TICKETS);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeTicket, setActiveTicket] = useState(null);
+  const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [isAvailable, setIsAvailable] = useState(true);
   const [response, setResponse] = useState("");
@@ -194,12 +210,11 @@ export function App() {
         </div>
       )}
       <Layout
-        showSettings={showSettings}
-        setShowSettings={setShowSettings}
         currentView={currentView}
         setCurrentView={setCurrentView}
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
+        setShowSettings={setShowSettings}
       >
         {currentView === views.TICKETS && !activeTicket && (
           <TicketQueue tickets={tickets} setActiveTicket={setActiveTicket} />

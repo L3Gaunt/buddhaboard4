@@ -1,4 +1,3 @@
-import React from "react";
 export function DashboardView() {
   return (
     <div className="bg-white rounded-lg shadow p-6">

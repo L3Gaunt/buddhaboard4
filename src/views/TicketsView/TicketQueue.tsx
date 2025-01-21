@@ -1,10 +1,30 @@
-import React from "react";
-export function TicketQueue({ tickets, setActiveTicket }) {
+import type { FC } from 'react';
+
+interface Ticket {
+  id: number;
+  title: string;
+  description: string;
+  priority: string;
+  number: string;
+  time: string;
+  conversation: Array<{
+    sender: string;
+    message: string;
+    time: string;
+  }>;
+}
+
+interface TicketQueueProps {
+  tickets: Ticket[];
+  setActiveTicket: (ticket: Ticket | null) => void;
+}
+
+export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket }) => {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-xl font-semibold mb-4">Ticket Queue</h2>
       <div className="space-y-4">
-        {tickets.map((ticket) => (
+        {tickets.map((ticket: Ticket) => (
           <div
             key={ticket.id}
             className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
@@ -29,4 +49,4 @@ export function TicketQueue({ tickets, setActiveTicket }) {
       </div>
     </div>
   );
-}
+};

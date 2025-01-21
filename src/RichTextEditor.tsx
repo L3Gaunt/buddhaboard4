@@ -1,9 +1,15 @@
-import React from "react";
+import type { FC } from 'react';
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Bold, Italic, List, ListOrdered } from "lucide-react";
 import { Button } from "@/components/ui/button";
-export function RichTextEditor({ content, onChange }) {
+
+interface RichTextEditorProps {
+  content: string;
+  onChange: (content: string) => void;
+}
+
+export const RichTextEditor: FC<RichTextEditorProps> = ({ content, onChange }) => {
   const editor = useEditor({
     extensions: [StarterKit],
     content: content,
@@ -56,4 +62,4 @@ export function RichTextEditor({ content, onChange }) {
       />
     </div>
   );
-}
+};

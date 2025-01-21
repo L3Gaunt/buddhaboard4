@@ -1,6 +1,7 @@
-import React from "react";
+import type { FC } from 'react';
 import { Button } from "@/components/ui/button";
-export function AgentsView() {
+
+export const AgentsView: FC = () => {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-xl font-semibold mb-4">Agent Management</h2>
@@ -30,4 +31,4 @@ export function AgentsView() {
       </div>
     </div>
   );
-}
+};

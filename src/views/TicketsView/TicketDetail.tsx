@@ -1,8 +1,35 @@
-import React from "react";
+import type { FC } from 'react';
 import { ArrowLeft, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "../../RichTextEditor";
-export function TicketDetail({
+
+interface Ticket {
+  id: number;
+  title: string;
+  description: string;
+  priority: string;
+  number: string;
+  time: string;
+  conversation: Array<{
+    sender: string;
+    message: string;
+    time: string;
+  }>;
+}
+
+interface TicketDetailProps {
+  ticket: Ticket;
+  setActiveTicket: (ticket: Ticket | null) => void;
+  ticketPriority: string;
+  setTicketPriority: (priority: string) => void;
+  ticketStatus: string;
+  setTicketStatus: (status: string) => void;
+  setShowReassignModal: (show: boolean) => void;
+  response: string;
+  setResponse: (response: string) => void;
+}
+
+export const TicketDetail: FC<TicketDetailProps> = ({
   ticket,
   setActiveTicket,
   ticketPriority,
@@ -12,7 +39,23 @@ export function TicketDetail({
   setShowReassignModal,
   response,
   setResponse,
-}) {
+}) => {
+  const handleSendMessage = () => {
+    if (!response.trim()) return;
+
+    const newMessage = {
+      sender: "Agent",
+      message: response,
+      time: new Date().toLocaleTimeString()
+    };
+
+    setActiveTicket({
+      ...ticket,
+      conversation: [...ticket.conversation, newMessage],
+    });
+    setResponse("");
+  };
+
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="border-b border-gray-200 p-4">
@@ -73,7 +116,7 @@ export function TicketDetail({
         </div>
       </div>
       <div className="p-6 space-y-6">
-        {ticket.conversation.map((message, index) => (
+        {ticket.conversation.map((message: { sender: string; message: string; time: string }, index: number) => (
           <div
             key={index}
             className={`flex ${message.sender === "Customer" ? "justify-start" : "justify-end"}`}
@@ -98,20 +141,7 @@ export function TicketDetail({
           <RichTextEditor content={response} onChange={setResponse} />
           <div className="flex justify-end">
             <Button
-              onClick={() => {
-                if (response.trim()) {
-                  const newMessage = {
-                    sender: "Agent",
-                    message: response,
-                    time: "Just now",
-                  };
-                  setActiveTicket({
-                    ...ticket,
-                    conversation: [...ticket.conversation, newMessage],
-                  });
-                  setResponse("");
-                }
-              }}
+              onClick={handleSendMessage}
             >
               Send Response
             </Button>
@@ -120,4 +150,4 @@ export function TicketDetail({
       </div>
     </div>
   );
-}
+};
