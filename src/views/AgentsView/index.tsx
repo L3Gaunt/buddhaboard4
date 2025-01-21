@@ -1,34 +1,27 @@
-import type { FC } from 'react';
+import { type FC, useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { type Agent, AgentStatus, AgentRole } from '@/types';
+import { getAgents } from '@/lib/api';
 
 export const AgentsView: FC = () => {
-  const agents: Agent[] = [
-    {
-      id: "1",
-      name: "John Doe",
-      role: AgentRole.AGENT,
-      status: AgentStatus.ONLINE,
-      avatar: "",
-      email: "john.doe@example.com"
-    },
-    {
-      id: "2",
-      name: "Jane Smith",
-      role: AgentRole.SUPERVISOR,
-      status: AgentStatus.BUSY,
-      avatar: "",
-      email: "jane.smith@example.com"
-    },
-    {
-      id: "3",
-      name: "Mike Johnson",
-      role: AgentRole.ADMIN,
-      status: AgentStatus.AWAY,
-      avatar: "",
-      email: "mike.johnson@example.com"
-    }
-  ];
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAgents = async () => {
+      try {
+        const agentsData = await getAgents();
+        setAgents(agentsData);
+      } catch (error) {
+        console.error('Error fetching agents:', error);
+        // TODO: Add error handling UI
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAgents();
+  }, []);
 
   const getStatusStyle = (status: AgentStatus) => {
     switch (status) {
@@ -58,40 +51,52 @@ export const AgentsView: FC = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-xl font-semibold mb-4">Agent Management</h2>
       <div className="space-y-4">
-        {agents.map((agent) => (
-          <div
-            key={agent.id}
-            className="border rounded-lg p-4 flex items-center justify-between"
-          >
-            <div className="flex items-center">
-              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-600">
-                  {agent.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </span>
-              </div>
-              <div className="ml-4">
-                <h3 className="font-medium">{agent.name}</h3>
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-0.5 text-xs rounded-full ${getRoleStyle(agent.role)}`}>
-                    {agent.role.replace("_", " ")}
-                  </span>
-                  <span className={`px-2 py-0.5 text-xs rounded-full ${getStatusStyle(agent.status)}`}>
-                    {agent.status.replace("_", " ")}
+        {agents.map((agent) => {
+          // Convert readonly agent to mutable one for type safety
+          const mutableAgent = JSON.parse(JSON.stringify(agent)) as Agent;
+          return (
+            <div
+              key={String(mutableAgent.id)}
+              className="border rounded-lg p-4 flex items-center justify-between"
+            >
+              <div className="flex items-center">
+                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-sm font-medium text-gray-600">
+                    {mutableAgent.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
                   </span>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">{agent.email}</p>
+                <div className="ml-4">
+                  <h3 className="font-medium">{mutableAgent.name}</h3>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-0.5 text-xs rounded-full ${getRoleStyle(mutableAgent.role)}`}>
+                      {mutableAgent.role.replace("_", " ")}
+                    </span>
+                    <span className={`px-2 py-0.5 text-xs rounded-full ${getStatusStyle(mutableAgent.status)}`}>
+                      {mutableAgent.status.replace("_", " ")}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">{mutableAgent.email}</p>
+                </div>
               </div>
+              <Button variant="outline">Manage</Button>
             </div>
-            <Button variant="outline">Manage</Button>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

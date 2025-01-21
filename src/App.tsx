@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CheckCircle2, XCircle, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
@@ -16,10 +16,8 @@ import {
   TicketStatus,
   AgentStatus,
   AgentRole,
-  createTicketId,
-  createAgentId,
-  createConversationId
 } from '@/types';
+import { getTickets, getAgents, getTicketConversations, updateAgentStatus } from '@/lib/api';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<ViewType>(Views.TICKETS);
@@ -31,104 +29,76 @@ export default function App() {
   const [ticketPriority, setTicketPriority] = useState<TicketPriority>(TicketPriority.MEDIUM);
   const [ticketStatus, setTicketStatus] = useState<TicketStatus>(TicketStatus.OPEN);
   const [showReassignModal, setShowReassignModal] = useState(false);
-  const [assignedAgent, setAssignedAgent] = useState<string>("John Doe");
+  const [assignedAgent, setAssignedAgent] = useState<string>("");
+  
+  // State for data from Supabase
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Create IDs once and reuse them
-  const agent1Id = createAgentId("agent_1");
-  const agent2Id = createAgentId("agent_2");
-  const agent3Id = createAgentId("agent_3");
-  const agent4Id = createAgentId("agent_4");
+  // Fetch initial data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [ticketsData, agentsData] = await Promise.all([
+          getTickets(),
+          getAgents()
+        ]);
+        setTickets(ticketsData);
+        setAgents(agentsData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const agents: Agent[] = [
-    {
-      id: agent1Id,
-      name: "John Doe",
-      role: AgentRole.AGENT,
-      status: AgentStatus.ONLINE,
-      avatar: "JD",
-      email: "john.doe@example.com"
-    },
-    {
-      id: agent2Id,
-      name: "Jane Smith",
-      role: AgentRole.AGENT,
-      status: AgentStatus.ONLINE,
-      avatar: "JS",
-      email: "jane.smith@example.com"
-    },
-    {
-      id: agent3Id,
-      name: "Mike Johnson",
-      role: AgentRole.AGENT,
-      status: AgentStatus.AWAY,
-      avatar: "MJ",
-      email: "mike.johnson@example.com"
-    },
-    {
-      id: agent4Id,
-      name: "Sarah Wilson",
-      role: AgentRole.SUPERVISOR,
-      status: AgentStatus.ONLINE,
-      avatar: "SW",
-      email: "sarah.wilson@example.com"
-    },
-  ];
+    fetchData();
+  }, []);
 
-  // Create ticket IDs once
-  const ticket1Id = createTicketId(1);
-  const ticket2Id = createTicketId(2);
+  // Fetch conversations when active ticket changes
+  useEffect(() => {
+    const fetchConversations = async () => {
+      if (activeTicket) {
+        try {
+          const conversations = await getTicketConversations(activeTicket.id);
+          setActiveTicket(prev => prev ? { ...prev, conversation: conversations } : null);
+        } catch (error) {
+          console.error('Error fetching conversations:', error);
+        }
+      }
+    };
 
-  const tickets: Ticket[] = [
-    {
-      id: ticket1Id,
-      title: "Cannot access account after password reset",
-      description: "Customer reported issues logging in...",
-      priority: TicketPriority.MEDIUM,
-      status: TicketStatus.OPEN,
-      number: "1234",
-      createdAt: new Date(Date.now() - 7200000), // 2 hours ago
-      lastUpdated: new Date(Date.now() - 3600000), // 1 hour ago
-      conversation: [
-        {
-          id: createConversationId("conv_1"),
-          sender: "Customer",
-          message: "Hi, I can't log into my account after resetting my password. The new password isn't working.",
-          timestamp: new Date(Date.now() - 7200000),
-        },
-        {
-          id: createConversationId("conv_2"),
-          sender: "System",
-          message: "Password reset request processed",
-          timestamp: new Date(Date.now() - 5400000),
-        },
-        {
-          id: createConversationId("conv_3"),
-          sender: agent1Id,
-          message: "Hello! I understand you're having trouble logging in. Could you please confirm if you received the password reset email?",
-          timestamp: new Date(Date.now() - 3600000),
-        },
-      ],
-      assignedTo: agent1Id,
-    },
-    {
-      id: ticket2Id,
-      title: "Feature request: Dark mode",
-      description: "User suggesting new feature implementation...",
-      priority: TicketPriority.LOW,
-      status: TicketStatus.OPEN,
-      number: "1235",
-      createdAt: new Date(Date.now() - 10800000), // 3 hours ago
-      lastUpdated: new Date(Date.now() - 10800000),
-      conversation: [
-        {
-          id: createConversationId("conv_4"),
-          sender: "Customer",
-          message: "Would love to see a dark mode option in the app!",
-          timestamp: new Date(Date.now() - 10800000),
-        },
-      ],
-    },
-  ];
+    fetchConversations();
+  }, [activeTicket?.id]);
+
+  // Update agent status
+  useEffect(() => {
+    const updateStatus = async () => {
+      const currentAgent = agents[0]; // Assuming first agent is current user
+      if (currentAgent) {
+        try {
+          await updateAgentStatus(
+            currentAgent.id,
+            isAvailable ? AgentStatus.ONLINE : AgentStatus.AWAY
+          );
+        } catch (error) {
+          console.error('Error updating agent status:', error);
+        }
+      }
+    };
+
+    updateStatus();
+  }, [isAvailable, agents]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
     <>

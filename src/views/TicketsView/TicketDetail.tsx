@@ -7,8 +7,13 @@ import {
   type TicketDetailProps, 
   TicketPriority, 
   TicketStatus,
-  type Conversation 
+  type Conversation,
+  type TicketId,
+  type ConversationId,
+  createTicketId,
+  createConversationId
 } from '@/types';
+import { updateTicket, addConversation } from '@/lib/api';
 
 export const TicketDetail: FC<TicketDetailProps> = ({
   ticket,
@@ -21,22 +26,56 @@ export const TicketDetail: FC<TicketDetailProps> = ({
   response,
   setResponse,
 }) => {
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!response.trim()) return;
 
-    const newMessage: Conversation = {
-      id: Date.now().toString(),
-      sender: "Agent",
-      message: response,
-      time: new Date().toLocaleTimeString()
-    };
+    try {
+      const newConversation = await addConversation(
+        createTicketId(Number(ticket.id)),
+        response,
+        "Agent" // TODO: Replace with actual agent ID
+      );
 
-    setActiveTicket({
-      ...ticket,
-      conversation: [...ticket.conversation, newMessage],
-      lastUpdated: new Date().toLocaleTimeString()
-    });
-    setResponse("");
+      // Convert readonly objects to mutable ones
+      const mutableTicket = JSON.parse(JSON.stringify(ticket)) as Ticket;
+      const mutableConversation = {
+        ...newConversation,
+        id: createConversationId(newConversation.id),
+        timestamp: new Date(newConversation.timestamp)
+      } as Conversation;
+
+      const updatedTicket: Ticket = {
+        ...mutableTicket,
+        conversation: [...mutableTicket.conversation, mutableConversation],
+        lastUpdated: new Date()
+      };
+
+      setActiveTicket(updatedTicket);
+      setResponse("");
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // TODO: Add error handling UI
+    }
+  };
+
+  const handlePriorityChange = async (newPriority: TicketPriority) => {
+    try {
+      await updateTicket(createTicketId(Number(ticket.id)), { priority: newPriority });
+      setTicketPriority(newPriority);
+    } catch (error) {
+      console.error('Error updating priority:', error);
+      // TODO: Add error handling UI
+    }
+  };
+
+  const handleStatusChange = async (newStatus: TicketStatus) => {
+    try {
+      await updateTicket(createTicketId(Number(ticket.id)), { status: newStatus });
+      setTicketStatus(newStatus);
+    } catch (error) {
+      console.error('Error updating status:', error);
+      // TODO: Add error handling UI
+    }
   };
 
   return (
@@ -59,7 +98,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
             <select
               className="px-3 py-1 text-sm border rounded-md"
               value={ticketPriority}
-              onChange={(e) => setTicketPriority(e.target.value as TicketPriority)}
+              onChange={(e) => handlePriorityChange(e.target.value as TicketPriority)}
             >
               <option value={TicketPriority.LOW}>Low Priority</option>
               <option value={TicketPriority.MEDIUM}>Medium Priority</option>
@@ -69,7 +108,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
             <select
               className="px-3 py-1 text-sm border rounded-md"
               value={ticketStatus}
-              onChange={(e) => setTicketStatus(e.target.value as TicketStatus)}
+              onChange={(e) => handleStatusChange(e.target.value as TicketStatus)}
             >
               <option value={TicketStatus.OPEN}>Open</option>
               <option value={TicketStatus.IN_PROGRESS}>In Progress</option>
@@ -114,33 +153,37 @@ export const TicketDetail: FC<TicketDetailProps> = ({
         </div>
       </div>
       <div className="p-6 space-y-6">
-        {ticket.conversation.map((message: { sender: string; message: string; time: string }, index: number) => (
-          <div
-            key={index}
-            className={`flex ${message.sender === "Customer" ? "justify-start" : "justify-end"}`}
-          >
+        {ticket.conversation.map((message) => {
+          // Convert readonly message to mutable one
+          const mutableMessage = JSON.parse(JSON.stringify(message));
+          return (
             <div
-              className={`max-w-[80%] rounded-lg p-4 ${message.sender === "System" ? "bg-gray-100 text-gray-600 text-sm" : message.sender === "Customer" ? "bg-blue-100" : "bg-green-100"}`}
+              key={String(mutableMessage.id)}
+              className={`flex ${mutableMessage.sender === "Customer" ? "justify-start" : "justify-end"}`}
             >
-              <div className="font-medium text-sm mb-1">{message.sender}</div>
               <div
-                className="prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{
-                  __html: message.message,
-                }}
-              />
-              <div className="text-xs text-gray-500 mt-2">{message.time}</div>
+                className={`max-w-[80%] rounded-lg p-4 ${mutableMessage.sender === "System" ? "bg-gray-100 text-gray-600 text-sm" : mutableMessage.sender === "Customer" ? "bg-blue-100" : "bg-green-100"}`}
+              >
+                <div className="font-medium text-sm mb-1">{mutableMessage.sender}</div>
+                <div
+                  className="prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{
+                    __html: mutableMessage.message,
+                  }}
+                />
+                <div className="text-xs text-gray-500 mt-2">
+                  {new Date(mutableMessage.timestamp).toLocaleString()}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       <div className="border-t border-gray-200 p-4">
         <div className="space-y-4">
           <RichTextEditor content={response} onChange={setResponse} />
           <div className="flex justify-end">
-            <Button
-              onClick={handleSendMessage}
-            >
+            <Button onClick={handleSendMessage}>
               Send Response
             </Button>
           </div>
