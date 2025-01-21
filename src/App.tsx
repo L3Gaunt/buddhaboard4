@@ -1,93 +1,130 @@
 import { useState } from "react";
 import { CheckCircle2, XCircle, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Layout from "./components/Layout";
+import Layout from "@/components/Layout";
 import { TicketQueue } from "./views/TicketsView/TicketQueue";
 import { TicketDetail } from "./views/TicketsView/TicketDetail";
 import { DashboardView } from "./views/DashboardView";
 import { AgentsView } from "./views/AgentsView";
 import { ChatView } from "./views/ChatView";
-import { type Ticket, type Agent, type ViewType, Views } from '@/types';
+import { 
+  type Ticket, 
+  type Agent, 
+  type ViewType, 
+  Views, 
+  TicketPriority, 
+  TicketStatus,
+  AgentStatus,
+  AgentRole,
+  createTicketId,
+  createAgentId,
+  createConversationId
+} from '@/types';
 
-export function App() {
+export default function App() {
   const [currentView, setCurrentView] = useState<ViewType>(Views.TICKETS);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [isAvailable, setIsAvailable] = useState(true);
   const [response, setResponse] = useState("");
-  const [ticketPriority, setTicketPriority] = useState("Medium");
-  const [ticketStatus, setTicketStatus] = useState("Open");
+  const [ticketPriority, setTicketPriority] = useState<TicketPriority>(TicketPriority.MEDIUM);
+  const [ticketStatus, setTicketStatus] = useState<TicketStatus>(TicketStatus.OPEN);
   const [showReassignModal, setShowReassignModal] = useState(false);
-  const [assignedAgent, setAssignedAgent] = useState("John Doe");
+  const [assignedAgent, setAssignedAgent] = useState<string>("John Doe");
+
+  // Create IDs once and reuse them
+  const agent1Id = createAgentId("agent_1");
+  const agent2Id = createAgentId("agent_2");
+  const agent3Id = createAgentId("agent_3");
+  const agent4Id = createAgentId("agent_4");
 
   const agents: Agent[] = [
     {
+      id: agent1Id,
       name: "John Doe",
-      role: "Senior Support Agent",
-      status: "Available",
+      role: AgentRole.AGENT,
+      status: AgentStatus.ONLINE,
       avatar: "JD",
+      email: "john.doe@example.com"
     },
     {
+      id: agent2Id,
       name: "Jane Smith",
-      role: "Technical Support",
-      status: "Available",
+      role: AgentRole.AGENT,
+      status: AgentStatus.ONLINE,
       avatar: "JS",
+      email: "jane.smith@example.com"
     },
     {
+      id: agent3Id,
       name: "Mike Johnson",
-      role: "Customer Support",
-      status: "Away",
+      role: AgentRole.AGENT,
+      status: AgentStatus.AWAY,
       avatar: "MJ",
+      email: "mike.johnson@example.com"
     },
     {
+      id: agent4Id,
       name: "Sarah Wilson",
-      role: "Product Specialist",
-      status: "Available",
+      role: AgentRole.SUPERVISOR,
+      status: AgentStatus.ONLINE,
       avatar: "SW",
+      email: "sarah.wilson@example.com"
     },
   ];
 
+  // Create ticket IDs once
+  const ticket1Id = createTicketId(1);
+  const ticket2Id = createTicketId(2);
+
   const tickets: Ticket[] = [
     {
-      id: 1,
+      id: ticket1Id,
       title: "Cannot access account after password reset",
       description: "Customer reported issues logging in...",
-      priority: "Medium",
+      priority: TicketPriority.MEDIUM,
+      status: TicketStatus.OPEN,
       number: "1234",
-      time: "2 hours ago",
+      createdAt: new Date(Date.now() - 7200000), // 2 hours ago
+      lastUpdated: new Date(Date.now() - 3600000), // 1 hour ago
       conversation: [
         {
+          id: createConversationId("conv_1"),
           sender: "Customer",
-          message:
-            "Hi, I can't log into my account after resetting my password. The new password isn't working.",
-          time: "2 hours ago",
+          message: "Hi, I can't log into my account after resetting my password. The new password isn't working.",
+          timestamp: new Date(Date.now() - 7200000),
         },
         {
+          id: createConversationId("conv_2"),
           sender: "System",
           message: "Password reset request processed",
-          time: "1.5 hours ago",
+          timestamp: new Date(Date.now() - 5400000),
         },
         {
-          sender: "Agent",
-          message:
-            "Hello! I understand you're having trouble logging in. Could you please confirm if you received the password reset email?",
-          time: "1 hour ago",
+          id: createConversationId("conv_3"),
+          sender: agent1Id,
+          message: "Hello! I understand you're having trouble logging in. Could you please confirm if you received the password reset email?",
+          timestamp: new Date(Date.now() - 3600000),
         },
       ],
+      assignedTo: agent1Id,
     },
     {
-      id: 2,
+      id: ticket2Id,
       title: "Feature request: Dark mode",
       description: "User suggesting new feature implementation...",
-      priority: "Low",
+      priority: TicketPriority.LOW,
+      status: TicketStatus.OPEN,
       number: "1235",
-      time: "3 hours ago",
+      createdAt: new Date(Date.now() - 10800000), // 3 hours ago
+      lastUpdated: new Date(Date.now() - 10800000),
       conversation: [
         {
+          id: createConversationId("conv_4"),
           sender: "Customer",
           message: "Would love to see a dark mode option in the app!",
-          time: "3 hours ago",
+          timestamp: new Date(Date.now() - 10800000),
         },
       ],
     },
@@ -157,8 +194,10 @@ export function App() {
               <div className="space-y-2">
                 {agents.map((agent) => (
                   <div
-                    key={agent.name}
-                    className={`p-3 rounded-lg border hover:bg-gray-50 cursor-pointer flex items-center justify-between ${assignedAgent === agent.name ? "border-blue-500 bg-blue-50" : ""}`}
+                    key={agent.id}
+                    className={`p-3 rounded-lg border hover:bg-gray-50 cursor-pointer flex items-center justify-between ${
+                      assignedAgent === agent.name ? "border-blue-500 bg-blue-50" : ""
+                    }`}
                     onClick={() => {
                       setAssignedAgent(agent.name);
                       setShowReassignModal(false);
@@ -177,7 +216,11 @@ export function App() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <span
-                        className={`px-2 py-1 text-xs rounded-full ${agent.status === "Available" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}
+                        className={`px-2 py-1 text-xs rounded-full ${
+                          agent.status === AgentStatus.ONLINE
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
                       >
                         {agent.status}
                       </span>
@@ -199,22 +242,22 @@ export function App() {
         setIsMobileMenuOpen={setIsMobileMenuOpen}
         setShowSettings={setShowSettings}
       >
-        {currentView === Views.TICKETS && !activeTicket && (
-          <TicketQueue tickets={tickets} setActiveTicket={setActiveTicket} />
-        )}
-        {currentView === Views.TICKETS && activeTicket && (
-          <TicketDetail
-            ticket={activeTicket}
-            setActiveTicket={setActiveTicket}
-            ticketPriority={ticketPriority}
-            setTicketPriority={setTicketPriority}
-            ticketStatus={ticketStatus}
-            setTicketStatus={setTicketStatus}
-            setShowReassignModal={setShowReassignModal}
-            response={response}
-            setResponse={setResponse}
-          />
-        )}
+        {currentView === Views.TICKETS &&
+          (activeTicket ? (
+            <TicketDetail
+              ticket={activeTicket}
+              setActiveTicket={setActiveTicket}
+              ticketPriority={ticketPriority}
+              setTicketPriority={setTicketPriority}
+              ticketStatus={ticketStatus}
+              setTicketStatus={setTicketStatus}
+              setShowReassignModal={setShowReassignModal}
+              response={response}
+              setResponse={setResponse}
+            />
+          ) : (
+            <TicketQueue tickets={tickets} setActiveTicket={setActiveTicket} />
+          ))}
         {currentView === Views.DASHBOARD && <DashboardView />}
         {currentView === Views.AGENTS && <AgentsView />}
         {currentView === Views.CHAT && <ChatView />}

@@ -56,6 +56,11 @@ export type TicketId = number & { readonly brand: unique symbol };
 export type AgentId = string & { readonly brand: unique symbol };
 export type ConversationId = string & { readonly brand: unique symbol };
 
+// Utility functions to create branded types
+export const createTicketId = (id: number): TicketId => id as TicketId;
+export const createAgentId = (id: string): AgentId => id as AgentId;
+export const createConversationId = (id: string): ConversationId => id as ConversationId;
+
 /**
  * Represents a support ticket in the system
  */
