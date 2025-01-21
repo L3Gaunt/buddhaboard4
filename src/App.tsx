@@ -18,7 +18,7 @@ import {
   AgentRole,
   createTicketId,
   createAgentId,
-  createConversationId
+  createMessageId
 } from '@/types';
 
 export default function App() {
@@ -90,19 +90,19 @@ export default function App() {
       lastUpdated: new Date(Date.now() - 3600000), // 1 hour ago
       conversation: [
         {
-          id: createConversationId("conv_1"),
+          id: createMessageId("conv_1"),
           sender: "Customer",
           message: "Hi, I can't log into my account after resetting my password. The new password isn't working.",
           timestamp: new Date(Date.now() - 7200000),
         },
         {
-          id: createConversationId("conv_2"),
+          id: createMessageId("conv_2"),
           sender: "System",
           message: "Password reset request processed",
           timestamp: new Date(Date.now() - 5400000),
         },
         {
-          id: createConversationId("conv_3"),
+          id: createMessageId("conv_3"),
           sender: agent1Id,
           message: "Hello! I understand you're having trouble logging in. Could you please confirm if you received the password reset email?",
           timestamp: new Date(Date.now() - 3600000),
@@ -121,7 +121,7 @@ export default function App() {
       lastUpdated: new Date(Date.now() - 10800000),
       conversation: [
         {
-          id: createConversationId("conv_4"),
+          id: createMessageId("conv_4"),
           sender: "Customer",
           message: "Would love to see a dark mode option in the app!",
           timestamp: new Date(Date.now() - 10800000),

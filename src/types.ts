@@ -54,12 +54,12 @@ export type AgentRole = typeof AgentRole[keyof typeof AgentRole];
 // Custom type aliases for better type safety
 export type TicketId = number & { readonly brand: unique symbol };
 export type AgentId = string & { readonly brand: unique symbol };
-export type ConversationId = string & { readonly brand: unique symbol };
+export type MessageId = string & { readonly brand: unique symbol };
 
 // Utility functions to create branded types
 export const createTicketId = (id: number): TicketId => id as TicketId;
 export const createAgentId = (id: string): AgentId => id as AgentId;
-export const createConversationId = (id: string): ConversationId => id as ConversationId;
+export const createMessageId = (id: string): MessageId => id as MessageId;
 
 /**
  * Represents a support ticket in the system
@@ -72,7 +72,7 @@ export interface Ticket {
   status: TicketStatus;
   number: string;
   createdAt: Date;
-  conversation: Conversation[];
+  conversation: Message[];
   assignedTo?: AgentId;
   lastUpdated: Date;
   metadata?: Record<string, unknown>;
@@ -81,8 +81,8 @@ export interface Ticket {
 /**
  * Represents a message in a ticket conversation
  */
-export interface Conversation {
-  id: ConversationId;
+export interface Message {
+  id: MessageId;
   sender: AgentId | string; // Can be agent ID or customer email/name
   message: string;
   timestamp: Date;
