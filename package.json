@@ -11,15 +11,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "lucide-react": "latest",
+    "@radix-ui/react-slot": "latest",
+    "@supabase/supabase-js": "^2.48.0",
     "@tiptap/react": "latest",
     "@tiptap/starter-kit": "latest",
+    "class-variance-authority": "latest",
     "clsx": "latest",
-    "tailwind-merge": "latest",
-    "@radix-ui/react-slot": "latest",
-    "class-variance-authority": "latest"
+    "lucide-react": "latest",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwind-merge": "latest"
   },
   "devDependencies": {
     "@types/node": "^20.11.18",
@@ -28,13 +29,13 @@
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.54.0",
     "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "latest",
     "eslint": "^8.50.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.1",
-    "typescript": "^5.5.4",
-    "vite": "^5.2.0",
+    "postcss": "latest",
     "tailwindcss": "latest",
-    "autoprefixer": "latest",
-    "postcss": "latest"
+    "typescript": "^5.5.4",
+    "vite": "^5.2.0"
   }
 }

@@ -1,76 +1,127 @@
 // Common Types and Interfaces
 
-// Enum for ticket priority
-export enum TicketPriority {
-  LOW = "low",
-  MEDIUM = "medium",
-  HIGH = "high",
-  URGENT = "urgent"
-}
+/**
+ * Enum for ticket priority levels
+ * @readonly
+ */
+export const TicketPriority = {
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+  URGENT: "urgent"
+} as const;
 
-// Enum for ticket status
-export enum TicketStatus {
-  OPEN = "open",
-  IN_PROGRESS = "in_progress",
-  RESOLVED = "resolved",
-  CLOSED = "closed"
-}
+export type TicketPriority = typeof TicketPriority[keyof typeof TicketPriority];
 
-// Enum for agent status
-export enum AgentStatus {
-  ONLINE = "online",
-  OFFLINE = "offline",
-  BUSY = "busy",
-  AWAY = "away"
-}
+/**
+ * Enum for ticket status
+ * @readonly
+ */
+export const TicketStatus = {
+  OPEN: "open",
+  IN_PROGRESS: "in_progress",
+  RESOLVED: "resolved",
+  CLOSED: "closed"
+} as const;
 
-// Enum for agent roles
-export enum AgentRole {
-  ADMIN = "admin",
-  AGENT = "agent",
-  SUPERVISOR = "supervisor"
-}
+export type TicketStatus = typeof TicketStatus[keyof typeof TicketStatus];
 
-// Ticket related types
+/**
+ * Enum for agent status
+ * @readonly
+ */
+export const AgentStatus = {
+  ONLINE: "online",
+  OFFLINE: "offline",
+  BUSY: "busy",
+  AWAY: "away"
+} as const;
+
+export type AgentStatus = typeof AgentStatus[keyof typeof AgentStatus];
+
+/**
+ * Enum for agent roles
+ * @readonly
+ */
+export const AgentRole = {
+  ADMIN: "admin",
+  AGENT: "agent",
+  SUPERVISOR: "supervisor"
+} as const;
+
+export type AgentRole = typeof AgentRole[keyof typeof AgentRole];
+
+// Custom type aliases for better type safety
+export type TicketId = number & { readonly brand: unique symbol };
+export type AgentId = string & { readonly brand: unique symbol };
+export type ConversationId = string & { readonly brand: unique symbol };
+
+/**
+ * Represents a support ticket in the system
+ */
 export interface Ticket {
-  id: number;
+  id: TicketId;
   title: string;
   description: string;
   priority: TicketPriority;
   status: TicketStatus;
   number: string;
-  time: string; // Consider using Date type if working with actual dates
+  createdAt: Date;
   conversation: Conversation[];
-  assignedTo?: string; // Optional agent assignment
-  lastUpdated: string; // Consider using Date type if working with actual dates
+  assignedTo?: AgentId;
+  lastUpdated: Date;
+  metadata?: Record<string, unknown>;
 }
 
+/**
+ * Represents a message in a ticket conversation
+ */
 export interface Conversation {
-  id: string;
-  sender: string;
+  id: ConversationId;
+  sender: AgentId | string; // Can be agent ID or customer email/name
   message: string;
-  time: string; // Consider using Date type if working with actual dates
-  attachments?: string[]; // Optional attachments
+  timestamp: Date;
+  attachments?: Array<{
+    url: string;
+    name: string;
+    type: string;
+    size: number;
+  }>;
+  metadata?: Record<string, unknown>;
 }
 
-// Form Data type for ticket submission
+/**
+ * Form data structure for ticket submission
+ */
 export interface TicketFormData {
   title: string;
   description: string;
   priority: TicketPriority;
+  attachments?: File[];
 }
 
-// Agent related types
+/**
+ * Represents an agent in the system
+ */
 export interface Agent {
-  id: string;
+  id: AgentId;
   name: string;
   role: AgentRole;
   status: AgentStatus;
   avatar: string;
   email: string;
+  metadata?: {
+    department?: string;
+    skills?: string[];
+    languages?: string[];
+    [key: string]: unknown;
+  };
 }
 
-// View types
+/**
+ * Available views in the application
+ * @readonly
+ */
 export const Views = {
   TICKETS: "tickets",
   DASHBOARD: "dashboard",
@@ -80,42 +131,62 @@ export const Views = {
 
 export type ViewType = typeof Views[keyof typeof Views];
 
-// Component Props Types
+// Utility type for making all properties in an object readonly
+type DeepReadonly<T> = {
+  readonly [P in keyof T]: T[P] extends object ? DeepReadonly<T[P]> : T[P];
+};
+
+/**
+ * Props for the Sidebar component
+ */
 export interface SidebarProps {
-  currentView: ViewType;
-  setCurrentView: (view: ViewType) => void;
-  isMobileMenuOpen: boolean;
+  readonly currentView: ViewType;
+  readonly setCurrentView: (view: ViewType) => void;
+  readonly isMobileMenuOpen: boolean;
 }
 
+/**
+ * Props for the Layout component
+ */
 export interface LayoutProps {
-  currentView: ViewType;
-  setCurrentView: (view: ViewType) => void;
-  isMobileMenuOpen: boolean;
-  setIsMobileMenuOpen: (isOpen: boolean) => void;
-  children: React.ReactNode;
-  setShowSettings: (show: boolean) => void;
+  readonly currentView: ViewType;
+  readonly setCurrentView: (view: ViewType) => void;
+  readonly isMobileMenuOpen: boolean;
+  readonly setIsMobileMenuOpen: (isOpen: boolean) => void;
+  readonly children: React.ReactNode;
+  readonly setShowSettings: (show: boolean) => void;
 }
 
+/**
+ * Props for the TicketQueue component
+ */
 export interface TicketQueueProps {
-  tickets: Ticket[];
-  setActiveTicket: (ticket: Ticket | null) => void;
+  readonly tickets: ReadonlyArray<Ticket>;
+  readonly setActiveTicket: (ticket: Ticket | null) => void;
 }
 
+/**
+ * Props for the TicketDetail component
+ */
 export interface TicketDetailProps {
-  ticket: Ticket;
-  setActiveTicket: (ticket: Ticket | null) => void;
-  ticketPriority: TicketPriority;
-  setTicketPriority: (priority: TicketPriority) => void;
-  ticketStatus: TicketStatus;
-  setTicketStatus: (status: TicketStatus) => void;
-  setShowReassignModal: (show: boolean) => void;
-  response: string;
-  setResponse: (response: string) => void;
+  readonly ticket: DeepReadonly<Ticket>;
+  readonly setActiveTicket: (ticket: Ticket | null) => void;
+  readonly ticketPriority: TicketPriority;
+  readonly setTicketPriority: (priority: TicketPriority) => void;
+  readonly ticketStatus: TicketStatus;
+  readonly setTicketStatus: (status: TicketStatus) => void;
+  readonly setShowReassignModal: (show: boolean) => void;
+  readonly response: string;
+  readonly setResponse: (response: string) => void;
 }
 
+/**
+ * Props for the RichTextEditor component
+ */
 export interface RichTextEditorProps {
-  content: string;
-  onChange: (content: string) => void;
-  placeholder?: string;
-  readOnly?: boolean;
+  readonly content: string;
+  readonly onChange: (content: string) => void;
+  readonly placeholder?: string;
+  readonly readOnly?: boolean;
+  readonly maxLength?: number;
 } 
