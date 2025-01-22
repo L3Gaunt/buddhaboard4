@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { signIn, signUp } from '@/lib/auth';
+import { signIn, getAgentProfile } from '@/lib/auth';
 import { Button } from "@/components/ui/button";
 
 export function LoginView() {
@@ -17,28 +17,20 @@ export function LoginView() {
       console.log('Attempting to sign in with:', { email });
       const result = await signIn(email, password);
       console.log('Sign in result:', result);
+      
+      if (result.user) {
+        // Get agent profile to confirm they are an agent
+        const agentProfile = await getAgentProfile(result.user.id);
+        if (agentProfile) {
+          // Force a page reload to update the app state
+          window.location.reload();
+        } else {
+          setError('Access denied: Not an agent account');
+        }
+      }
     } catch (err) {
       console.error('Detailed login error:', err);
       setError(err instanceof Error ? err.message : 'Invalid email or password');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateTestAgent = async () => {
-    try {
-      setLoading(true);
-      const result = await signUp({
-        email: 'agent1@buddhaboard.com',
-        password: 'password123',
-        name: 'Sarah Johnson',
-        role: 'agent'
-      });
-      console.log('Created test agent:', result);
-      setError('Test agent created successfully! You can now log in.');
-    } catch (err) {
-      console.error('Error creating test agent:', err);
-      setError(err instanceof Error ? err.message : 'Error creating test agent');
     } finally {
       setLoading(false);
     }
@@ -88,16 +80,6 @@ export function LoginView() {
             {loading ? 'Signing in...' : 'Sign in'}
           </Button>
         </form>
-        <div className="mt-4 pt-4 border-t">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleCreateTestAgent}
-            disabled={loading}
-          >
-            Create Test Agent
-          </Button>
-        </div>
       </div>
     </div>
   );
