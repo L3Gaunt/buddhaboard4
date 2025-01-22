@@ -29,15 +29,21 @@ export async function getTickets(filters?: {
   return data;
 }
 
-export async function getTicketById(id: number) {
+export async function getTicketById(number: number) {
   const { data, error } = await supabase
     .from('tickets')
     .select('*')
-    .eq('id', id)
+    .eq('number', number)
     .single();
 
   if (error) throw error;
-  return data;
+  if (!data) throw new Error(`Ticket with number ${number} not found`);
+  
+  // Ensure conversation is initialized
+  return {
+    ...data,
+    conversation: data.conversation || []
+  };
 }
 
 export async function createTicket(ticket: TicketInsert) {
@@ -51,11 +57,11 @@ export async function createTicket(ticket: TicketInsert) {
   return data;
 }
 
-export async function updateTicket(id: number, updates: TicketUpdate) {
+export async function updateTicket(number: number, updates: TicketUpdate) {
   const { data, error } = await supabase
     .from('tickets')
     .update(updates)
-    .eq('id', id)
+    .eq('number', number)
     .select()
     .single();
 
@@ -64,7 +70,7 @@ export async function updateTicket(id: number, updates: TicketUpdate) {
 }
 
 export async function addMessageToTicket(
-  ticketId: number,
+  ticketNumber: number,
   message: {
     id: string;
     sender: string;
@@ -78,13 +84,15 @@ export async function addMessageToTicket(
     }>;
   }
 ) {
-  const { data: ticket } = await getTicketById(ticketId);
+  const ticket = await getTicketById(ticketNumber);
+  if (!ticket) throw new Error(`Ticket with number ${ticketNumber} not found`);
+
   const conversation = [...(ticket.conversation || []), message];
 
   const { data, error } = await supabase
     .from('tickets')
     .update({ conversation })
-    .eq('id', ticketId)
+    .eq('number', ticketNumber)
     .select()
     .single();
 
@@ -94,18 +102,18 @@ export async function addMessageToTicket(
 
 // Optional: Real-time subscriptions
 export function subscribeToTicketUpdates(
-  ticketId: number,
+  ticketNumber: number,
   callback: (ticket: TicketData) => void
 ) {
   return supabase
-    .channel(`ticket:${ticketId}`)
+    .channel(`ticket:${ticketNumber}`)
     .on(
       'postgres_changes',
       {
         event: '*',
         schema: 'public',
         table: 'tickets',
-        filter: `id=eq.${ticketId}`,
+        filter: `number=eq.${ticketNumber}`,
       },
       (payload) => callback(payload.new as TicketData)
     )

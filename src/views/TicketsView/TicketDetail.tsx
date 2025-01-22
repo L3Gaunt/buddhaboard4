@@ -4,6 +4,7 @@ import { ArrowLeft, UserPlus, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "../../RichTextEditor";
 import CustomerProfileView from '../CustomerProfileView';
+import { addMessageToTicket } from '@/lib/tickets';
 import { 
   type Ticket, 
   type TicketDetailProps, 
@@ -37,7 +38,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
 }) => {
   const [showCustomerProfile, setShowCustomerProfile] = React.useState(false);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!response.trim()) return;
 
     const newMessage: Message = {
@@ -47,21 +48,36 @@ export const TicketDetail: FC<TicketDetailProps> = ({
       timestamp: new Date()
     };
 
-    // Create a new ticket object with the updated conversation
-    const updatedTicket = {
-      ...ticket,
-      conversation: [...ticket.conversation, newMessage],
-      lastUpdated: new Date()
-    } as UnwrapReadonly<Ticket>;
+    try {
+      // Convert TicketId to number using valueOf()
+      const numericId = Number(ticket.id.valueOf());
+      
+      await addMessageToTicket(numericId, {
+        id: newMessage.id,
+        sender: newMessage.sender,
+        message: newMessage.message,
+        timestamp: newMessage.timestamp.toISOString()
+      });
 
-    setActiveTicket(updatedTicket);
-    setResponse("");
+      // Update local state
+      const updatedTicket = {
+        ...ticket,
+        conversation: [...ticket.conversation, newMessage],
+        lastUpdated: new Date()
+      } as UnwrapReadonly<Ticket>;
+
+      setActiveTicket(updatedTicket);
+      setResponse("");
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // TODO: Add error handling UI
+    }
   };
 
   return (
     <div className="flex">
-      <div className={`bg-white rounded-lg shadow flex-grow ${showCustomerProfile ? 'mr-4' : ''}`}>
-        <div className="border-b border-gray-200 p-4">
+      <div className={`bg-white rounded-lg shadow flex-grow ${showCustomerProfile ? 'mr-4' : ''} flex flex-col h-[calc(100vh-4rem)]`}>
+        <div className="border-b border-gray-200 p-4 flex-shrink-0">
           <Button
             variant="ghost"
             className="mb-4"
@@ -141,7 +157,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
             </span>
           </div>
         </div>
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 flex-grow overflow-y-auto">
           {ticket.conversation.map((message, index) => {
             const isCustomerMessage = isCustomerId(message.sender);
             const messageDate = new Date(message.timestamp);
@@ -176,8 +192,8 @@ export const TicketDetail: FC<TicketDetailProps> = ({
             );
           })}
         </div>
-        <div className="border-t border-gray-200 p-4">
-          <div className="space-y-4">
+        <div className="border-t border-gray-200 p-4 flex-shrink-0 bg-white">
+          <div className="space-y-2">
             <RichTextEditor content={response} onChange={setResponse} />
             <div className="flex justify-end">
               <Button onClick={handleSendMessage}>

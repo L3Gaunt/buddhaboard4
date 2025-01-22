@@ -54,7 +54,7 @@ export const RichTextEditor: FC<RichTextEditorProps> = ({ content, onChange }) =
       </div>
       <EditorContent
         editor={editor}
-        className="p-4 min-h-[200px] [&_.ProseMirror]:min-h-[200px] [&_.ProseMirror]:outline-none [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4"
+        className="p-4 min-h-[100px] max-h-[400px] resize-y overflow-auto [&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:outline-none [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4"
       />
     </div>
   );

@@ -9,19 +9,22 @@ import { LoginView } from "./views/LoginView";
 import { supabase } from './lib/supabase';
 import { AgentSettingsModal } from "@/components/modals/AgentSettingsModal";
 import { ReassignTicketModal } from "@/components/modals/ReassignTicketModal";
-import { 
-  type Ticket, 
-  type Agent,
-  type ViewType, 
+import {
+  type Ticket,
   type Customer,
-  Views, 
-  TicketPriority, 
+  type Message,
+  type ViewType,
+  type Agent,
+  Views,
   TicketStatus,
+  TicketPriority,
   AgentStatus,
   createTicketId,
   createAgentId,
-  createCustomerId
+  createCustomerId,
+  createMessageId
 } from '@/types';
+import type { Json } from '@/types/supabase';
 
 // Import Supabase services
 import { getCurrentUser, getAgentProfile, updateAgentStatus } from '@/lib/auth';
@@ -85,15 +88,35 @@ export default function App() {
           console.log('Ticket data:', ticketData);
 
           setTickets(ticketData.map(ticket => ({
-            id: createTicketId(ticket.id),
+            id: createTicketId(ticket.number),
             title: ticket.title,
             description: ticket.description,
-            priority: ticket.priority,
-            status: ticket.status,
+            priority: ticket.priority.toLowerCase() as TicketPriority,
+            status: ticket.status.toLowerCase() as TicketStatus,
             number: ticket.number,
             createdAt: new Date(ticket.created_at),
             lastUpdated: new Date(ticket.last_updated),
-            conversation: ticket.conversation || [],
+            conversation: (ticket.conversation || []).map(msg => {
+              const msgObj = msg as Record<string, Json>;
+              if (typeof msgObj === 'object' && msgObj !== null && 'message' in msgObj) {
+                return {
+                  id: createMessageId(String(msgObj.id || 'msg_' + Date.now())),
+                  sender: String(msgObj.sender || '').startsWith('customer_') 
+                    ? createCustomerId(String(msgObj.sender))
+                    : createAgentId(String(msgObj.sender)),
+                  message: String(msgObj.message),
+                  timestamp: new Date(String(msgObj.timestamp || Date.now())),
+                  attachments: msgObj.attachments as Message['attachments'],
+                  metadata: msgObj.metadata as Message['metadata']
+                };
+              }
+              return {
+                id: createMessageId('system_msg'),
+                sender: createCustomerId('system'),
+                message: String(msg),
+                timestamp: new Date(),
+              };
+            }),
             assignedTo: ticket.assigned_to ? createAgentId(ticket.assigned_to) : undefined,
             customer_id: createCustomerId(ticket.customer_id)
           })));
@@ -112,10 +135,14 @@ export default function App() {
                 email: customerData.email,
                 name: customerData.name,
                 createdAt: new Date(customerData.created_at),
-                avatar: customerData.avatar,
-                phone: customerData.phone,
-                company: customerData.company,
-                metadata: customerData.metadata
+                avatar: customerData.avatar || undefined,
+                phone: customerData.phone || undefined,
+                company: customerData.company || undefined,
+                metadata: typeof customerData.metadata === 'object' && customerData.metadata ? {
+                  ...Object.fromEntries(
+                    Object.entries(customerData.metadata).map(([key, value]) => [key, value])
+                  )
+                } : undefined
               });
             }
           }
@@ -171,11 +198,12 @@ export default function App() {
       >
         {currentView === Views.TICKETS && (
           <div className="flex flex-1 overflow-hidden">
-            <div className="w-1/3 overflow-auto border-r">
-              <TicketQueue tickets={tickets} setActiveTicket={setActiveTicket} />
-            </div>
-            {activeTicket && customer && (
-              <div className="w-2/3 overflow-auto">
+            {!activeTicket ? (
+              <div className="w-full overflow-auto">
+                <TicketQueue tickets={tickets} setActiveTicket={setActiveTicket} />
+              </div>
+            ) : customer && (
+              <div className="w-full overflow-auto">
                 <TicketDetail
                   ticket={activeTicket}
                   setActiveTicket={setActiveTicket}

@@ -50,13 +50,14 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE agents ENABLE ROW LEVEL SECURITY;
 
 -- Users policies
+DROP POLICY IF EXISTS "Users can view their own data" ON users;
 CREATE POLICY "Users can view their own data"
     ON users FOR SELECT
-    USING (auth.uid() IN (
-        SELECT a.id FROM agents a
-        UNION
-        SELECT users.id FROM users
-    ));
+    USING (
+        auth.uid() = id -- User can view their own data
+        OR 
+        EXISTS (SELECT 1 FROM agents WHERE agents.id = auth.uid()) -- Agents can view all users
+    );
 
 CREATE POLICY "Only agents can insert users"
     ON users FOR INSERT

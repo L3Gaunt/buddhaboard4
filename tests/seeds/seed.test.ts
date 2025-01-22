@@ -186,7 +186,7 @@ describe('Seed Test Data', () => {
             version: '121.0.0'
           }
         }
-      ]);
+      ], { onConflict: 'number' });
 
     if (ticketError) {
       console.error('Error creating ticket:', ticketError);

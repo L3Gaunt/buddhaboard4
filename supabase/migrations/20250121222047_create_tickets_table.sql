@@ -28,8 +28,7 @@ $$;
 
 -- Create tickets table
 CREATE TABLE tickets (
-    id BIGSERIAL PRIMARY KEY,
-    number TEXT NOT NULL UNIQUE,
+    number BIGSERIAL PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     priority TEXT NOT NULL CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
@@ -67,17 +66,34 @@ CREATE TRIGGER update_ticket_last_updated_trigger
     FOR EACH ROW
     EXECUTE FUNCTION update_ticket_last_updated();
 
--- Create a function to generate ticket numbers
-CREATE OR REPLACE FUNCTION generate_ticket_number()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.number = 'TKT-' || TO_CHAR(NEW.id, 'FM000000');
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- Enable RLS on tickets table
+ALTER TABLE tickets ENABLE ROW LEVEL SECURITY;
 
--- Create a trigger to automatically generate ticket numbers
-CREATE TRIGGER generate_ticket_number_trigger
-    BEFORE INSERT ON tickets
-    FOR EACH ROW
-    EXECUTE FUNCTION generate_ticket_number(); 
+-- Create policies for tickets
+CREATE POLICY "Allow customers and agents to view tickets they are involved with"
+    ON tickets FOR SELECT
+    USING (
+        auth.uid() = customer_id -- Customer can view their own tickets
+        OR
+        auth.uid() = assigned_to -- Assigned agent can view
+        OR
+        EXISTS (SELECT 1 FROM agents WHERE agents.id = auth.uid()) -- All agents can view all tickets
+    );
+
+CREATE POLICY "Allow agents and customers to create their own tickets"
+    ON tickets FOR INSERT
+    TO authenticated
+    WITH CHECK (
+        EXISTS (SELECT 1 FROM agents WHERE agents.id = auth.uid())
+        OR
+        auth.uid() = customer_id -- Allow customers to create their own tickets
+    );
+
+CREATE POLICY "Allow agents to update any ticket and customers to update their open tickets"
+    ON tickets FOR UPDATE
+    TO authenticated
+    USING (
+        EXISTS (SELECT 1 FROM agents WHERE agents.id = auth.uid())
+        OR
+        (auth.uid() = customer_id) -- Customers can update their open tickets
+    ); 

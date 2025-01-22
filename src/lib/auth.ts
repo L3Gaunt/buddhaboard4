@@ -6,7 +6,8 @@ import {
   type AgentStatus,
   type Customer,
   type AgentId,
-  createAgentId
+  createAgentId,
+  createCustomerId
 } from '../types';
 
 export type AgentData = Database['public']['Tables']['agents']['Row'];
@@ -67,7 +68,11 @@ export async function getAgentProfile(userId: AgentId | string): Promise<Agent |
     ...data,
     id: createAgentId(data.id),
     avatar: data.avatar || '',
-    metadata: data.metadata || {}
+    metadata: data.metadata ? {
+      department: (data.metadata as any)?.department,
+      skills: (data.metadata as any)?.skills || [],
+      languages: (data.metadata as any)?.languages || []
+    } : {}
   } : null;
 }
 
@@ -81,9 +86,18 @@ export async function getUserProfile(userId: string): Promise<Customer | null> {
   if (error) throw error;
   return data ? {
     ...data,
-    id: data.id,
+    id: createCustomerId(data.id),
     createdAt: new Date(data.created_at),
-    metadata: data.metadata || {}
+    metadata: data.metadata ? {
+      lastLogin: (data.metadata as any)?.lastLogin ? new Date((data.metadata as any).lastLogin) : undefined,
+      preferences: {
+        language: (data.metadata as any)?.preferences?.language,
+        notifications: (data.metadata as any)?.preferences?.notifications
+      }
+    } : undefined,
+    avatar: data.avatar || undefined,
+    company: data.company || undefined,
+    phone: data.phone || undefined
   } : null;
 }
 

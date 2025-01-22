@@ -93,7 +93,7 @@ export interface Ticket {
   description: string;
   priority: TicketPriority;
   status: TicketStatus;
-  number: string;
+  number: number;
   createdAt: Date;
   conversation: Message[];
   assignedTo?: AgentId;

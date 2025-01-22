@@ -8,7 +8,7 @@ let supabase: SupabaseClient<Database>;
 async function cleanupTestData() {
   try {
     // First clean up database records
-    await supabase.from('tickets').delete().neq('id', 0);
+    await supabase.from('tickets').delete().neq('number', 0);
     await supabase.from('users').delete().neq('id', '');
     await supabase.from('agents').delete().neq('id', '');
 
