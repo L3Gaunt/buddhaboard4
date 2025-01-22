@@ -148,4 +148,26 @@ END;
 $$;
 
 -- Grant execute permission to public (anonymous) users
-GRANT EXECUTE ON FUNCTION public.get_ticket_by_hash(text) TO public; 
+GRANT EXECUTE ON FUNCTION public.get_ticket_by_hash(text) TO public;
+
+-- Create function to get least busy agent
+CREATE OR REPLACE FUNCTION get_least_busy_agent()
+RETURNS TABLE (agent_id UUID, open_tickets BIGINT) 
+LANGUAGE SQL
+AS $$
+    WITH agent_counts AS (
+        SELECT 
+            a.id as agent_id,
+            COUNT(t.number) as open_tickets
+        FROM agents a
+        LEFT JOIN tickets t ON t.assigned_to = a.id AND t.status = 'open'
+        WHERE a.status = 'online'
+        GROUP BY a.id
+        ORDER BY COUNT(t.number) ASC
+        LIMIT 1
+    )
+    SELECT * FROM agent_counts;
+$$;
+
+-- Grant execute permission to authenticated users
+GRANT EXECUTE ON FUNCTION public.get_least_busy_agent() TO authenticated; 

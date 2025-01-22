@@ -38,6 +38,18 @@ serve(async (req) => {
 
       if (authError) throw authError
 
+      // Find the least busy online agent
+      const { data: leastBusyAgent, error: agentError } = await supabaseAdmin.rpc(
+        'get_least_busy_agent'
+      )
+
+      if (agentError) throw agentError
+      
+      console.log('Least busy agent:', leastBusyAgent?.[0]?.agent_id || 'No agent available')
+      if (leastBusyAgent?.[0]) {
+        console.log('Current open tickets:', leastBusyAgent[0].open_tickets)
+      }
+
       // Create the ticket
       const { data, error } = await supabaseAdmin
         .from('tickets')
@@ -47,7 +59,8 @@ serve(async (req) => {
           priority,
           status: 'open',
           customer_id: authData.user.id,
-          conversation: []
+          conversation: [],
+          assigned_to: leastBusyAgent?.[0]?.agent_id || null
         })
         .select()
         .single()
