@@ -1,7 +1,35 @@
 import type { FC } from 'react';
-import { type Ticket, type TicketQueueProps, TicketPriority } from '@/types';
+import { useState, useEffect } from 'react';
+import { type Ticket, type TicketQueueProps, TicketPriority, type AgentId } from '@/types';
+import { getAgentProfile } from '@/lib/auth';
 
 export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket }) => {
+  const [agentNames, setAgentNames] = useState<Record<AgentId, string>>({});
+
+  useEffect(() => {
+    // Fetch agent names for all assigned tickets
+    const fetchAgentNames = async () => {
+      const uniqueAgentIds = [...new Set(tickets
+        .map(ticket => ticket.assignedTo)
+        .filter((id): id is AgentId => id !== undefined))];
+
+      const names: Record<AgentId, string> = {};
+      for (const agentId of uniqueAgentIds) {
+        try {
+          const agent = await getAgentProfile(agentId);
+          if (agent) {
+            names[agentId] = agent.name;
+          }
+        } catch (error) {
+          console.error(`Error fetching agent name for ${agentId}:`, error);
+        }
+      }
+      setAgentNames(names);
+    };
+
+    fetchAgentNames();
+  }, [tickets]);
+
   const getPriorityStyle = (priority: TicketPriority) => {
     switch (priority) {
       case TicketPriority.LOW:
@@ -47,7 +75,7 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket }) 
               {ticket.assignedTo && (
                 <>
                   <span className="mx-2">•</span>
-                  <span>Assigned to: {ticket.assignedTo}</span>
+                  <span>Assigned to: {agentNames[ticket.assignedTo] || 'Loading...'}</span>
                 </>
               )}
             </div>
