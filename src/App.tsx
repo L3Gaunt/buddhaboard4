@@ -105,7 +105,6 @@ export default function App() {
           setTickets(ticketData.map(ticket => ({
             id: createTicketId(ticket.number),
             title: ticket.title,
-            description: ticket.description,
             priority: ticket.priority.toLowerCase() as TicketPriority,
             status: ticket.status.toLowerCase() as TicketStatus,
             number: ticket.number,

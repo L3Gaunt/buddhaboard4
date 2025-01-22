@@ -51,7 +51,6 @@ export interface Database {
           conversation: Json[]
           created_at: string
           customer_id: string
-          description: string
           last_updated: string
           metadata: Json | null
           number: number
@@ -64,7 +63,6 @@ export interface Database {
           conversation?: Json[]
           created_at?: string
           customer_id: string
-          description: string
           last_updated?: string
           metadata?: Json | null
           number?: number
@@ -77,7 +75,6 @@ export interface Database {
           conversation?: Json[]
           created_at?: string
           customer_id?: string
-          description?: string
           last_updated?: string
           metadata?: Json | null
           number?: number
@@ -130,7 +127,6 @@ export interface Database {
         Returns: {
           number: number
           title: string
-          description: string
           priority: string
           status: string
           created_at: string

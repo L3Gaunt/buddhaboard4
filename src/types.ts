@@ -90,7 +90,6 @@ export interface Customer {
 export interface Ticket {
   id: TicketId;
   title: string;
-  description: string;
   priority: TicketPriority;
   status: TicketStatus;
   number: number;
@@ -124,7 +123,6 @@ export interface Message {
  */
 export interface TicketFormData {
   title: string;
-  description: string;
   priority: TicketPriority;
   attachments?: File[];
 }

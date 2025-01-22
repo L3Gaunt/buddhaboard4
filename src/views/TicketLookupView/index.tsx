@@ -135,9 +135,6 @@ export function TicketLookupView() {
           <div className="space-y-6">
             <div>
               <h2 className="font-medium text-gray-900">{ticket.title}</h2>
-              <p className="mt-2 text-gray-600 whitespace-pre-wrap">
-                {ticket.description}
-              </p>
             </div>
 
             {ticket.conversation && ticket.conversation.length > 0 && (

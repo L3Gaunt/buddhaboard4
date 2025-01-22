@@ -62,7 +62,9 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket }) 
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="font-medium">{ticket.title}</h3>
-                <p className="text-sm text-gray-500">{ticket.description}</p>
+                {ticket.conversation[0] && (
+                  <p className="text-sm text-gray-500">{ticket.conversation[0].message}</p>
+                )}
               </div>
               <span className={`px-2 py-1 text-xs rounded-full ${getPriorityStyle(ticket.priority)}`}>
                 {ticket.priority.replace("_", " ")} Priority

@@ -4,7 +4,7 @@ import type { Database, Json } from '../../src/types/supabase';
 
 type TicketInsert = Database['public']['Tables']['tickets']['Insert'];
 
-function generateRandomTicket(customerId: string, agentId: string, index: number): TicketInsert {
+function generateRandomTicket(customerId: string, agentId: string, index: number): Omit<TicketInsert, 'description'> {
   const priorities = ['low', 'medium', 'high', 'urgent'];
   const statuses = ['open', 'waiting_customer_reply', 'resolved', 'closed'];
   const titles = [
@@ -30,9 +30,10 @@ function generateRandomTicket(customerId: string, agentId: string, index: number
   const randomDate = new Date();
   randomDate.setDate(randomDate.getDate() - Math.floor(Math.random() * 30));
 
+  const initialDescription = descriptions[Math.floor(Math.random() * descriptions.length)];
+
   return {
     title: titles[index % titles.length],
-    description: descriptions[Math.floor(Math.random() * descriptions.length)],
     priority: priorities[Math.floor(Math.random() * priorities.length)],
     status: statuses[Math.floor(Math.random() * statuses.length)],
     assigned_to: agentId,
@@ -42,7 +43,7 @@ function generateRandomTicket(customerId: string, agentId: string, index: number
       {
         id: `${index}-1`,
         isFromCustomer: true,
-        message: 'Hi, I need help with this issue.',
+        message: initialDescription,
         timestamp: randomDate.toISOString()
       },
       {
@@ -215,7 +216,7 @@ describe('Seed Test Data', () => {
     }
 
     // Generate 50 tickets distributed among agents and customers
-    const tickets: TicketInsert[] = [];
+    const tickets: Omit<TicketInsert, 'description'>[] = [];
     for (let i = 0; i < 50; i++) {
       const customer = customers[i % customers.length];
       const agent = agents[i % agents.length];

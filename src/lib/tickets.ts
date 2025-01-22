@@ -134,10 +134,10 @@ export function subscribeToTicketUpdates(
 
 export type UnauthenticatedTicketData = {
   title: string;
-  description: string;
   priority: TicketData['priority'];
   email?: string;
   name?: string;
+  firstMessage: string; // The initial message from the customer
 };
 
 export async function createUnauthenticatedTicket(ticket: UnauthenticatedTicketData) {

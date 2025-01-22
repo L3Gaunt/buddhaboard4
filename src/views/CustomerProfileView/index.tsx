@@ -15,7 +15,9 @@ const CustomerTicketList: React.FC<CustomerTicketListProps> = ({ tickets, onTick
             <div className="flex justify-between items-start">
               <div>
                 <h4 className="font-medium">{ticket.title}</h4>
-                <p className="text-sm text-gray-500">{ticket.description}</p>
+                {ticket.conversation[0] && (
+                  <p className="text-sm text-gray-500">{ticket.conversation[0].message}</p>
+                )}
               </div>
               <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
                 {ticket.priority}

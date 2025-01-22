@@ -35,7 +35,6 @@ $$;
 CREATE TABLE tickets (
     number BIGSERIAL PRIMARY KEY,
     title TEXT NOT NULL,
-    description TEXT NOT NULL,
     priority TEXT NOT NULL CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
     status TEXT NOT NULL CHECK (status IN ('open', 'waiting_customer_reply', 'resolved', 'closed')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -108,7 +107,6 @@ CREATE OR REPLACE FUNCTION public.get_ticket_by_hash(hash text)
 RETURNS TABLE (
     number BIGINT,
     title TEXT,
-    description TEXT,
     priority TEXT,
     status TEXT,
     created_at TIMESTAMPTZ,

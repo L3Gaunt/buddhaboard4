@@ -4,12 +4,19 @@ import { Button } from "@/components/ui/button";
 import { type TicketFormData, TicketPriority } from "@/types";
 import { createUnauthenticatedTicket } from "@/lib/tickets";
 
+// Extend TicketFormData to include firstMessage for this form
+interface UserTicketFormData extends TicketFormData {
+  firstMessage: string;
+  email?: string;
+  name?: string;
+}
+
 export function UserTicketView() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [ticketHash, setTicketHash] = useState<string>("");
-  const [formData, setFormData] = useState<TicketFormData & { email?: string; name?: string }>({
+  const [formData, setFormData] = useState<UserTicketFormData>({
     title: "",
-    description: "",
+    firstMessage: "",
     priority: TicketPriority.MEDIUM,
     email: "",
     name: "",
@@ -20,10 +27,10 @@ export function UserTicketView() {
     try {
       const result = await createUnauthenticatedTicket({
         title: formData.title,
-        description: formData.description,
         priority: formData.priority,
         email: formData.email || undefined,
         name: formData.name || undefined,
+        firstMessage: formData.firstMessage
       });
       setTicketHash(result.ticketHash);
       setShowSuccess(true);
@@ -83,7 +90,7 @@ export function UserTicketView() {
                   setShowSuccess(false);
                   setFormData({
                     title: "",
-                    description: "",
+                    firstMessage: "",
                     priority: TicketPriority.MEDIUM,
                     email: "",
                     name: "",
@@ -179,22 +186,22 @@ export function UserTicketView() {
           </div>
           <div>
             <label
-              htmlFor="description"
+              htmlFor="firstMessage"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Description
+              Message
             </label>
             <textarea
-              id="description"
+              id="firstMessage"
               required
               rows={6}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Please provide as much detail as possible about your issue"
-              value={formData.description}
+              value={formData.firstMessage}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  description: e.target.value,
+                  firstMessage: e.target.value,
                 })
               }
             />

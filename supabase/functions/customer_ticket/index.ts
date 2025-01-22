@@ -24,7 +24,7 @@ serve(async (req) => {
     const { action } = body
 
     if (action === 'create') {
-      const { title, description, priority, email, name } = body
+      const { title, firstMessage, priority, email, name } = body
 
       // Create an anonymous user
       const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
@@ -55,11 +55,15 @@ serve(async (req) => {
         .from('tickets')
         .insert({
           title,
-          description,
           priority,
           status: 'open',
           customer_id: authData.user.id,
-          conversation: [],
+          conversation: [{
+            id: `msg_${Date.now()}`,
+            isFromCustomer: true,
+            message: firstMessage,
+            timestamp: new Date().toISOString()
+          }],
           assigned_to: leastBusyAgent?.[0]?.agent_id || null
         })
         .select()
