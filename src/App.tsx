@@ -98,7 +98,7 @@ export default function App() {
           // Load tickets assigned to current agent
           const ticketData = await getTickets({ 
             assigned_to: user.id,
-            status: [TicketStatus.OPEN, TicketStatus.IN_PROGRESS]
+            status: [TicketStatus.OPEN, TicketStatus.WAITING_CUSTOMER_REPLY]
           });
           console.log('Ticket data:', ticketData);
 

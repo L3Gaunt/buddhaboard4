@@ -140,7 +140,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
                 onChange={(e) => handleStatusChange(e.target.value as TicketStatus)}
               >
                 <option value={TicketStatus.OPEN}>Open</option>
-                <option value={TicketStatus.IN_PROGRESS}>In Progress</option>
+                <option value={TicketStatus.WAITING_CUSTOMER_REPLY}>Waiting for Customer Reply</option>
                 <option value={TicketStatus.RESOLVED}>Resolved</option>
                 <option value={TicketStatus.CLOSED}>Closed</option>
               </select>
@@ -172,7 +172,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
               className={`px-2 py-1 text-xs rounded-full ${
                 ticketStatus === TicketStatus.OPEN
                   ? "bg-blue-100 text-blue-800"
-                  : ticketStatus === TicketStatus.IN_PROGRESS
+                  : ticketStatus === TicketStatus.WAITING_CUSTOMER_REPLY
                   ? "bg-yellow-100 text-yellow-800"
                   : "bg-green-100 text-green-800"
               }`}

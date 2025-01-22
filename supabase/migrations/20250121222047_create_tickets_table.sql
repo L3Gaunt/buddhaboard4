@@ -37,7 +37,7 @@ CREATE TABLE tickets (
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     priority TEXT NOT NULL CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
-    status TEXT NOT NULL CHECK (status IN ('open', 'in_progress', 'resolved', 'closed')),
+    status TEXT NOT NULL CHECK (status IN ('open', 'waiting_customer_reply', 'resolved', 'closed')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     last_updated TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     assigned_to UUID REFERENCES auth.users(id),

@@ -6,7 +6,7 @@ type TicketInsert = Database['public']['Tables']['tickets']['Insert'];
 
 function generateRandomTicket(customerId: string, agentId: string, index: number): TicketInsert {
   const priorities = ['low', 'medium', 'high', 'urgent'];
-  const statuses = ['open', 'in_progress', 'resolved', 'closed'];
+  const statuses = ['open', 'waiting_customer_reply', 'resolved', 'closed'];
   const titles = [
     'Login issues with the platform',
     'Need help with billing',

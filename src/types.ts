@@ -19,7 +19,7 @@ export type TicketPriority = typeof TicketPriority[keyof typeof TicketPriority];
  */
 export const TicketStatus = {
   OPEN: "open",
-  IN_PROGRESS: "in_progress",
+  WAITING_CUSTOMER_REPLY: "waiting_customer_reply",
   RESOLVED: "resolved",
   CLOSED: "closed"
 } as const;
