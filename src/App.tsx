@@ -101,9 +101,7 @@ export default function App() {
               if (typeof msgObj === 'object' && msgObj !== null && 'message' in msgObj) {
                 return {
                   id: createMessageId(String(msgObj.id || 'msg_' + Date.now())),
-                  sender: String(msgObj.sender || '').startsWith('customer_') 
-                    ? createCustomerId(String(msgObj.sender))
-                    : createAgentId(String(msgObj.sender)),
+                  isFromCustomer: msgObj.isFromCustomer as boolean,
                   message: String(msgObj.message),
                   timestamp: new Date(String(msgObj.timestamp || Date.now())),
                   attachments: msgObj.attachments as Message['attachments'],
@@ -112,7 +110,7 @@ export default function App() {
               }
               return {
                 id: createMessageId('system_msg'),
-                sender: createCustomerId('system'),
+                isFromCustomer: true,
                 message: String(msg),
                 timestamp: new Date(),
               };

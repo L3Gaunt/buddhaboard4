@@ -107,7 +107,7 @@ export interface Ticket {
  */
 export interface Message {
   id: MessageId;
-  sender: AgentId | CustomerId; // Can be either an agent or customer
+  isFromCustomer: boolean;  // true if from customer, false if from agent
   message: string;
   timestamp: Date;
   attachments?: Array<{

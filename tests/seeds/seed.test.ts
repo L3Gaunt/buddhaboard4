@@ -1,5 +1,64 @@
 import { describe, it, expect } from 'vitest';
 import { supabase, testUsers, createConfirmedUser } from './setup';
+import type { Database, Json } from '../../src/types/supabase';
+
+type TicketInsert = Database['public']['Tables']['tickets']['Insert'];
+
+function generateRandomTicket(customerId: string, agentId: string, index: number): TicketInsert {
+  const priorities = ['low', 'medium', 'high', 'urgent'];
+  const statuses = ['open', 'in_progress', 'resolved', 'closed'];
+  const titles = [
+    'Login issues with the platform',
+    'Need help with billing',
+    'Feature request: Dark mode',
+    'App crashes on startup',
+    'Password reset not working',
+    'Integration problems with API',
+    'Performance is slow',
+    'Data export not working',
+    'Cannot update profile picture',
+    'Mobile app sync issues'
+  ];
+  const descriptions = [
+    'I\'m experiencing difficulties with the system.',
+    'The application is not responding as expected.',
+    'I need assistance with this functionality.',
+    'This feature is not working properly.',
+    'I\'m getting unexpected errors.'
+  ];
+
+  const randomDate = new Date();
+  randomDate.setDate(randomDate.getDate() - Math.floor(Math.random() * 30));
+
+  return {
+    title: titles[index % titles.length],
+    description: descriptions[Math.floor(Math.random() * descriptions.length)],
+    priority: priorities[Math.floor(Math.random() * priorities.length)],
+    status: statuses[Math.floor(Math.random() * statuses.length)],
+    assigned_to: agentId,
+    customer_id: customerId,
+    created_at: randomDate.toISOString(),
+    conversation: [
+      {
+        id: `${index}-1`,
+        isFromCustomer: true,
+        message: 'Hi, I need help with this issue.',
+        timestamp: randomDate.toISOString()
+      },
+      {
+        id: `${index}-2`,
+        isFromCustomer: false,
+        message: 'I\'ll be happy to help you with this. Can you provide more details?',
+        timestamp: new Date(randomDate.getTime() + 1000 * 60 * 30).toISOString()
+      }
+    ],
+    metadata: {
+      browser: ['Chrome', 'Firefox', 'Safari', 'Edge'][Math.floor(Math.random() * 4)],
+      version: '1.0.0',
+      platform: ['Windows', 'MacOS', 'Linux'][Math.floor(Math.random() * 3)]
+    }
+  };
+}
 
 describe('Seed Test Data', () => {
   async function cleanupUser(userId: string) {
@@ -143,13 +202,11 @@ describe('Seed Test Data', () => {
   it('should create sample tickets', async () => {
     const { data: customers } = await supabase
       .from('users')
-      .select('id, email')
-      .limit(2);
+      .select('id, email');
     
     const { data: agents } = await supabase
       .from('agents')
-      .select('id, email')
-      .limit(2);
+      .select('id, email');
 
     expect(customers).toBeDefined();
     expect(agents).toBeDefined();
@@ -157,39 +214,20 @@ describe('Seed Test Data', () => {
       throw new Error('No customers or agents found');
     }
 
+    // Generate 50 tickets distributed among agents and customers
+    const tickets: TicketInsert[] = [];
+    for (let i = 0; i < 50; i++) {
+      const customer = customers[i % customers.length];
+      const agent = agents[i % agents.length];
+      tickets.push(generateRandomTicket(customer.id, agent.id, i));
+    }
+
     const { error: ticketError } = await supabase
       .from('tickets')
-      .upsert([
-        {
-          title: 'Cannot access dashboard',
-          description: 'I\'m getting a 404 error when trying to access the main dashboard.',
-          priority: 'high',
-          status: 'in_progress',
-          assigned_to: agents[0].id,
-          customer_id: customers[0].id,
-          conversation: [
-            {
-              id: '1',
-              sender: customers[0].id,
-              message: 'I cannot access the dashboard. Getting 404 error.',
-              timestamp: new Date().toISOString()
-            },
-            {
-              id: '2',
-              sender: agents[0].id,
-              message: 'I\'ll look into this right away. Can you please clear your browser cache and try again?',
-              timestamp: new Date().toISOString()
-            }
-          ],
-          metadata: {
-            browser: 'Chrome',
-            version: '121.0.0'
-          }
-        }
-      ], { onConflict: 'number' });
+      .upsert(tickets, { onConflict: 'number' });
 
     if (ticketError) {
-      console.error('Error creating ticket:', ticketError);
+      console.error('Error creating tickets:', ticketError);
       throw ticketError;
     }
   });

@@ -11,17 +11,9 @@ import {
   TicketPriority, 
   TicketStatus,
   type Message,
-  type CustomerId,
-  type AgentId,
   type UnwrapReadonly,
-  createMessageId,
-  createAgentId
+  createMessageId
 } from '@/types';
-
-// Type guard to check if a sender is a CustomerId
-const isCustomerId = (sender: UnwrapReadonly<AgentId | CustomerId>): sender is CustomerId => {
-  return typeof sender === 'string' && sender.startsWith('customer_');
-};
 
 export const TicketDetail: FC<TicketDetailProps> = ({
   ticket,
@@ -43,7 +35,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
 
     const newMessage: Message = {
       id: createMessageId(`msg_${Date.now()}`),
-      sender: createAgentId("agent-1"), // This should be the actual agent ID
+      isFromCustomer: false, // Agent message
       message: response,
       timestamp: new Date()
     };
@@ -54,7 +46,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
       
       await addMessageToTicket(numericId, {
         id: newMessage.id,
-        sender: newMessage.sender,
+        isFromCustomer: newMessage.isFromCustomer,
         message: newMessage.message,
         timestamp: newMessage.timestamp.toISOString()
       });
@@ -183,24 +175,19 @@ export const TicketDetail: FC<TicketDetailProps> = ({
         </div>
         <div className="p-6 space-y-6 flex-grow overflow-y-auto">
           {ticket.conversation.map((message, index) => {
-            const isCustomerMessage = isCustomerId(message.sender);
             const messageDate = new Date(message.timestamp);
             return (
               <div
                 key={index}
-                className={`flex ${isCustomerMessage ? "justify-start" : "justify-end"}`}
+                className={`flex ${message.isFromCustomer ? "justify-start" : "justify-end"}`}
               >
                 <div
                   className={`max-w-[80%] rounded-lg p-4 ${
-                    isCustomerMessage && message.sender.toString().startsWith('system_')
-                      ? "bg-gray-100 text-gray-600 text-sm"
-                      : isCustomerMessage
-                      ? "bg-blue-100"
-                      : "bg-green-100"
+                    message.isFromCustomer ? "bg-blue-100" : "bg-green-100"
                   }`}
                 >
                   <div className="font-medium text-sm mb-1">
-                    {isCustomerMessage ? "Customer" : "Agent"}
+                    {message.isFromCustomer ? "Customer" : "Agent"}
                   </div>
                   <div
                     className="prose prose-sm max-w-none"

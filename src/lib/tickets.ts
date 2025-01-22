@@ -73,7 +73,7 @@ export async function addMessageToTicket(
   ticketNumber: number,
   message: {
     id: string;
-    sender: string;
+    isFromCustomer: boolean;
     message: string;
     timestamp: string;
     attachments?: Array<{

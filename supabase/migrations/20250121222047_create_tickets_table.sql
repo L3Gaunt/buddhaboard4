@@ -7,17 +7,22 @@ DECLARE
   item JSONB;
 BEGIN
   IF conversation IS NULL THEN
-    RETURN TRUE; -- or FALSE, depending on whether you allow NULL or an empty array
+    RETURN TRUE;
   END IF;
 
   FOREACH item IN ARRAY conversation
   LOOP
     IF jsonb_typeof(item) <> 'object'
       OR NOT (item ? 'id')
-      OR NOT (item ? 'sender')
+      OR NOT (item ? 'isFromCustomer')
       OR NOT (item ? 'message')
       OR NOT (item ? 'timestamp')
     THEN
+      RETURN FALSE;
+    END IF;
+
+    -- Additional type check for isFromCustomer
+    IF jsonb_typeof(item->'isFromCustomer') <> 'boolean' THEN
       RETURN FALSE;
     END IF;
   END LOOP;
