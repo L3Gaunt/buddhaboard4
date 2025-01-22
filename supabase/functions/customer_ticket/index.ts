@@ -108,7 +108,7 @@ serve(async (req) => {
           conversation: updatedConversation,
           last_updated: new Date().toISOString()
         })
-        .eq('id', ticket.id)
+        .eq('number', ticketNumber)
         .select()
         .single()
 

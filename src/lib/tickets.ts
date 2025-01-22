@@ -143,7 +143,7 @@ export type UnauthenticatedTicketData = {
 export async function createUnauthenticatedTicket(ticket: UnauthenticatedTicketData) {
   console.log('Creating unauthenticated ticket:', ticket);
   const response = await fetch(
-    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-anonymous-ticket`,
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/customer_ticket`,
     {
       method: 'POST',
       headers: {
@@ -151,7 +151,10 @@ export async function createUnauthenticatedTicket(ticket: UnauthenticatedTicketD
         'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         'Accept': 'application/json'
       },
-      body: JSON.stringify(ticket),
+      body: JSON.stringify({
+        action: 'create',
+        ...ticket
+      }),
     }
   );
 
