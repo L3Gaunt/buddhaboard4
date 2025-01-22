@@ -21,49 +21,23 @@ export function TicketLookupView() {
           return;
         }
 
-        // Decode the hash to get ticket number and user ID
-        let decoded;
-        try {
-          decoded = atob(hash);
-          console.log('Decoded hash:', decoded);
-        } catch (decodeError) {
-          console.error('Error decoding hash:', decodeError);
-          setError('Invalid ticket hash format');
-          setLoading(false);
-          return;
-        }
-
-        const [ticketNumber, userId] = decoded.split(':');
-        console.log('Parsed ticket data:', { ticketNumber, userId });
-
-        if (!ticketNumber || !userId) {
-          console.error('Invalid hash format - missing ticket number or user ID');
-          setError('Invalid ticket hash format');
-          setLoading(false);
-          return;
-        }
-
-        // Fetch the ticket
-        console.log('Fetching ticket from Supabase:', { ticketNumber: parseInt(ticketNumber, 10), userId });
+        // Use the new database function to lookup the ticket
         const { data, error: ticketError } = await supabase
-          .from('tickets')
-          .select('*')
-          .eq('number', parseInt(ticketNumber, 10))
-          .eq('customer_id', userId)
-          .single();
+          .rpc('get_ticket_by_hash', { hash });
 
         if (ticketError) {
-          console.error('Supabase error:', ticketError);
+          console.error('Error looking up ticket:', ticketError);
           throw ticketError;
         }
-        
-        if (!data) {
+
+        if (!data || !Array.isArray(data) || data.length === 0) {
           console.error('No ticket found');
           throw new Error('Ticket not found');
         }
 
         console.log('Ticket found:', data);
-        setTicket(data);
+        // Take the first ticket from the array
+        setTicket(data[0]);
       } catch (err) {
         console.error('Error looking up ticket:', err);
         setError('Invalid ticket hash or ticket not found');

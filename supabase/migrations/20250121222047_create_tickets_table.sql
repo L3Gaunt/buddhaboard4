@@ -101,4 +101,51 @@ CREATE POLICY "Allow agents to update any ticket and customers to update their o
         EXISTS (SELECT 1 FROM agents WHERE agents.id = auth.uid())
         OR
         (auth.uid() = customer_id) -- Customers can update their open tickets
-    ); 
+    );
+
+-- Create a secure function to view tickets by hash
+CREATE OR REPLACE FUNCTION public.get_ticket_by_hash(hash text)
+RETURNS TABLE (
+    number BIGINT,
+    title TEXT,
+    description TEXT,
+    priority TEXT,
+    status TEXT,
+    created_at TIMESTAMPTZ,
+    last_updated TIMESTAMPTZ,
+    assigned_to UUID,
+    customer_id UUID,
+    conversation JSONB[],
+    metadata JSONB
+) 
+SECURITY DEFINER -- Run with privileges of defining user (typically service role)
+SET search_path = public -- Set search path for security
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    decoded text;
+    ticket_number bigint;
+    user_id uuid;
+BEGIN
+    -- Decode base64 hash
+    BEGIN
+        decoded := convert_from(decode(hash, 'base64'), 'UTF8');
+    EXCEPTION WHEN OTHERS THEN
+        RAISE EXCEPTION 'Invalid hash format';
+    END;
+
+    -- Split decoded string into ticket number and user ID
+    ticket_number := split_part(decoded, ':', 1)::bigint;
+    user_id := split_part(decoded, ':', 2)::uuid;
+
+    -- Return matching ticket if it exists and belongs to the user
+    RETURN QUERY
+    SELECT t.*
+    FROM tickets t
+    WHERE t.number = ticket_number
+    AND t.customer_id = user_id;
+END;
+$$;
+
+-- Grant execute permission to public (anonymous) users
+GRANT EXECUTE ON FUNCTION public.get_ticket_by_hash(text) TO public; 

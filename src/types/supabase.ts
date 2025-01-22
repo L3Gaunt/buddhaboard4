@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
       agents: {
@@ -125,10 +125,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      validate_conversation_format: {
-        Args: {
+      get_ticket_by_hash: {
+        Args: { hash: string }
+        Returns: {
+          number: number
+          title: string
+          description: string
+          priority: string
+          status: string
+          created_at: string
+          last_updated: string
+          assigned_to: string | null
+          customer_id: string
           conversation: Json[]
+          metadata: Json | null
         }
+      }
+      validate_conversation_format: {
+        Args: { conversation: Json[] }
         Returns: boolean
       }
     }
