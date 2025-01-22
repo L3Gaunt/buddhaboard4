@@ -4,7 +4,7 @@ import { ArrowLeft, UserPlus, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "../../RichTextEditor";
 import CustomerProfileView from '../CustomerProfileView';
-import { addMessageToTicket } from '@/lib/tickets';
+import { addMessageToTicket, updateTicketPriority, updateTicket } from '@/lib/tickets';
 import { 
   type Ticket, 
   type TicketDetailProps, 
@@ -74,6 +74,30 @@ export const TicketDetail: FC<TicketDetailProps> = ({
     }
   };
 
+  const handlePriorityChange = async (newPriority: TicketPriority) => {
+    try {
+      const numericId = Number(ticket.id.valueOf());
+      await updateTicketPriority(numericId, newPriority);
+      setTicketPriority(newPriority);
+    } catch (error) {
+      console.error('Error updating ticket priority:', error);
+      // TODO: Add error handling UI
+    }
+  };
+
+  const handleStatusChange = async (newStatus: TicketStatus) => {
+    try {
+      const numericId = Number(ticket.id.valueOf());
+      await updateTicket(numericId, {
+        status: newStatus
+      });
+      setTicketStatus(newStatus);
+    } catch (error) {
+      console.error('Error updating ticket status:', error);
+      // TODO: Add error handling UI
+    }
+  };
+
   return (
     <div className="flex">
       <div className={`bg-white rounded-lg shadow flex-grow ${showCustomerProfile ? 'mr-4' : ''} flex flex-col h-[calc(100vh-4rem)]`}>
@@ -103,7 +127,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
               <select
                 className="px-3 py-1 text-sm border rounded-md"
                 value={ticketPriority}
-                onChange={(e) => setTicketPriority(e.target.value as TicketPriority)}
+                onChange={(e) => handlePriorityChange(e.target.value as TicketPriority)}
               >
                 <option value={TicketPriority.LOW}>Low Priority</option>
                 <option value={TicketPriority.MEDIUM}>Medium Priority</option>
@@ -113,7 +137,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
               <select
                 className="px-3 py-1 text-sm border rounded-md"
                 value={ticketStatus}
-                onChange={(e) => setTicketStatus(e.target.value as TicketStatus)}
+                onChange={(e) => handleStatusChange(e.target.value as TicketStatus)}
               >
                 <option value={TicketStatus.OPEN}>Open</option>
                 <option value={TicketStatus.IN_PROGRESS}>In Progress</option>

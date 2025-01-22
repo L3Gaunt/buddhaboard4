@@ -100,6 +100,18 @@ export async function addMessageToTicket(
   return data;
 }
 
+export async function updateTicketPriority(number: number, priority: string) {
+  return updateTicket(number, {
+    priority
+  });
+}
+
+export async function closeTicket(number: number) {
+  return updateTicket(number, {
+    status: 'closed'
+  });
+}
+
 // Optional: Real-time subscriptions
 export function subscribeToTicketUpdates(
   ticketNumber: number,
