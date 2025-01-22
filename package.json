@@ -8,7 +8,11 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "seed": "SEED=true vitest run"
   },
   "dependencies": {
     "@radix-ui/react-slot": "latest",
@@ -17,11 +21,9 @@
     "@tiptap/starter-kit": "latest",
     "class-variance-authority": "latest",
     "clsx": "latest",
-    "date-fns": "^4.1.0",
     "lucide-react": "latest",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^7.1.3",
     "tailwind-merge": "latest"
   },
   "devDependencies": {
@@ -39,6 +41,8 @@
     "supabase": "^2.6.8",
     "tailwindcss": "latest",
     "typescript": "^5.5.4",
-    "vite": "^5.2.0"
+    "vite": "^5.2.0",
+    "vitest": "^1.3.1",
+    "@vitest/ui": "^1.3.1"
   }
 }

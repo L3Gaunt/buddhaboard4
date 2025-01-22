@@ -99,6 +99,7 @@ export interface Ticket {
   assignedTo?: AgentId;
   lastUpdated: Date;
   metadata?: Record<string, unknown>;
+  customer_id: CustomerId;
 }
 
 /**

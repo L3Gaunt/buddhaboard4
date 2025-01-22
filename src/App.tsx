@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CheckCircle2, XCircle, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
@@ -7,22 +7,25 @@ import { TicketDetail } from "./views/TicketsView/TicketDetail";
 import { DashboardView } from "./views/DashboardView";
 import { AgentsView } from "./views/AgentsView";
 import { ChatView } from "./views/ChatView";
+import { LoginView } from "./views/LoginView";
+import { supabase } from './lib/supabase';
 import { 
   type Ticket, 
   type Agent,
-  type AgentId,
   type ViewType, 
   type Customer,
   Views, 
   TicketPriority, 
   TicketStatus,
   AgentStatus,
-  AgentRole,
   createTicketId,
   createAgentId,
-  createMessageId,
   createCustomerId
 } from '@/types';
+
+// Import Supabase services
+import { getCurrentUser, getAgentProfile, updateAgentStatus } from '@/lib/auth';
+import { getTickets } from '@/lib/tickets';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<ViewType>(Views.TICKETS);
@@ -34,124 +37,114 @@ export default function App() {
   const [ticketPriority, setTicketPriority] = useState<TicketPriority>(TicketPriority.MEDIUM);
   const [ticketStatus, setTicketStatus] = useState<TicketStatus>(TicketStatus.OPEN);
   const [showReassignModal, setShowReassignModal] = useState(false);
-  const [assignedAgent, setAssignedAgent] = useState<AgentId>(createAgentId("agent_1"));
+  const [currentAgent, setCurrentAgent] = useState<Agent | null>(null);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [agents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Create IDs once and reuse them
-  const agent1Id = createAgentId("agent_1");
-  const agent2Id = createAgentId("agent_2");
-  const agent3Id = createAgentId("agent_3");
-  const agent4Id = createAgentId("agent_4");
-  const customerId = createCustomerId("customer_1");
-  const systemId = createCustomerId("system_1");
+  // Load current agent and their tickets
+  useEffect(() => {
+    async function loadInitialData() {
+      try {
+        // Get current user and their agent profile
+        const user = await getCurrentUser();
+        console.log('Current user:', user);
+        if (!user) {
+          setIsAuthenticated(false);
+          setLoading(false);
+          return;
+        }
 
-  // Create a customer for the active ticket
-  const customer: Customer = {
-    id: customerId,
-    email: "customer@example.com",
-    name: "John Customer",
-    createdAt: new Date(Date.now() - 86400000), // 1 day ago
-    phone: "+1234567890",
-    company: "Example Corp",
-    avatar: "JC",
-    metadata: {
-      lastLogin: new Date(Date.now() - 3600000), // 1 hour ago
-      preferences: {
-        language: "en",
-        notifications: true
+        setIsAuthenticated(true);
+        const agentProfile = await getAgentProfile(user.id);
+        console.log('Agent profile:', agentProfile);
+        if (agentProfile) {
+          const metadata = agentProfile.metadata as { 
+            department?: string; 
+            skills?: string[]; 
+            languages?: string[]; 
+          } | null;
+
+          setCurrentAgent({
+            id: createAgentId(agentProfile.id),
+            name: agentProfile.name,
+            role: agentProfile.role,
+            status: agentProfile.status,
+            avatar: agentProfile.avatar || agentProfile.name.substring(0, 2).toUpperCase(),
+            email: agentProfile.email,
+            metadata: metadata || undefined
+          });
+
+          // Load tickets assigned to current agent
+          const ticketData = await getTickets({ 
+            assigned_to: user.id,
+            status: [TicketStatus.OPEN, TicketStatus.IN_PROGRESS]
+          });
+          console.log('Ticket data:', ticketData);
+
+          setTickets(ticketData.map(ticket => ({
+            id: createTicketId(ticket.id),
+            title: ticket.title,
+            description: ticket.description,
+            priority: ticket.priority,
+            status: ticket.status,
+            number: ticket.number,
+            createdAt: new Date(ticket.created_at),
+            lastUpdated: new Date(ticket.last_updated),
+            conversation: ticket.conversation || [],
+            assignedTo: ticket.assigned_to ? createAgentId(ticket.assigned_to) : undefined,
+            customer_id: createCustomerId(ticket.customer_id)
+          })));
+
+          // Load customer data if there's an active ticket
+          if (activeTicket) {
+            const { data: customerData } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', activeTicket.customer_id)
+              .single();
+
+            if (customerData) {
+              setCustomer({
+                id: createCustomerId(customerData.id),
+                email: customerData.email,
+                name: customerData.name,
+                createdAt: new Date(customerData.created_at),
+                avatar: customerData.avatar,
+                phone: customerData.phone,
+                company: customerData.company,
+                metadata: customerData.metadata
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+      } finally {
+        setLoading(false);
       }
     }
-  };
 
-  const agents: Agent[] = [
-    {
-      id: agent1Id,
-      name: "John Doe",
-      role: AgentRole.AGENT,
-      status: AgentStatus.ONLINE,
-      avatar: "JD",
-      email: "john.doe@example.com"
-    },
-    {
-      id: agent2Id,
-      name: "Jane Smith",
-      role: AgentRole.AGENT,
-      status: AgentStatus.ONLINE,
-      avatar: "JS",
-      email: "jane.smith@example.com"
-    },
-    {
-      id: agent3Id,
-      name: "Mike Johnson",
-      role: AgentRole.AGENT,
-      status: AgentStatus.AWAY,
-      avatar: "MJ",
-      email: "mike.johnson@example.com"
-    },
-    {
-      id: agent4Id,
-      name: "Sarah Wilson",
-      role: AgentRole.SUPERVISOR,
-      status: AgentStatus.ONLINE,
-      avatar: "SW",
-      email: "sarah.wilson@example.com"
-    },
-  ];
+    loadInitialData();
+  }, [activeTicket?.customer_id]);
 
-  // Create ticket IDs once
-  const ticket1Id = createTicketId(1);
-  const ticket2Id = createTicketId(2);
+  // Update agent status
+  useEffect(() => {
+    if (currentAgent) {
+      updateAgentStatus(currentAgent.id, isAvailable ? AgentStatus.ONLINE : AgentStatus.AWAY)
+        .catch(console.error);
+    }
+  }, [isAvailable, currentAgent]);
 
-  const tickets: Ticket[] = [
-    {
-      id: ticket1Id,
-      title: "Cannot access account after password reset",
-      description: "Customer reported issues logging in...",
-      priority: TicketPriority.MEDIUM,
-      status: TicketStatus.OPEN,
-      number: "1234",
-      createdAt: new Date(Date.now() - 7200000), // 2 hours ago
-      lastUpdated: new Date(Date.now() - 3600000), // 1 hour ago
-      conversation: [
-        {
-          id: createMessageId("conv_1"),
-          sender: customerId,
-          message: "Hi, I can't log into my account after resetting my password. The new password isn't working.",
-          timestamp: new Date(Date.now() - 7200000),
-        },
-        {
-          id: createMessageId("conv_2"),
-          sender: systemId,
-          message: "Password reset request processed",
-          timestamp: new Date(Date.now() - 5400000),
-        },
-        {
-          id: createMessageId("conv_3"),
-          sender: agent1Id,
-          message: "Hello! I understand you're having trouble logging in. Could you please confirm if you received the password reset email?",
-          timestamp: new Date(Date.now() - 3600000),
-        },
-      ],
-      assignedTo: agent1Id,
-    },
-    {
-      id: ticket2Id,
-      title: "Feature request: Dark mode",
-      description: "User suggesting new feature implementation...",
-      priority: TicketPriority.LOW,
-      status: TicketStatus.OPEN,
-      number: "1235",
-      createdAt: new Date(Date.now() - 10800000), // 3 hours ago
-      lastUpdated: new Date(Date.now() - 10800000),
-      conversation: [
-        {
-          id: createMessageId("conv_4"),
-          sender: customerId,
-          message: "Would love to see a dark mode option in the app!",
-          timestamp: new Date(Date.now() - 10800000),
-        },
-      ],
-    },
-  ];
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <LoginView />;
+  }
 
   return (
     <>
@@ -209,7 +202,7 @@ export default function App() {
               <p className="text-sm text-gray-500">
                 Current agent:{" "}
                 <span className="font-medium text-gray-900">
-                  {agents.find(a => a.id === assignedAgent)?.name}
+                  {currentAgent?.name}
                 </span>
               </p>
             </div>
@@ -219,10 +212,10 @@ export default function App() {
                   <div
                     key={agent.id}
                     className={`p-3 rounded-lg border hover:bg-gray-50 cursor-pointer flex items-center justify-between ${
-                      assignedAgent === agent.id ? "border-blue-500 bg-blue-50" : ""
+                      currentAgent?.id === agent.id ? "border-blue-500 bg-blue-50" : ""
                     }`}
                     onClick={() => {
-                      setAssignedAgent(agent.id);
+                      setCurrentAgent(agent);
                       setShowReassignModal(false);
                     }}
                   >
@@ -247,7 +240,7 @@ export default function App() {
                       >
                         {agent.status}
                       </span>
-                      {assignedAgent === agent.id && (
+                      {currentAgent?.id === agent.id && (
                         <Check className="h-5 w-5 text-blue-500" />
                       )}
                     </div>
@@ -265,24 +258,30 @@ export default function App() {
         setIsMobileMenuOpen={setIsMobileMenuOpen}
         setShowSettings={setShowSettings}
       >
-        {currentView === Views.TICKETS &&
-          (activeTicket ? (
-            <TicketDetail
-              ticket={activeTicket}
-              setActiveTicket={setActiveTicket}
-              ticketPriority={ticketPriority}
-              setTicketPriority={setTicketPriority}
-              ticketStatus={ticketStatus}
-              setTicketStatus={setTicketStatus}
-              setShowReassignModal={setShowReassignModal}
-              response={response}
-              setResponse={setResponse}
-              customer={customer}
-              customerTickets={tickets}
-            />
-          ) : (
-            <TicketQueue tickets={tickets} setActiveTicket={setActiveTicket} />
-          ))}
+        {currentView === Views.TICKETS && (
+          <div className="flex flex-1 overflow-hidden">
+            <div className="w-1/3 overflow-auto border-r">
+              <TicketQueue tickets={tickets} setActiveTicket={setActiveTicket} />
+            </div>
+            {activeTicket && customer && (
+              <div className="w-2/3 overflow-auto">
+                <TicketDetail
+                  ticket={activeTicket}
+                  setActiveTicket={setActiveTicket}
+                  ticketPriority={ticketPriority}
+                  setTicketPriority={setTicketPriority}
+                  ticketStatus={ticketStatus}
+                  setTicketStatus={setTicketStatus}
+                  setShowReassignModal={setShowReassignModal}
+                  response={response}
+                  setResponse={setResponse}
+                  customer={customer}
+                  customerTickets={tickets.filter(t => t.customer_id === activeTicket.customer_id)}
+                />
+              </div>
+            )}
+          </div>
+        )}
         {currentView === Views.DASHBOARD && <DashboardView />}
         {currentView === Views.AGENTS && <AgentsView agents={agents} />}
         {currentView === Views.CHAT && <ChatView />}
