@@ -26,17 +26,42 @@ serve(async (req) => {
     if (action === 'create') {
       const { title, firstMessage, priority, email, name } = body
 
-      // Create an anonymous user
-      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-        email: email || `anonymous-${Date.now()}@temp.buddhaboard.com`,
-        email_confirm: true,
-        user_metadata: {
-          name: name || 'Anonymous User',
-          is_anonymous: true
-        }
-      })
+      // Check if user exists in public.users table
+      const { data: existingUser, error: userLookupError } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .eq('email', email)
+        .single()
 
-      if (authError) throw authError
+      if (userLookupError && userLookupError.code !== 'PGRST116') {
+        throw userLookupError
+      }
+
+      let userId: string
+      if (existingUser) {
+        userId = existingUser.id
+        // Update the user's name if provided
+        if (name) {
+          await supabaseAdmin
+            .from('users')
+            .update({ name })
+            .eq('id', userId)
+        }
+      } else {
+        // Create new user in public.users table
+        const { data: newUser, error: createUserError } = await supabaseAdmin
+          .from('users')
+          .insert({
+            email: email || `anonymous-${Date.now()}@temp.buddhaboard.com`,
+            name: name || 'Anonymous User',
+            metadata: { is_anonymous: !email }
+          })
+          .select()
+          .single()
+
+        if (createUserError) throw createUserError
+        userId = newUser.id
+      }
 
       // Find the least busy online agent
       const { data: leastBusyAgent, error: agentError } = await supabaseAdmin.rpc(
@@ -57,7 +82,7 @@ serve(async (req) => {
           title,
           priority,
           status: 'open',
-          customer_id: authData.user.id,
+          customer_id: userId,
           conversation: [{
             id: `msg_${Date.now()}`,
             isFromCustomer: true,
@@ -72,7 +97,7 @@ serve(async (req) => {
       if (error) throw error
 
       // Create a hash from the ticket number and user ID
-      const ticketHash = btoa(`${data.number}:${authData.user.id}`).replace(/=/g, '')
+      const ticketHash = btoa(`${data.number}:${userId}`).replace(/=/g, '')
 
       return new Response(
         JSON.stringify({ 

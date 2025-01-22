@@ -40,7 +40,7 @@ CREATE TABLE tickets (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     last_updated TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     assigned_to UUID REFERENCES auth.users(id),
-    customer_id UUID NOT NULL REFERENCES auth.users(id),
+    customer_id UUID NOT NULL REFERENCES public.users(id),
     conversation JSONB[] NOT NULL DEFAULT '{}',
     metadata JSONB,
 

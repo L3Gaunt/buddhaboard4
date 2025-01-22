@@ -1,9 +1,69 @@
 import { supabase } from './supabase';
 import type { Database } from '../types/supabase';
+import { type Ticket, type Message, createTicketId, createCustomerId, createAgentId, createMessageId } from '../types';
+import type { Json } from '../types/supabase';
 
 export type TicketData = Database['public']['Tables']['tickets']['Row'];
 export type TicketInsert = Database['public']['Tables']['tickets']['Insert'];
 export type TicketUpdate = Database['public']['Tables']['tickets']['Update'];
+
+type JsonObject = { [key: string]: Json | undefined };
+
+interface DatabaseMessage extends JsonObject {
+  id: string;
+  isFromCustomer: boolean;
+  message: string;
+  timestamp: string;
+  attachments?: Array<{
+    url: string;
+    name: string;
+    type: string;
+    size: number;
+  }>;
+  metadata?: Record<string, unknown>;
+}
+
+// Type guard to check if a value is a DatabaseMessage
+function isDatabaseMessage(value: Json): value is DatabaseMessage {
+  if (typeof value !== 'object' || value === null) return false;
+  const msg = value as Record<string, unknown>;
+  return (
+    typeof msg.id === 'string' &&
+    typeof msg.isFromCustomer === 'boolean' &&
+    typeof msg.message === 'string' &&
+    typeof msg.timestamp === 'string'
+  );
+}
+
+// Transform database ticket to frontend ticket
+function transformTicket(data: TicketData): Ticket {
+  // Ensure conversation is properly initialized and typed
+  const conversation = Array.isArray(data.conversation) ? data.conversation : [];
+  
+  return {
+    id: createTicketId(data.number),
+    number: data.number,
+    title: data.title,
+    priority: data.priority as Ticket['priority'],
+    status: data.status as Ticket['status'],
+    createdAt: new Date(data.created_at),
+    lastUpdated: new Date(data.last_updated),
+    assignedTo: data.assigned_to ? createAgentId(data.assigned_to) : undefined,
+    customer_id: createCustomerId(data.customer_id),
+    conversation: conversation.map(msg => {
+      const message = msg as any;
+      return {
+        id: createMessageId(message.id),
+        isFromCustomer: message.isFromCustomer,
+        message: message.message,
+        timestamp: new Date(message.timestamp),
+        attachments: message.attachments,
+        metadata: message.metadata
+      };
+    }),
+    metadata: data.metadata as Record<string, unknown> | undefined
+  };
+}
 
 export async function getTickets(filters?: {
   status?: TicketData['status'][];
@@ -26,7 +86,7 @@ export async function getTickets(filters?: {
   const { data, error } = await query.order('created_at', { ascending: false });
   console.log('Query result:', { data, error });
   if (error) throw error;
-  return data;
+  return data.map(transformTicket);
 }
 
 export async function getTicketById(number: number) {
@@ -39,11 +99,7 @@ export async function getTicketById(number: number) {
   if (error) throw error;
   if (!data) throw new Error(`Ticket with number ${number} not found`);
   
-  // Ensure conversation is initialized
-  return {
-    ...data,
-    conversation: data.conversation || []
-  };
+  return transformTicket(data);
 }
 
 export async function createTicket(ticket: TicketInsert) {
