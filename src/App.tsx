@@ -153,6 +153,7 @@ export default function App() {
         setIsAvailable={setIsAvailable}
         showSettings={showSettings}
         setShowSettings={setShowSettings}
+        currentAgent={currentAgent}
       />
       <ReassignTicketModal
         showReassignModal={showReassignModal}
