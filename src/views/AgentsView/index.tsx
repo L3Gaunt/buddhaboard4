@@ -1,12 +1,19 @@
-import type { FC } from 'react';
+import { useState, type FC } from 'react';
 import { Button } from "@/components/ui/button";
 import { type Agent, AgentStatus, AgentRole } from '@/types';
+import { EditAgentModal } from '@/components/modals/EditAgentModal';
+import { updateAgentProfile, changeAgentPassword } from '@/lib/agents';
+import { toast } from 'sonner';
 
 interface AgentsViewProps {
   agents: Agent[];
+  onAgentUpdated: () => void; // Callback to refresh the agents list
 }
 
-export const AgentsView: FC<AgentsViewProps> = ({ agents }) => {
+export const AgentsView: FC<AgentsViewProps> = ({ agents, onAgentUpdated }) => {
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const getStatusStyle = (status: AgentStatus) => {
     switch (status) {
       case AgentStatus.ONLINE:
@@ -35,6 +42,36 @@ export const AgentsView: FC<AgentsViewProps> = ({ agents }) => {
     }
   };
 
+  const handleUpdateAgent = async (updates: Partial<Agent>) => {
+    if (!selectedAgent) return;
+    
+    setIsUpdating(true);
+    try {
+      await updateAgentProfile(selectedAgent.id, updates);
+      toast.success('Agent profile updated successfully');
+      onAgentUpdated();
+    } catch (error) {
+      console.error('Error updating agent:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to update agent profile');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handlePasswordChange = async (agentId: string, newPassword: string) => {
+    setIsUpdating(true);
+    try {
+      await changeAgentPassword(agentId, newPassword);
+      toast.success('Password changed successfully');
+    } catch (error) {
+      console.error('Error changing password:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to change password');
+      throw error; // Re-throw to be handled by the modal
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-xl font-semibold mb-4">Agent Management</h2>
@@ -42,16 +79,25 @@ export const AgentsView: FC<AgentsViewProps> = ({ agents }) => {
         {agents.map((agent) => (
           <div
             key={agent.id}
-            className="border rounded-lg p-4 flex items-center justify-between"
+            className="border rounded-lg p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
           >
             <div className="flex items-center">
-              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-600">
-                  {agent.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </span>
+              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                {agent.avatar ? (
+                  <img 
+                    src={agent.avatar} 
+                    alt={agent.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement!.innerText = agent.name.substring(0, 2).toUpperCase();
+                    }}
+                  />
+                ) : (
+                  <span className="text-sm font-medium text-gray-600">
+                    {agent.name.substring(0, 2).toUpperCase()}
+                  </span>
+                )}
               </div>
               <div className="ml-4">
                 <h3 className="font-medium">{agent.name}</h3>
@@ -64,12 +110,30 @@ export const AgentsView: FC<AgentsViewProps> = ({ agents }) => {
                   </span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">{agent.email}</p>
+                {agent.metadata?.department && (
+                  <p className="text-sm text-gray-500">Department: {agent.metadata.department}</p>
+                )}
               </div>
             </div>
-            <Button variant="outline">Manage</Button>
+            <Button 
+              variant="outline"
+              onClick={() => setSelectedAgent(agent)}
+              disabled={isUpdating}
+            >
+              Edit Profile
+            </Button>
           </div>
         ))}
       </div>
+
+      {selectedAgent && (
+        <EditAgentModal
+          agent={selectedAgent}
+          onClose={() => setSelectedAgent(null)}
+          onSave={handleUpdateAgent}
+          onPasswordChange={handlePasswordChange}
+        />
+      )}
     </div>
   );
 };

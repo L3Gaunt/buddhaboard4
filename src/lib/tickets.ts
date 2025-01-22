@@ -7,9 +7,7 @@ export type TicketData = Database['public']['Tables']['tickets']['Row'];
 export type TicketInsert = Database['public']['Tables']['tickets']['Insert'];
 export type TicketUpdate = Database['public']['Tables']['tickets']['Update'];
 
-type JsonObject = { [key: string]: Json | undefined };
-
-interface DatabaseMessage extends JsonObject {
+interface DatabaseMessage {
   id: string;
   isFromCustomer: boolean;
   message: string;
@@ -20,26 +18,26 @@ interface DatabaseMessage extends JsonObject {
     type: string;
     size: number;
   }>;
-  metadata?: Record<string, unknown>;
-}
-
-// Type guard to check if a value is a DatabaseMessage
-function isDatabaseMessage(value: Json): value is DatabaseMessage {
-  if (typeof value !== 'object' || value === null) return false;
-  const msg = value as Record<string, unknown>;
-  return (
-    typeof msg.id === 'string' &&
-    typeof msg.isFromCustomer === 'boolean' &&
-    typeof msg.message === 'string' &&
-    typeof msg.timestamp === 'string'
-  );
+  metadata?: Json;
 }
 
 // Transform database ticket to frontend ticket
 function transformTicket(data: TicketData): Ticket {
   // Ensure conversation is properly initialized and typed
-  const conversation = Array.isArray(data.conversation) ? data.conversation : [];
-  
+  const conversation = Array.isArray(data.conversation) 
+    ? data.conversation.map((msg): Message => {
+        const dbMsg = msg as Record<string, Json>;
+        return {
+          id: createMessageId(String(dbMsg.id)),
+          isFromCustomer: Boolean(dbMsg.isFromCustomer),
+          message: String(dbMsg.message),
+          timestamp: new Date(String(dbMsg.timestamp)),
+          attachments: dbMsg.attachments as Message['attachments'],
+          metadata: dbMsg.metadata as Record<string, unknown>
+        };
+      })
+    : [];
+
   return {
     id: createTicketId(data.number),
     number: data.number,
@@ -50,17 +48,7 @@ function transformTicket(data: TicketData): Ticket {
     lastUpdated: new Date(data.last_updated),
     assignedTo: data.assigned_to ? createAgentId(data.assigned_to) : undefined,
     customer_id: createCustomerId(data.customer_id),
-    conversation: conversation.map(msg => {
-      const message = msg as any;
-      return {
-        id: createMessageId(message.id),
-        isFromCustomer: message.isFromCustomer,
-        message: message.message,
-        timestamp: new Date(message.timestamp),
-        attachments: message.attachments,
-        metadata: message.metadata
-      };
-    }),
+    conversation,
     metadata: data.metadata as Record<string, unknown> | undefined
   };
 }
@@ -127,33 +115,37 @@ export async function updateTicket(number: number, updates: TicketUpdate) {
 
 export async function addMessageToTicket(
   ticketNumber: number,
-  message: {
-    id: string;
-    isFromCustomer: boolean;
-    message: string;
-    timestamp: string;
-    attachments?: Array<{
-      url: string;
-      name: string;
-      type: string;
-      size: number;
-    }>;
-  }
+  message: DatabaseMessage
 ) {
-  const ticket = await getTicketById(ticketNumber);
-  if (!ticket) throw new Error(`Ticket with number ${ticketNumber} not found`);
-
-  const conversation = [...(ticket.conversation || []), message];
-
-  const { data, error } = await supabase
+  const { data: ticket } = await supabase
     .from('tickets')
-    .update({ conversation })
+    .select('conversation')
+    .eq('number', ticketNumber)
+    .single();
+
+  if (!ticket) return null;
+
+  const conversation = Array.isArray(ticket.conversation) ? ticket.conversation : [];
+  const updatedConversation = [...conversation, {
+    id: message.id,
+    isFromCustomer: message.isFromCustomer,
+    message: message.message,
+    timestamp: message.timestamp,
+    attachments: message.attachments,
+    metadata: message.metadata
+  }];
+
+  const { data } = await supabase
+    .from('tickets')
+    .update({ 
+      conversation: updatedConversation,
+      last_updated: new Date().toISOString()
+    })
     .eq('number', ticketNumber)
     .select()
     .single();
 
-  if (error) throw error;
-  return data;
+  return data ? transformTicket(data) : null;
 }
 
 export async function updateTicketPriority(number: number, priority: string) {
