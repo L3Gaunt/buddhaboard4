@@ -72,7 +72,7 @@ CREATE POLICY "Only agents can update users"
 CREATE POLICY "Agents can view other agents"
     ON agents FOR SELECT
     TO authenticated
-    USING (auth.uid() IN (SELECT id FROM agents));
+    USING (true);
 
 CREATE POLICY "Only admins can insert agents"
     ON agents FOR INSERT
