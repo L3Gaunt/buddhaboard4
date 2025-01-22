@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import type { FC } from 'react';
 import { ArrowLeft, UserPlus, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,14 @@ export const TicketDetail: FC<TicketDetailProps> = ({
   customerTickets,
 }) => {
   const [showCustomerProfile, setShowCustomerProfile] = React.useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom when conversation updates
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [ticket.conversation]);
 
   const handleSendMessage = async () => {
     if (!response.trim()) return;
@@ -173,7 +181,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
             </span>
           </div>
         </div>
-        <div className="p-6 space-y-6 flex-grow overflow-y-auto">
+        <div ref={chatContainerRef} className="p-6 space-y-6 flex-grow overflow-y-auto">
           {ticket.conversation.map((message, index) => {
             const messageDate = new Date(message.timestamp);
             return (

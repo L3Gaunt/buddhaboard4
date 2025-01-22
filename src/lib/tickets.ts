@@ -130,4 +130,39 @@ export function subscribeToTicketUpdates(
       (payload) => callback(payload.new as TicketData)
     )
     .subscribe();
+}
+
+export type UnauthenticatedTicketData = {
+  title: string;
+  description: string;
+  priority: TicketData['priority'];
+  email?: string;
+  name?: string;
+};
+
+export async function createUnauthenticatedTicket(ticket: UnauthenticatedTicketData) {
+  console.log('Creating unauthenticated ticket:', ticket);
+  const response = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-anonymous-ticket`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(ticket),
+    }
+  );
+
+  console.log('Response status:', response.status);
+  console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+  
+  const { data, error } = await response.json();
+  console.log('Response data:', data);
+  if (error) {
+    console.error('Error creating ticket:', error);
+    throw new Error(error);
+  }
+  return data;
 } 

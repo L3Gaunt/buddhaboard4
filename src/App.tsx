@@ -6,6 +6,8 @@ import { DashboardView } from "./views/DashboardView";
 import { AgentsView } from "./views/AgentsView";
 import { ChatView } from "./views/ChatView";
 import { LoginView } from "./views/LoginView";
+import { UserTicketView } from "./views/UserTicketView";
+import { TicketLookupView } from "./views/TicketLookupView";
 import { supabase } from './lib/supabase';
 import { AgentSettingsModal } from "@/components/modals/AgentSettingsModal";
 import { ReassignTicketModal } from "@/components/modals/ReassignTicketModal";
@@ -31,6 +33,19 @@ import { getCurrentUser, getAgentProfile, updateAgentStatus } from '@/lib/auth';
 import { getTickets } from '@/lib/tickets';
 
 export default function App() {
+  // Check if we're on a public route
+  const isSubmitTicketPage = window.location.pathname === '/submit-ticket';
+  const isTicketLookupPage = window.location.pathname.startsWith('/ticket/');
+  
+  // If it's a public route, render the appropriate view without authentication
+  if (isSubmitTicketPage) {
+    return <UserTicketView />;
+  }
+  
+  if (isTicketLookupPage) {
+    return <TicketLookupView />;
+  }
+
   const [currentView, setCurrentView] = useState<ViewType>(Views.TICKETS);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
