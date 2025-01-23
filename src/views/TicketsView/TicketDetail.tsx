@@ -115,7 +115,10 @@ export const TicketDetail: FC<TicketDetailProps> = ({
           <Button
             variant="ghost"
             className="mb-4"
-            onClick={() => setActiveTicket(null)}
+            onClick={() => {
+              window.history.pushState({}, '', '/tickets');
+              setActiveTicket(null);
+            }}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Queue

@@ -28,13 +28,14 @@ import {
 
 // Import Supabase services
 import { getCurrentUser, getAgentProfile, updateAgentStatus } from '@/lib/auth';
-import { getTickets } from '@/lib/tickets';
+import { getTickets, getTicketById } from '@/lib/tickets';
 import { getAllAgents } from '@/lib/agents';
 
 export default function App() {
   // Check if we're on a public route
   const isSubmitTicketPage = window.location.pathname === '/submit-ticket';
   const isTicketLookupPage = window.location.pathname.startsWith('/ticket/');
+  const isInternalTicketPage = window.location.pathname.startsWith('/tickets/');
   
   // If it's a public route, render the appropriate view without authentication
   if (isSubmitTicketPage) {
@@ -139,10 +140,49 @@ export default function App() {
     }
   }
 
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      if (isInternalTicketPage) {
+        const ticketNumber = parseInt(window.location.pathname.split('/tickets/')[1], 10);
+        if (!isNaN(ticketNumber)) {
+          getTicketById(ticketNumber)
+            .then(ticket => {
+              setActiveTicket(ticket);
+              setCurrentView(Views.TICKETS);
+            })
+            .catch(error => console.error('Error loading ticket:', error));
+        }
+      } else if (window.location.pathname === '/tickets') {
+        setActiveTicket(null);
+        setCurrentView(Views.TICKETS);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isInternalTicketPage]);
+
   // Load current agent and their tickets
   useEffect(() => {
+    async function loadTicketFromUrl() {
+      if (isInternalTicketPage && isAuthenticated) {
+        const ticketNumber = parseInt(window.location.pathname.split('/tickets/')[1], 10);
+        if (!isNaN(ticketNumber)) {
+          try {
+            const ticket = await getTicketById(ticketNumber);
+            setActiveTicket(ticket);
+            setCurrentView(Views.TICKETS);
+          } catch (error) {
+            console.error('Error loading ticket:', error);
+          }
+        }
+      }
+    }
+
     loadInitialData();
-  }, [activeTicket?.customer_id]);
+    loadTicketFromUrl();
+  }, [activeTicket?.customer_id, isAuthenticated]);
 
   // Update agent status
   useEffect(() => {

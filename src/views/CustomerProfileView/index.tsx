@@ -14,7 +14,11 @@ const CustomerTicketList: React.FC<CustomerTicketListProps> = ({ tickets, onTick
           <div
             key={ticket.id}
             className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
-            onClick={() => onTicketSelect(ticket)}
+            onClick={() => {
+              const newUrl = `/tickets/${ticket.number}`;
+              window.history.pushState({}, '', newUrl);
+              onTicketSelect(ticket);
+            }}
           >
             <div className="flex justify-between items-start">
               <div>
