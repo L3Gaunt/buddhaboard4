@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "../../RichTextEditor";
 import CustomerProfileView from '../CustomerProfileView';
 import { addMessageToTicket, updateTicketPriority, updateTicket, getAllCustomerTickets } from '@/lib/tickets';
+import { getAgentProfile } from '@/lib/auth';
+import { AgentCard } from '@/components/AgentCard';
 import { 
   type Ticket, 
   type TicketDetailProps, 
@@ -12,6 +14,7 @@ import {
   TicketStatus,
   type Message,
   type UnwrapReadonly,
+  type Agent,
   createMessageId
 } from '@/types';
 import { TicketBadge } from '../../components/TicketBadge';
@@ -30,7 +33,20 @@ export const TicketDetail: FC<TicketDetailProps> = ({
 }) => {
   const [showCustomerProfile, setShowCustomerProfile] = React.useState(false);
   const [customerTickets, setCustomerTickets] = useState<Ticket[]>([]);
+  const [assignedAgent, setAssignedAgent] = useState<Agent | null>(null);
+  const [showAgentCard, setShowAgentCard] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  // Fetch assigned agent when ticket changes
+  useEffect(() => {
+    if (ticket.assignedTo) {
+      getAgentProfile(ticket.assignedTo.toString())
+        .then(agent => setAssignedAgent(agent))
+        .catch(error => console.error('Error fetching assigned agent:', error));
+    } else {
+      setAssignedAgent(null);
+    }
+  }, [ticket.assignedTo]);
 
   // Fetch all customer tickets when showing profile
   useEffect(() => {
@@ -127,6 +143,17 @@ export const TicketDetail: FC<TicketDetailProps> = ({
             <div>
               <h2 className="text-xl font-semibold">{ticket.title}</h2>
               <p className="text-sm text-gray-500">Ticket #{ticket.number}</p>
+              {assignedAgent && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Assigned to:{' '}
+                  <button
+                    onClick={() => setShowAgentCard(true)}
+                    className="text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    {assignedAgent.name}
+                  </button>
+                </p>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -167,9 +194,11 @@ export const TicketDetail: FC<TicketDetailProps> = ({
               </Button>
             </div>
           </div>
-          <div className="flex gap-2 mt-4">
-            <TicketBadge type="priority" value={ticketPriority} />
-            <TicketBadge type="status" value={ticketStatus} />
+          <div className="space-y-4 mt-4">
+            <div className="flex gap-2">
+              <TicketBadge type="priority" value={ticketPriority} />
+              <TicketBadge type="status" value={ticketStatus} />
+            </div>
           </div>
         </div>
         <div ref={chatContainerRef} className="p-6 space-y-6 flex-grow overflow-y-auto">
@@ -225,6 +254,23 @@ export const TicketDetail: FC<TicketDetailProps> = ({
             setShowCustomerProfile(false);
           }}
         />
+      )}
+
+      {showAgentCard && assignedAgent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-4 max-w-md w-full">
+            <div className="flex justify-end mb-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAgentCard(false)}
+              >
+                ×
+              </Button>
+            </div>
+            <AgentCard agent={assignedAgent} showStatus={true} />
+          </div>
+        </div>
       )}
     </div>
   );
