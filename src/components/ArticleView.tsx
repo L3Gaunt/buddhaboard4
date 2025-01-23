@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { ArrowLeft, Edit2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { ArrowLeft, Edit2, Save, X } from 'lucide-react';
 import type { KBArticle } from '../types/knowledge-base';
 import { getTagStyles } from '../views/KnowledgeBaseView';
-import { ArticleEditor } from './ArticleEditor';
+import { ArticleEditor, ArticleEditorRef } from './ArticleEditor';
 
 interface ArticleViewProps {
   article: KBArticle;
@@ -15,6 +15,7 @@ export function ArticleView({ article, onBack, onSave, canEdit = false }: Articl
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(article.title);
   const [editedDescription, setEditedDescription] = useState(article.description || '');
+  const editorRef = useRef<ArticleEditorRef>(null);
 
   const handleSave = async (content: string) => {
     if (onSave) {
@@ -42,13 +43,37 @@ export function ArticleView({ article, onBack, onSave, canEdit = false }: Articl
             </button>
           )}
           {canEdit && (
-            <button
-              onClick={() => setIsEditing(!isEditing)}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors duration-200 hover:bg-gray-50"
-            >
-              <Edit2 className="h-4 w-4" />
-              {isEditing ? 'View Article' : 'Edit Article'}
-            </button>
+            <div className="flex items-center gap-2">
+              {isEditing ? (
+                <>
+                  <button
+                    onClick={() => {
+                      const content = editorRef.current?.getContent() || article.content;
+                      handleSave(content);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
+                  >
+                    <Save className="h-4 w-4" />
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors duration-200 hover:bg-gray-50"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setIsEditing(!isEditing)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors duration-200 hover:bg-gray-50"
+                >
+                  <Edit2 className="h-4 w-4" />
+                  Edit Article
+                </button>
+              )}
+            </div>
           )}
         </div>
 
@@ -92,6 +117,7 @@ export function ArticleView({ article, onBack, onSave, canEdit = false }: Articl
       </div>
       
       <ArticleEditor
+        ref={editorRef}
         content={article.content}
         isEditing={isEditing}
         onSave={handleSave}
