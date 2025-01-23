@@ -25,7 +25,7 @@ export function ArticleEditor({ content, isEditing, onSave, onCancel }: ArticleE
       },
     },
     editable: isEditing,
-  });
+  }, [isEditing, content]);
 
   if (!editor) return null;
 
