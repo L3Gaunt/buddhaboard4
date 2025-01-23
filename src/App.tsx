@@ -36,6 +36,7 @@ export default function App() {
   const isSubmitTicketPage = window.location.pathname === '/submit-ticket';
   const isTicketLookupPage = window.location.pathname.startsWith('/ticket/');
   const isInternalTicketPage = window.location.pathname.startsWith('/tickets/');
+  const isDashboardPage = window.location.pathname === '/dashboard';
   
   // If it's a public route, render the appropriate view without authentication
   if (isSubmitTicketPage) {
@@ -46,7 +47,7 @@ export default function App() {
     return <TicketLookupView />;
   }
 
-  const [currentView, setCurrentView] = useState<ViewType>(Views.TICKETS);
+  const [currentView, setCurrentView] = useState<ViewType>(isDashboardPage ? Views.DASHBOARD : Views.TICKETS);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
   const [showSettings, setShowSettings] = useState(false);
