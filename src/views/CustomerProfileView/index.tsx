@@ -1,5 +1,6 @@
 import React from 'react';
 import { CustomerProfileProps, CustomerTicketListProps } from '../../types';
+import { TicketBadge } from '../../components/TicketBadge';
 
 const CustomerTicketList: React.FC<CustomerTicketListProps> = ({ tickets, onTicketSelect }) => {
   return (
@@ -19,9 +20,10 @@ const CustomerTicketList: React.FC<CustomerTicketListProps> = ({ tickets, onTick
                   <p className="text-sm text-gray-500">{ticket.conversation[0].message}</p>
                 )}
               </div>
-              <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                {ticket.priority}
-              </span>
+              <div className="flex gap-2">
+                <TicketBadge type="status" value={ticket.status} />
+                <TicketBadge type="priority" value={ticket.priority} />
+              </div>
             </div>
             <div className="mt-2 flex items-center text-sm text-gray-500">
               <span>Ticket #{ticket.number}</span>

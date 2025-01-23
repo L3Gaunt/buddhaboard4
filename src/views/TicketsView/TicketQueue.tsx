@@ -1,7 +1,7 @@
-import type { FC } from 'react';
-import { useState, useEffect } from 'react';
-import { type Ticket, type TicketQueueProps, TicketPriority, type AgentId } from '@/types';
-import { getAgentProfile } from '@/lib/auth';
+import { FC, useEffect, useState } from 'react';
+import { TicketQueueProps, AgentId } from '../../types';
+import { getAgentProfile } from '../../lib/auth';
+import { TicketBadge } from '../../components/TicketBadge';
 
 export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket }) => {
   const [agentNames, setAgentNames] = useState<Record<AgentId, string>>({});
@@ -30,21 +30,6 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket }) 
     fetchAgentNames();
   }, [tickets]);
 
-  const getPriorityStyle = (priority: TicketPriority) => {
-    switch (priority) {
-      case TicketPriority.LOW:
-        return "bg-blue-100 text-blue-800";
-      case TicketPriority.MEDIUM:
-        return "bg-yellow-100 text-yellow-800";
-      case TicketPriority.HIGH:
-        return "bg-orange-100 text-orange-800";
-      case TicketPriority.URGENT:
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleString();
   };
@@ -53,7 +38,7 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket }) 
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-xl font-semibold mb-4">Ticket Queue</h2>
       <div className="space-y-4">
-        {tickets.map((ticket: Ticket) => (
+        {tickets.map((ticket) => (
           <div
             key={ticket.id}
             className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
@@ -66,9 +51,10 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket }) 
                   <p className="text-sm text-gray-500">{ticket.conversation[0].message}</p>
                 )}
               </div>
-              <span className={`px-2 py-1 text-xs rounded-full ${getPriorityStyle(ticket.priority)}`}>
-                {ticket.priority.replace("_", " ")} Priority
-              </span>
+              <div className="flex gap-2">
+                <TicketBadge type="status" value={ticket.status} />
+                <TicketBadge type="priority" value={ticket.priority} />
+              </div>
             </div>
             <div className="mt-2 flex items-center text-sm text-gray-500">
               <span>Ticket #{ticket.number}</span>

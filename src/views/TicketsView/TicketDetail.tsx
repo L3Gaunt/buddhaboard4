@@ -14,6 +14,7 @@ import {
   type UnwrapReadonly,
   createMessageId
 } from '@/types';
+import { TicketBadge } from '../../components/TicketBadge';
 
 export const TicketDetail: FC<TicketDetailProps> = ({
   ticket,
@@ -164,30 +165,8 @@ export const TicketDetail: FC<TicketDetailProps> = ({
             </div>
           </div>
           <div className="flex gap-2 mt-4">
-            <span
-              className={`px-2 py-1 text-xs rounded-full ${
-                ticketPriority === TicketPriority.LOW
-                  ? "bg-blue-100 text-blue-800"
-                  : ticketPriority === TicketPriority.MEDIUM
-                  ? "bg-yellow-100 text-yellow-800"
-                  : ticketPriority === TicketPriority.HIGH
-                  ? "bg-orange-100 text-orange-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
-              {ticketPriority} Priority
-            </span>
-            <span
-              className={`px-2 py-1 text-xs rounded-full ${
-                ticketStatus === TicketStatus.OPEN
-                  ? "bg-blue-100 text-blue-800"
-                  : ticketStatus === TicketStatus.WAITING_CUSTOMER_REPLY
-                  ? "bg-yellow-100 text-yellow-800"
-                  : "bg-green-100 text-green-800"
-              }`}
-            >
-              {ticketStatus.replace("_", " ")}
-            </span>
+            <TicketBadge type="priority" value={ticketPriority} />
+            <TicketBadge type="status" value={ticketStatus} />
           </div>
         </div>
         <div ref={chatContainerRef} className="p-6 space-y-6 flex-grow overflow-y-auto">
