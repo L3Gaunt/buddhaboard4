@@ -64,7 +64,6 @@ export const testUsers = {
     { email: 'jane.smith@example.com', password: 'password123', name: 'Jane Smith' },
     { email: 'maria.garcia@example.com', password: 'password123', name: 'Maria Garcia' },
     { email: 'david.wilson@example.com', password: 'password123', name: 'David Wilson' },
-    { email: 'yuki.tanaka@example.com', password: 'password123', name: 'Yuki Tanaka' }
   ]
 };
 
