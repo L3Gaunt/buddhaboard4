@@ -2,8 +2,10 @@ import { useState, type FC } from 'react';
 import { Button } from "@/components/ui/button";
 import { type Agent, AgentStatus, AgentRole } from '@/types';
 import { EditAgentModal } from '@/components/modals/EditAgentModal';
+import { CreateAgentModal } from '@/components/modals/CreateAgentModal';
 import { updateAgentProfile, changeAgentPassword } from '@/lib/agents';
 import { toast } from 'sonner';
+import { UserPlus } from 'lucide-react';
 
 interface AgentsViewProps {
   agents: Agent[];
@@ -12,6 +14,7 @@ interface AgentsViewProps {
 
 export const AgentsView: FC<AgentsViewProps> = ({ agents, onAgentUpdated }) => {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const getStatusStyle = (status: AgentStatus) => {
@@ -74,7 +77,16 @@ export const AgentsView: FC<AgentsViewProps> = ({ agents, onAgentUpdated }) => {
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold mb-4">Agent Management</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Agent Management</h2>
+        <Button
+          onClick={() => setShowCreateModal(true)}
+          className="flex items-center gap-2"
+        >
+          <UserPlus className="h-4 w-4" />
+          Add Agent
+        </Button>
+      </div>
       <div className="space-y-4">
         {agents.map((agent) => (
           <div
@@ -134,6 +146,12 @@ export const AgentsView: FC<AgentsViewProps> = ({ agents, onAgentUpdated }) => {
           onPasswordChange={handlePasswordChange}
         />
       )}
+
+      <CreateAgentModal
+        show={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onAgentCreated={onAgentUpdated}
+      />
     </div>
   );
 };

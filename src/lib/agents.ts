@@ -1,5 +1,4 @@
 import { supabase } from './supabase';
-import { updatePassword } from './auth';
 import type { Agent, AgentId, AgentRole, AgentStatus } from '@/types';
 import type { Database } from '@/types/supabase';
 
@@ -67,6 +66,59 @@ export async function changeAgentPassword(
   if (agentError) throw agentError;
   if (!agent) throw new Error('Agent not found');
 
-  // Update the password using Supabase Auth
-  await updatePassword(newPassword);
+  // Call the Edge Function to change the password
+  const { error } = await supabase.functions.invoke('change_password', {
+    body: {
+      targetUserId: agentId,
+      newPassword
+    }
+  });
+
+  if (error) throw error;
+}
+
+export type CreateAgentData = {
+  name: string;
+  email: string;
+  password: string;
+  role: AgentRole;
+  department?: string;
+  skills?: string[];
+  languages?: string[];
+};
+
+export async function createAgent(data: CreateAgentData) {
+  // First create the auth user via edge function
+  const { data: authData, error: authError } = await supabase.functions.invoke('create_agent', {
+    body: {
+      email: data.email,
+      password: data.password,
+      name: data.name,
+      role: data.role
+    }
+  });
+
+  if (authError) throw authError;
+  if (!authData?.userId) throw new Error('No user ID returned from auth creation');
+
+  // Then create the agent profile
+  const { data: agent, error: profileError } = await supabase
+    .from('agents')
+    .insert({
+      id: authData.userId,
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      status: 'offline',
+      metadata: {
+        department: data.department,
+        skills: data.skills || [],
+        languages: data.languages || []
+      }
+    })
+    .select()
+    .single();
+
+  if (profileError) throw profileError;
+  return agent;
 } 

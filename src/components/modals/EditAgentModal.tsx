@@ -34,6 +34,16 @@ export function EditAgentModal({
     setError("");
     
     try {
+      // Validate passwords if attempting to change
+      if (newPassword || confirmPassword) {
+        if (newPassword !== confirmPassword) {
+          throw new Error("Passwords do not match");
+        }
+        if (newPassword.length < 6) {
+          throw new Error("Password must be at least 6 characters long");
+        }
+      }
+
       const updatedAgent: Partial<Agent> = {
         name,
         email,
@@ -48,7 +58,7 @@ export function EditAgentModal({
       
       await onSave(updatedAgent);
       
-      if (newPassword && newPassword === confirmPassword) {
+      if (newPassword) {
         await onPasswordChange(agent.id, newPassword);
       }
       
