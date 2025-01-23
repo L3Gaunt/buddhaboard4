@@ -94,6 +94,17 @@ export function LoginView() {
             </p>
           )}
         </form>
+        <div className="mt-6 text-center border-t pt-6">
+          <p className="text-sm text-gray-600">
+            Need help? {' '}
+            <a 
+              href="/submit-ticket" 
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Submit a Support Ticket
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/submit-ticket",
+      "destination": "/"
+    },
+    {
+      "source": "/ticket/:hash",
+      "destination": "/"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ]
+} 
