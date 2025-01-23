@@ -1,7 +1,5 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Heading from "@tiptap/extension-heading";
-import CodeBlock from "@tiptap/extension-code-block";
 import { Save, X } from "lucide-react";
 
 interface ArticleEditorProps {
@@ -14,11 +12,11 @@ interface ArticleEditorProps {
 export function ArticleEditor({ content, isEditing, onSave, onCancel }: ArticleEditorProps) {
   const editor = useEditor({
     extensions: [
-      StarterKit,
-      Heading.configure({
-        levels: [1, 2, 3],
+      StarterKit.configure({
+        heading: {
+          levels: [1, 2, 3],
+        },
       }),
-      CodeBlock,
     ],
     content,
     editorProps: {
