@@ -103,7 +103,8 @@ export function KnowledgeBaseView() {
       // Then filter by search query if one exists
       const matchesSearch = !searchQuery || 
         article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.content.toLowerCase().includes(searchQuery.toLowerCase());
+        article.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (article.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
       
       return matchesTags && matchesSearch;
     });
