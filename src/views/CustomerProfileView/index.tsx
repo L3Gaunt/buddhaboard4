@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { CustomerProfileProps, CustomerTicketListProps } from '../../types';
 import { TicketBadge } from '../../components/TicketBadge';
+import { RichTextEditor } from '../../RichTextEditor';
+import { updateCustomerNotes } from '../../lib/customers';
+import debounce from 'lodash/debounce';
 
 const CustomerTicketList: React.FC<CustomerTicketListProps> = ({ tickets, onTicketSelect }) => {
   return (
@@ -44,6 +47,35 @@ const CustomerProfileView: React.FC<CustomerProfileProps> = ({
   isExpanded = false,
   onTicketSelect,
 }) => {
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [localNotes, setLocalNotes] = useState<string>(propCustomer.metadata?.notes?.toString() || '');
+
+  useEffect(() => {
+    setLocalNotes(propCustomer.metadata?.notes?.toString() || '');
+  }, [propCustomer.metadata?.notes]);
+
+  const debouncedUpdateNotes = useCallback(
+    debounce(async (notes: string) => {
+      try {
+        setIsSaving(true);
+        setError(null);
+        await updateCustomerNotes(String(propCustomer.id), notes);
+      } catch (err) {
+        setError('Failed to save notes. Please try again.');
+        console.error('Error saving notes:', err);
+      } finally {
+        setIsSaving(false);
+      }
+    }, 1000),
+    [propCustomer.id]
+  );
+
+  const handleNotesChange = (notes: string) => {
+    setLocalNotes(notes);
+    debouncedUpdateNotes(notes);
+  };
+
   return (
     <div className={`bg-white rounded-lg shadow p-6 ${isExpanded ? 'w-full' : 'w-96'}`}>
       <div className="flex justify-between items-start mb-6">
@@ -75,7 +107,20 @@ const CustomerProfileView: React.FC<CustomerProfileProps> = ({
           <h3 className="text-sm font-medium text-gray-500">Customer Since</h3>
           <p>{new Date(propCustomer.createdAt).toLocaleDateString()}</p>
         </div>
+        
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-gray-500">Notes</h3>
+            {isSaving && <span className="text-sm text-gray-500">Saving...</span>}
+            {error && <span className="text-sm text-red-500">{error}</span>}
+          </div>
+          <RichTextEditor
+            content={localNotes}
+            onChange={handleNotesChange}
+          />
+        </div>
       </div>
+      
       {onTicketSelect && (
         <CustomerTicketList
           tickets={propCustomerTickets}

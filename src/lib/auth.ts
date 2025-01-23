@@ -90,10 +90,6 @@ export async function getUserProfile(userId: string): Promise<Customer | null> {
     createdAt: new Date(data.created_at),
     metadata: data.metadata ? {
       lastLogin: (data.metadata as any)?.lastLogin ? new Date((data.metadata as any).lastLogin) : undefined,
-      preferences: {
-        language: (data.metadata as any)?.preferences?.language,
-        notifications: (data.metadata as any)?.preferences?.notifications
-      }
     } : undefined,
     avatar: data.avatar || undefined,
     company: data.company || undefined,
