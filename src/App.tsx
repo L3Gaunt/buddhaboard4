@@ -37,6 +37,9 @@ export default function App() {
   const isTicketLookupPage = window.location.pathname.startsWith('/ticket/');
   const isInternalTicketPage = window.location.pathname.startsWith('/tickets/');
   const isDashboardPage = window.location.pathname === '/dashboard';
+  const isAgentsPage = window.location.pathname === '/agents';
+  const isChatPage = window.location.pathname === '/chat';
+  const isKnowledgeBasePage = window.location.pathname === '/knowledge-base';
   
   // If it's a public route, render the appropriate view without authentication
   if (isSubmitTicketPage) {
@@ -47,7 +50,13 @@ export default function App() {
     return <TicketLookupView />;
   }
 
-  const [currentView, setCurrentView] = useState<ViewType>(isDashboardPage ? Views.DASHBOARD : Views.TICKETS);
+  const [currentView, setCurrentView] = useState<ViewType>(
+    isDashboardPage ? Views.DASHBOARD : 
+    isAgentsPage ? Views.AGENTS :
+    isChatPage ? Views.CHAT :
+    isKnowledgeBasePage ? Views.KNOWLEDGE_BASE :
+    Views.TICKETS
+  );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -62,6 +71,28 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const handleViewChange = (view: ViewType) => {
+    setCurrentView(view);
+    let newPath = '/tickets'; // default path
+    
+    switch (view) {
+      case Views.DASHBOARD:
+        newPath = '/dashboard';
+        break;
+      case Views.AGENTS:
+        newPath = '/agents';
+        break;
+      case Views.KNOWLEDGE_BASE:
+        newPath = '/knowledge-base';
+        break;
+      case Views.CHAT:
+        newPath = '/chat';
+        break;
+    }
+    
+    window.history.pushState({}, '', newPath);
+  };
 
   async function loadInitialData() {
     try {
@@ -144,8 +175,9 @@ export default function App() {
   // Handle browser back/forward navigation
   useEffect(() => {
     const handlePopState = () => {
+      const path = window.location.pathname;
       if (isInternalTicketPage) {
-        const ticketNumber = parseInt(window.location.pathname.split('/tickets/')[1], 10);
+        const ticketNumber = parseInt(path.split('/tickets/')[1], 10);
         if (!isNaN(ticketNumber)) {
           getTicketById(ticketNumber)
             .then(ticket => {
@@ -154,9 +186,17 @@ export default function App() {
             })
             .catch(error => console.error('Error loading ticket:', error));
         }
-      } else if (window.location.pathname === '/tickets') {
+      } else if (path === '/tickets') {
         setActiveTicket(null);
         setCurrentView(Views.TICKETS);
+      } else if (path === '/dashboard') {
+        setCurrentView(Views.DASHBOARD);
+      } else if (path === '/agents') {
+        setCurrentView(Views.AGENTS);
+      } else if (path === '/chat') {
+        setCurrentView(Views.CHAT);
+      } else if (path === '/knowledge-base') {
+        setCurrentView(Views.KNOWLEDGE_BASE);
       }
     };
 
@@ -220,7 +260,7 @@ export default function App() {
       />
       <Layout
         currentView={currentView}
-        setCurrentView={setCurrentView}
+        setCurrentView={handleViewChange}
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
         setShowSettings={setShowSettings}
