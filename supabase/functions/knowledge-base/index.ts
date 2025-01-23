@@ -64,7 +64,7 @@ serve(async (req) => {
       const { data: agent, error: agentError } = await supabase
         .from('agents')
         .select('id')
-        .eq('user_id', user.data.user.id)
+        .eq('id', user.data.user.id)
         .single()
 
       if (agentError) {

@@ -56,7 +56,14 @@ export async function createArticle(article: CreateArticleInput) {
   return data;
 }
 
-export async function updateArticle(id: string, article: Partial<CreateArticleInput>) {
+type UpdateArticleInput = {
+  title: string;
+  description?: string;
+  content: string;
+  status: 'draft' | 'published' | 'archived';
+}
+
+export async function updateArticle(id: string, article: UpdateArticleInput) {
   const { data, error } = await supabase.functions.invoke<KBArticle>('knowledge-base', {
     body: {
       method: 'PUT',

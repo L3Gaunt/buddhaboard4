@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
-import { getArticles, getTags, getArticle } from '../../services/knowledge-base';
+import { getArticles, getTags, getArticle, updateArticle } from '../../services/knowledge-base';
 import type { KBArticle, KBTag } from '../../types/knowledge-base';
 import { ArticleView } from '../../components/ArticleView';
 
@@ -133,6 +133,28 @@ export function KnowledgeBaseView() {
     setCurrentPage(newPage);
   };
 
+  const handleArticleSave = async (updatedArticle: Partial<KBArticle>) => {
+    try {
+      setIsLoading(true);
+      await updateArticle(updatedArticle.id!, {
+        title: updatedArticle.title!,
+        description: updatedArticle.description,
+        content: updatedArticle.content!,
+        status: updatedArticle.status || 'published'
+      });
+      
+      // Refresh the article
+      if (currentArticle) {
+        const article = await getArticle(currentArticle.id);
+        setCurrentArticle(article);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update article');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (error) {
     return (
       <div className="flex-1 p-8">
@@ -156,7 +178,12 @@ export function KnowledgeBaseView() {
   if (currentArticle) {
     return (
       <div className="flex-1 p-8">
-        <ArticleView article={currentArticle} onBack={handleBack} />
+        <ArticleView 
+          article={currentArticle} 
+          onBack={handleBack}
+          onSave={handleArticleSave}
+          canEdit={true}
+        />
       </div>
     );
   }
