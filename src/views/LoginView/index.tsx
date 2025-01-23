@@ -7,6 +7,7 @@ export function LoginView() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showSecret, setShowSecret] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +80,19 @@ export function LoginView() {
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full mt-2"
+            onClick={() => setShowSecret(!showSecret)}
+          >
+            psst
+          </Button>
+          {showSecret && (
+            <p className="text-sm text-gray-600 mt-2 text-center italic">
+              Hey there, curious one! 👋 admin@buddhaboard.com, password123
+            </p>
+          )}
         </form>
       </div>
     </div>
