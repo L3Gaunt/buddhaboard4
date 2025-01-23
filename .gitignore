@@ -23,4 +23,4 @@ dist-ssr
 *.sln
 *.sw?
 .env*
-filename_explanations.md
+source_code_file_descriptions.md
