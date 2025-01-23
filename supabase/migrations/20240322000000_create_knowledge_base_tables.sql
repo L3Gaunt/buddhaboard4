@@ -2,6 +2,7 @@
 CREATE TABLE kb_articles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
+  description TEXT,
   slug TEXT NOT NULL UNIQUE,
   content TEXT NOT NULL,
   status TEXT NOT NULL CHECK (status IN ('draft', 'published')),

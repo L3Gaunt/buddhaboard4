@@ -8,6 +8,7 @@ const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 interface Article {
   id?: string
   title: string
+  description?: string
   slug: string
   content: string
   status: 'draft' | 'published'
@@ -89,6 +90,7 @@ serve(async (req) => {
                 .select(`
                   id,
                   title,
+                  description,
                   slug,
                   content,
                   status,
@@ -126,6 +128,7 @@ serve(async (req) => {
                 .select(`
                   id,
                   title,
+                  description,
                   slug,
                   content,
                   status,

@@ -6,10 +6,11 @@ INSERT INTO kb_tags (id, name, slug, color) VALUES
   ('44444444-4444-4444-4444-444444444444', 'Features', 'features', '#9C27B0');
 
 -- Seed data for kb_articles
-INSERT INTO kb_articles (id, title, slug, content, status) VALUES
+INSERT INTO kb_articles (id, title, description, slug, content, status) VALUES
   (
     'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
     'Welcome to Our Platform',
+    'A comprehensive guide to help you get started with our platform and understand its key features.',
     'welcome-to-our-platform',
     '# Welcome to Our Platform
 
@@ -29,6 +30,7 @@ This guide will help you get started with our platform. Here are the key things 
   (
     'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
     'Frequently Asked Questions',
+    'Find answers to common questions about our platform, its features, and how to get started.',
     'frequently-asked-questions',
     '# Frequently Asked Questions
 
@@ -44,6 +46,7 @@ A: Follow our getting started guide to begin your journey.',
   (
     'cccccccc-cccc-cccc-cccc-cccccccccccc',
     'Common Issues and Solutions',
+    'A collection of common issues users might encounter and detailed solutions to resolve them.',
     'common-issues-and-solutions',
     '# Common Issues and Solutions
 
@@ -59,6 +62,7 @@ Description and solution...',
   (
     'dddddddd-dddd-dddd-dddd-dddddddddddd',
     'Advanced Features Guide',
+    'Explore our advanced features and learn how to leverage them for maximum benefit.',
     'advanced-features-guide',
     '# Advanced Features Guide
 
