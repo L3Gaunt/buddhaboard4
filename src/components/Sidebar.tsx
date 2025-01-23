@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { Inbox, BarChart3, Users, MessageSquare } from "lucide-react";
+import { Inbox, BarChart3, Users, MessageSquare, Book } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type SidebarProps, Views } from '@/types';
 
@@ -43,6 +43,14 @@ const Sidebar: FC<SidebarProps> = ({ currentView, setCurrentView, isMobileMenuOp
         >
           <MessageSquare className="mr-2 h-4 w-4" />
           Live Chat
+        </Button>
+        <Button
+          variant={currentView === Views.KNOWLEDGE_BASE ? "secondary" : "ghost"}
+          className="w-full justify-start"
+          onClick={() => setCurrentView(Views.KNOWLEDGE_BASE)}
+        >
+          <Book className="mr-2 h-4 w-4" />
+          Knowledge Base
         </Button>
       </nav>
     </div>

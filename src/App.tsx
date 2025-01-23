@@ -8,6 +8,7 @@ import { ChatView } from "./views/ChatView";
 import { LoginView } from "./views/LoginView";
 import { UserTicketView } from "./views/UserTicketView";
 import { TicketLookupView } from "./views/TicketLookupView";
+import { KnowledgeBaseView } from "./views/KnowledgeBaseView";
 import { supabase } from './lib/supabase';
 import { AgentSettingsModal } from "@/components/modals/AgentSettingsModal";
 import { ReassignTicketModal } from "@/components/modals/ReassignTicketModal";
@@ -219,6 +220,7 @@ export default function App() {
           />
         )}
         {currentView === Views.CHAT && <ChatView />}
+        {currentView === Views.KNOWLEDGE_BASE && <KnowledgeBaseView />}
       </Layout>
     </>
   );

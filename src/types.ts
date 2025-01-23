@@ -155,6 +155,7 @@ export const Views = {
   AGENTS: "agents",
   CHAT: "chat",
   CUSTOMER_PROFILE: "customer_profile",
+  KNOWLEDGE_BASE: "knowledge_base",
 } as const;
 
 export type ViewType = typeof Views[keyof typeof Views];

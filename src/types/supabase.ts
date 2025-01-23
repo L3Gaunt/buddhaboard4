@@ -117,9 +117,193 @@ export interface Database {
         }
         Relationships: []
       }
+      kb_articles: {
+        Row: {
+          id: string
+          title: string
+          slug: string
+          description: string | null
+          content: string
+          status: 'draft' | 'published' | 'archived'
+          view_count: number
+          helpful_count: number
+          not_helpful_count: number
+          author_id: string | null
+          last_updated_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          slug: string
+          description?: string | null
+          content: string
+          status?: 'draft' | 'published' | 'archived'
+          view_count?: number
+          helpful_count?: number
+          not_helpful_count?: number
+          author_id?: string | null
+          last_updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          slug?: string
+          description?: string | null
+          content?: string
+          status?: 'draft' | 'published' | 'archived'
+          view_count?: number
+          helpful_count?: number
+          not_helpful_count?: number
+          author_id?: string | null
+          last_updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_articles_author_id_fkey"
+            columns: ["author_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_articles_last_updated_by_fkey"
+            columns: ["last_updated_by"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      kb_tags: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          color: string
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          color?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          color?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      kb_article_tags: {
+        Row: {
+          article_id: string
+          tag_id: string
+          created_at: string
+        }
+        Insert: {
+          article_id: string
+          tag_id: string
+          created_at?: string
+        }
+        Update: {
+          article_id?: string
+          tag_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_article_tags_article_id_fkey"
+            columns: ["article_id"]
+            referencedRelation: "kb_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_article_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            referencedRelation: "kb_tags"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      kb_article_feedback: {
+        Row: {
+          id: string
+          article_id: string
+          user_id: string | null
+          is_helpful: boolean
+          comment: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          article_id: string
+          user_id?: string | null
+          is_helpful: boolean
+          comment?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          article_id?: string
+          user_id?: string | null
+          is_helpful?: boolean
+          comment?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_article_feedback_article_id_fkey"
+            columns: ["article_id"]
+            referencedRelation: "kb_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_article_feedback_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      kb_article_stats: {
+        Row: {
+          id: string
+          title: string
+          status: 'draft' | 'published' | 'archived'
+          view_count: number
+          helpful_count: number
+          not_helpful_count: number
+          tag_count: number
+          related_articles_count: number
+          feedback_count: number
+          created_at: string
+          updated_at: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_articles_id_fkey"
+            columns: ["id"]
+            referencedRelation: "kb_articles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Functions: {
       get_ticket_by_hash: {
@@ -141,10 +325,17 @@ export interface Database {
         Args: { conversation: Json[] }
         Returns: boolean
       }
+      increment_article_view: {
+        Args: {
+          article_id: string
+        }
+        Returns: void
+      }
     }
     Enums: {
       agent_role: "admin" | "agent" | "supervisor"
       agent_status: "online" | "offline" | "busy" | "away"
+      article_status: 'draft' | 'published' | 'archived'
     }
     CompositeTypes: {
       [_ in never]: never
