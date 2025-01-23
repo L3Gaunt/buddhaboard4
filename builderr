@@ -1,0 +1,3630 @@
+name@name buddhaboard4 % npm run build                          
+
+> magic-patterns-vite-template@0.0.1 build
+> tsc && vite build
+
+src/App.tsx:4:10 - error TS2305: Module '"./views/TicketsView/DetailView"' has no exported member 'TicketDetail'.
+
+4 import { TicketDetail as DetailView } from "./views/TicketsView/DetailView";
+           ~~~~~~~~~~~~
+
+src/components/Layout.tsx:1:1 - error TS6133: 'ReactNode' is declared but its value is never read.
+
+1 import { type ReactNode } from "react";
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/components/modals/CreateAgentModal.tsx:8:15 - error TS6133: 'Agent' is declared but its value is never read.
+
+8 import { type Agent, AgentRole } from "@/types";
+                ~~~~~
+
+src/components/modals/EditAgentModal.tsx:1:20 - error TS6133: 'useEffect' is declared but its value is never read.
+
+1 import { useState, useEffect } from "react";
+                     ~~~~~~~~~
+
+src/components/modals/EditAgentModal.tsx:5:1 - error TS6133: 'Label' is declared but its value is never read.
+
+5 import { Label } from "@/components/ui/label";
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/components/modals/EditAgentModal.tsx:6:18 - error TS6133: 'SelectContent' is declared but its value is never read.
+
+6 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+                   ~~~~~~~~~~~~~
+
+src/components/modals/EditAgentModal.tsx:6:33 - error TS6133: 'SelectItem' is declared but its value is never read.
+
+6 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+                                  ~~~~~~~~~~
+
+src/components/modals/EditAgentModal.tsx:6:45 - error TS6133: 'SelectTrigger' is declared but its value is never read.
+
+6 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+                                              ~~~~~~~~~~~~~
+
+src/components/modals/EditAgentModal.tsx:6:60 - error TS6133: 'SelectValue' is declared but its value is never read.
+
+6 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+                                                             ~~~~~~~~~~~
+
+src/components/modals/EditAgentModal.tsx:7:1 - error TS6192: All imports in import declaration are unused.
+
+7 import { updateAgentProfile, changeAgentPassword } from "@/lib/agentService";
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/components/modals/EditAgentModal.tsx:9:1 - error TS6133: 'toast' is declared but its value is never read.
+
+9 import { toast } from "sonner";
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/components/modals/ReassignTicketModal.tsx:3:1 - error TS6192: All imports in import declaration are unused.
+
+3 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/RichTextEditor.tsx:4:24 - error TS6133: 'Underline' is declared but its value is never read.
+
+4 import { Bold, Italic, Underline, List, ListOrdered } from "lucide-react";
+                         ~~~~~~~~~
+
+src/views/TicketLookupView/index.tsx:2:24 - error TS2307: Cannot find module '@/components/ui/button' or its corresponding type declarations.
+
+2 import { Button } from "@/components/ui/button";
+                         ~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/views/TicketsView/DetailView.tsx:4:24 - error TS2307: Cannot find module '@/components/ui/button' or its corresponding type declarations.
+
+4 import { Button } from "@/components/ui/button";
+                         ~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/views/TicketsView/QueueView.tsx:4:33 - error TS2307: Cannot find module '@/lib/auth' or its corresponding type declarations.
+
+4 import { getAgentProfile } from '@/lib/auth';
+                                  ~~~~~~~~~~~~
+
+src/views/UserTicketView/index.tsx:3:24 - error TS2307: Cannot find module '@/components/ui/button' or its corresponding type declarations.
+
+3 import { Button } from "@/components/ui/button";
+                         ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Found 17 errors in 10 files.
+
+Errors  Files
+     1  src/App.tsx:4
+     1  src/components/Layout.tsx:1
+     1  src/components/modals/CreateAgentModal.tsx:8
+     8  src/components/modals/EditAgentModal.tsx:1
+     1  src/components/modals/ReassignTicketModal.tsx:3
+     1  src/RichTextEditor.tsx:4
+     1  src/views/TicketLookupView/index.tsx:2
+     1  src/views/TicketsView/DetailView.tsx:4
+     1  src/views/TicketsView/QueueView.tsx:4
+     1  src/views/UserTicketView/index.tsx:3
+name@name buddhaboard4 % 
+
+#!/bin/bash
+
+# Navigate to the root directory of the project (if not already there)
+cd "$(dirname "$0")" || exit
+
+# ----------------------------------------------------------------------
+# 1. Rename Files (with error handling)
+# ----------------------------------------------------------------------
+
+# Function to rename files safely
+safe_rename() {
+  if [ -e "$1" ]; then
+    mv "$1" "$2"
+    echo "Renamed: $1 → $2"
+  else
+    echo "Error: $1 not found. Skipping..."
+  fi
+}
+
+# Rename files with correct paths
+safe_rename "src/views/TicketsView/TicketDetail.tsx" "src/views/TicketsView/DetailView.tsx"
+safe_rename "src/views/TicketsView/TicketQueue.tsx" "src/views/TicketsView/QueueView.tsx"
+safe_rename "src/views/TicketLookupView/index.tsx" "src/views/CustomerTicketView/index.tsx"
+safe_rename "src/views/AgentsView/index.tsx" "src/views/AgentManagementView/index.tsx"
+safe_rename "src/components/modals/AgentSettingsModal.tsx" "src/components/modals/EditAgentSettingsModal.tsx"
+safe_rename "src/lib/agents.ts" "src/lib/agentService.ts"
+safe_rename "src/lib/auth.ts" "src/lib/authService.ts"
+safe_rename "src/views/UserTicketView/index.tsx" "src/views/CustomerTicketSubmissionView/index.tsx"
+safe_rename "src/components/ui/button.tsx" "src/components/ui/ButtonComponent.tsx"
+safe_rename "src/components/ui/input.tsx" "src/components/ui/InputComponent.tsx"
+safe_rename "src/views/DashboardView/index.tsx" "src/views/AnalyticsDashboardView/index.tsx"
+safe_rename "supabase/functions/change_password/index.ts" "supabase/functions/updateAgentPassword.ts"
+safe_rename "supabase/functions/create_agent/index.ts" "supabase/functions/createNewAgent.ts"
+
+# ----------------------------------------------------------------------
+# 2. Update Imports (macOS-compatible sed syntax)
+# ----------------------------------------------------------------------
+
+# Function to run sed safely
+safe_sed() {
+  if [ -e "$2" ]; then
+    sed -i "" "$1" "$2"
+  else
+    echo "Error: $2 not found. Skipping..."
+  fi
+}
+
+# Update imports in App.tsx
+safe_sed 's/TicketDetail/DetailView/g' src/App.tsx
+safe_sed 's/TicketQueue/QueueView/g' src/App.tsx
+safe_sed 's/TicketLookupView/CustomerTicketView/g' src/App.tsx
+safe_sed 's/AgentsView/AgentManagementView/g' src/App.tsx
+safe_sed 's/AgentSettingsModal/EditAgentSettingsModal/g' src/App.tsx
+safe_sed 's/from "..\/lib\/agents"/from "..\/lib\/agentService"/g' src/App.tsx
+safe_sed 's/from "..\/lib\/auth"/from "..\/lib\/authService"/g' src/App.tsx
+safe_sed 's/UserTicketView/CustomerTicketSubmissionView/g' src/App.tsx
+safe_sed 's/DashboardView/AnalyticsDashboardView/g' src/App.tsx
+
+# Update Button/Input components in all files
+find src -type f -name "*.tsx" -exec sed -i "" 's/from "..\/ui\/button"/from "..\/ui\/ButtonComponent"/g' {} +
+find src -type f -name "*.tsx" -exec sed -i "" 's/from "..\/ui\/input"/from "..\/ui\/InputComponent"/g' {} +
+
+# Update Supabase function calls (with escaped quotes)
+safe_sed "s/'change_password'/'updateAgentPassword'/g" src/lib/agentService.ts
+safe_sed "s/'create_agent'/'createNewAgent'/g" src/lib/agentService.ts
+
+echo "Renaming and import updates completed!"
+
+Listing files and their contents (excluding .gitignored files):
+FILENAME: src/App.tsx
+
+import { useState, useEffect } from "react";
+import Layout from "@/components/Layout";
+import { TicketQueue as QueueView } from "./views/TicketsView/QueueView";
+import { TicketDetail as DetailView } from "./views/TicketsView/DetailView";
+import { DashboardView as AnalyticsDashboardView } from "./views/DashboardView";
+import { AgentsView as AgentManagementView } from "./views/AgentsView";
+import { ChatView } from "./views/ChatView";
+import { LoginView } from "./views/LoginView";
+import { UserTicketView as CustomerTicketSubmissionView } from "./views/UserTicketView";
+import { TicketLookupView as CustomerTicketView } from "./views/TicketLookupView";
+import { supabase } from './lib/supabase';
+import { AgentSettingsModal as EditAgentSettingsModal } from "@/components/modals/EditAgentSettingsModal";
+import { ReassignTicketModal } from "@/components/modals/ReassignTicketModal";
+import { Toaster } from 'sonner';
+import {
+  type Ticket,
+  type Customer,
+  type ViewType,
+  type Agent,
+  Views,
+  TicketStatus,
+  TicketPriority,
+  AgentStatus,
+  createAgentId,
+  createCustomerId,
+} from '@/types';
+
+// Import Supabase services
+import { getCurrentUser, getAgentProfile, updateAgentStatus } from '@/lib/authService';
+import { getTickets } from '@/lib/tickets';
+import { getAllAgents } from '@/lib/agentService';
+
+export default function App() {
+  // Check if we're on a public route
+  const isSubmitTicketPage = window.location.pathname === '/submit-ticket';
+  const isTicketLookupPage = window.location.pathname.startsWith('/ticket/');
+  
+  // If it's a public route, render the appropriate view without authentication
+  if (isSubmitTicketPage) {
+    return <CustomerTicketSubmissionView />;
+  }
+  
+  if (isTicketLookupPage) {
+    return <CustomerTicketView />;
+  }
+
+  const [currentView, setCurrentView] = useState<ViewType>(Views.TICKETS);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [isAvailable, setIsAvailable] = useState(true);
+  const [response, setResponse] = useState("");
+  const [ticketPriority, setTicketPriority] = useState<TicketPriority>(TicketPriority.MEDIUM);
+  const [ticketStatus, setTicketStatus] = useState<TicketStatus>(TicketStatus.OPEN);
+  const [showReassignModal, setShowReassignModal] = useState(false);
+  const [currentAgent, setCurrentAgent] = useState<Agent | null>(null);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  async function loadInitialData() {
+    try {
+      // Get current user and their agent profile
+      const user = await getCurrentUser();
+      console.log('Current user:', user);
+      if (!user) {
+        setIsAuthenticated(false);
+        setLoading(false);
+        return;
+      }
+
+      setIsAuthenticated(true);
+
+      // Load all agents
+      const allAgents = await getAllAgents();
+      setAgents(allAgents);
+      
+      const agentProfile = await getAgentProfile(user.id);
+      console.log('Agent profile:', agentProfile);
+      if (agentProfile) {
+        const metadata = agentProfile.metadata as { 
+          department?: string; 
+          skills?: string[]; 
+          languages?: string[]; 
+        } | null;
+
+        setCurrentAgent({
+          id: createAgentId(agentProfile.id),
+          name: agentProfile.name,
+          role: agentProfile.role,
+          status: agentProfile.status,
+          avatar: agentProfile.avatar || agentProfile.name.substring(0, 2).toUpperCase(),
+          email: agentProfile.email,
+          metadata: metadata || undefined
+        });
+
+        // Load tickets assigned to current agent
+        const ticketData = await getTickets({ 
+          assigned_to: user.id,
+          status: [TicketStatus.OPEN, TicketStatus.WAITING_CUSTOMER_REPLY]
+        });
+        console.log('Ticket data:', ticketData);
+
+        setTickets(ticketData);
+
+        // Load customer data if there's an active ticket
+        if (activeTicket) {
+          const { data: customerData } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', activeTicket.customer_id)
+            .single();
+
+          if (customerData) {
+            setCustomer({
+              id: createCustomerId(customerData.id),
+              email: customerData.email,
+              name: customerData.name,
+              createdAt: new Date(customerData.created_at),
+              avatar: customerData.avatar || undefined,
+              phone: customerData.phone || undefined,
+              company: customerData.company || undefined,
+              metadata: typeof customerData.metadata === 'object' && customerData.metadata ? {
+                ...Object.fromEntries(
+                  Object.entries(customerData.metadata).map(([key, value]) => [key, value])
+                )
+              } : undefined
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error loading initial data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Load current agent and their tickets
+  useEffect(() => {
+    loadInitialData();
+  }, [activeTicket?.customer_id]);
+
+  // Update agent status
+  useEffect(() => {
+    if (currentAgent) {
+      updateAgentStatus(currentAgent.id, isAvailable ? AgentStatus.ONLINE : AgentStatus.AWAY)
+        .catch(console.error);
+    }
+  }, [isAvailable, currentAgent]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <LoginView />;
+  }
+
+  return (
+    <>
+      <Toaster position="top-right" />
+      <EditAgentSettingsModal
+        isAvailable={isAvailable}
+        setIsAvailable={setIsAvailable}
+        showSettings={showSettings}
+        setShowSettings={setShowSettings}
+        currentAgent={currentAgent}
+      />
+      <ReassignTicketModal
+        showReassignModal={showReassignModal}
+        setShowReassignModal={setShowReassignModal}
+        currentAgent={currentAgent}
+        setCurrentAgent={setCurrentAgent}
+        agents={agents}
+      />
+      <Layout
+        currentView={currentView}
+        setCurrentView={setCurrentView}
+        isMobileMenuOpen={isMobileMenuOpen}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
+        setShowSettings={setShowSettings}
+      >
+        {currentView === Views.TICKETS && (
+          <div className="flex flex-1 overflow-hidden">
+            {!activeTicket ? (
+              <div className="w-full overflow-auto">
+                <QueueView tickets={tickets} setActiveTicket={setActiveTicket} />
+              </div>
+            ) : customer && (
+              <div className="w-full overflow-auto">
+                <DetailView
+                  ticket={activeTicket}
+                  setActiveTicket={setActiveTicket}
+                  ticketPriority={ticketPriority}
+                  setTicketPriority={setTicketPriority}
+                  ticketStatus={ticketStatus}
+                  setTicketStatus={setTicketStatus}
+                  setShowReassignModal={setShowReassignModal}
+                  response={response}
+                  setResponse={setResponse}
+                  customer={customer}
+                  customerTickets={tickets.filter(t => t.customer_id === activeTicket.customer_id)}
+                />
+              </div>
+            )}
+          </div>
+        )}
+        {currentView === Views.DASHBOARD && <AnalyticsDashboardView />}
+        {currentView === Views.AGENTS && (
+          <AgentManagementView 
+            agents={agents} 
+            onAgentUpdated={() => {
+              // Reload the agent list
+              loadInitialData();
+            }} 
+          />
+        )}
+        {currentView === Views.CHAT && <ChatView />}
+      </Layout>
+    </>
+  );
+}
+
+----
+FILENAME: src/RichTextEditor.tsx
+
+import { type FC } from "react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { Bold, Italic, Underline, List, ListOrdered } from "lucide-react";
+import { Button } from "@/components/ui/ButtonComponent";
+import { type RichTextEditorProps } from '@/types';
+
+export const RichTextEditor: FC<RichTextEditorProps> = ({ content, onChange }) => {
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: content,
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML());
+    },
+  });
+  if (!editor) {
+    return null;
+  }
+  return (
+    <div className="border rounded-lg overflow-hidden">
+      <div className="border-b bg-gray-50 p-2 flex gap-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={editor.isActive("bold") ? "bg-gray-200" : ""}
+        >
+          <Bold className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={editor.isActive("italic") ? "bg-gray-200" : ""}
+        >
+          <Italic className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className={editor.isActive("bulletList") ? "bg-gray-200" : ""}
+        >
+          <List className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={editor.isActive("orderedList") ? "bg-gray-200" : ""}
+        >
+          <ListOrdered className="h-4 w-4" />
+        </Button>
+      </div>
+      <EditorContent
+        editor={editor}
+        className="p-4 min-h-[100px] max-h-[400px] resize-y overflow-auto [&_.ProseMirror]:min-h-[100px] [&_.ProseMirror]:outline-none [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4"
+      />
+    </div>
+  );
+};
+
+----
+FILENAME: src/components/Layout.tsx
+
+import { type ReactNode } from "react";
+import { Bell, Settings, Globe, Menu } from "lucide-react";
+import { Button } from "@/components/ui/ButtonComponent";
+import Sidebar from "./Sidebar";
+import { type LayoutProps } from '@/types';
+
+const Layout: React.FC<LayoutProps> = ({
+  currentView,
+  setCurrentView,
+  isMobileMenuOpen,
+  setIsMobileMenuOpen,
+  children,
+  setShowSettings,
+}) => {
+  return (
+    <div className="flex h-screen w-full bg-gray-50">
+      <Sidebar
+        currentView={currentView}
+        setCurrentView={setCurrentView}
+        isMobileMenuOpen={isMobileMenuOpen}
+      />
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="icon">
+              <Bell className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <Globe className="h-5 w-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSettings(true)}
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
+            <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+              <span className="text-sm font-medium text-gray-600">JD</span>
+            </div>
+          </div>
+        </header>
+        <main className="flex-1 overflow-auto p-6">{children}</main>
+      </div>
+    </div>
+  );
+}
+
+export default Layout;
+
+----
+FILENAME: src/components/Sidebar.tsx
+
+import { type FC } from "react";
+import { Inbox, BarChart3, Users, MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/ButtonComponent";
+import { type SidebarProps, Views } from '@/types';
+
+const Sidebar: FC<SidebarProps> = ({ currentView, setCurrentView, isMobileMenuOpen }) => {
+  return (
+    <div
+      className={`${isMobileMenuOpen ? "block" : "hidden"} md:block fixed md:relative z-40 w-64 h-full bg-white border-r border-gray-200`}
+    >
+      <div className="p-4 border-b border-gray-200">
+        <h1 className="text-xl font-bold text-gray-800">Support Desk</h1>
+      </div>
+      <nav className="p-4 space-y-2">
+        <Button
+          variant={currentView === Views.TICKETS ? "secondary" : "ghost"}
+          className="w-full justify-start"
+          onClick={() => setCurrentView(Views.TICKETS)}
+        >
+          <Inbox className="mr-2 h-4 w-4" />
+          Tickets
+        </Button>
+        <Button
+          variant={currentView === Views.DASHBOARD ? "secondary" : "ghost"}
+          className="w-full justify-start"
+          onClick={() => setCurrentView(Views.DASHBOARD)}
+        >
+          <BarChart3 className="mr-2 h-4 w-4" />
+          Dashboard
+        </Button>
+        <Button
+          variant={currentView === Views.AGENTS ? "secondary" : "ghost"}
+          className="w-full justify-start"
+          onClick={() => setCurrentView(Views.AGENTS)}
+        >
+          <Users className="mr-2 h-4 w-4" />
+          Agents
+        </Button>
+        <Button
+          variant={currentView === Views.CHAT ? "secondary" : "ghost"}
+          className="w-full justify-start"
+          onClick={() => setCurrentView(Views.CHAT)}
+        >
+          <MessageSquare className="mr-2 h-4 w-4" />
+          Live Chat
+        </Button>
+      </nav>
+    </div>
+  );
+};
+
+export default Sidebar;
+
+----
+FILENAME: src/components/modals/CreateAgentModal.tsx
+
+import { useState } from "react";
+import { XCircle } from "lucide-react";
+import { Button } from "@/components/ui/ButtonComponent";
+import { Input } from "@/components/ui/InputComponent";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { createAgent } from "@/lib/agentService";
+import { type Agent, AgentRole } from "@/types";
+import { toast } from "sonner";
+
+interface CreateAgentModalProps {
+  show: boolean;
+  onClose: () => void;
+  onAgentCreated: () => void;
+}
+
+export function CreateAgentModal({
+  show,
+  onClose,
+  onAgentCreated
+}: CreateAgentModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: AgentRole.AGENT as AgentRole,
+    department: "",
+  });
+
+  if (!show) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      await createAgent({
+        ...formData,
+        skills: [],
+        languages: []
+      });
+      toast.success("Agent created successfully");
+      onAgentCreated();
+      onClose();
+    } catch (error) {
+      console.error("Error creating agent:", error);
+      toast.error(error instanceof Error ? error.message : "Failed to create agent");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-6 w-96">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Create New Agent</h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            disabled={isLoading}
+          >
+            <XCircle className="h-5 w-5" />
+          </Button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              required
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              required
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+              required
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="role">Role</Label>
+            <Select
+              value={formData.role}
+              onValueChange={(value: AgentRole) => setFormData(prev => ({ ...prev, role: value }))}
+              disabled={isLoading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={AgentRole.AGENT}>Agent</SelectItem>
+                <SelectItem value={AgentRole.ADMIN}>Admin</SelectItem>
+                <SelectItem value={AgentRole.SUPERVISOR}>Supervisor</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="department">Department (Optional)</Label>
+            <Input
+              id="department"
+              value={formData.department}
+              onChange={(e) => setFormData(prev => ({ ...prev, department: e.target.value }))}
+              disabled={isLoading}
+            />
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading}
+            >
+              Create Agent
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+} 
+----
+FILENAME: src/components/modals/EditAgentModal.tsx
+
+import { useState, useEffect } from "react";
+import { XCircle } from "lucide-react";
+import { Button } from "@/components/ui/ButtonComponent";
+import { Input } from "@/components/ui/InputComponent";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { updateAgentProfile, changeAgentPassword } from "@/lib/agentService";
+import { type Agent, AgentRole } from "@/types";
+import { toast } from "sonner";
+
+interface EditAgentModalProps {
+  agent: Agent;
+  onClose: () => void;
+  onSave: (updatedAgent: Partial<Agent>) => Promise<void>;
+  onPasswordChange: (agentId: string, newPassword: string) => Promise<void>;
+}
+
+export function EditAgentModal({
+  agent,
+  onClose,
+  onSave,
+  onPasswordChange,
+}: EditAgentModalProps) {
+  const [name, setName] = useState(agent.name);
+  const [email, setEmail] = useState(agent.email);
+  const [role, setRole] = useState(agent.role);
+  const [department, setDepartment] = useState(agent.metadata?.department || "");
+  const [skills, setSkills] = useState(agent.metadata?.skills?.join(", ") || "");
+  const [languages, setLanguages] = useState(agent.metadata?.languages?.join(", ") || "");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      // Validate passwords if attempting to change
+      if (newPassword || confirmPassword) {
+        if (newPassword !== confirmPassword) {
+          throw new Error("Passwords do not match");
+        }
+        if (newPassword.length < 6) {
+          throw new Error("Password must be at least 6 characters long");
+        }
+      }
+
+      const updatedAgent: Partial<Agent> = {
+        name,
+        email,
+        role,
+        metadata: {
+          ...agent.metadata,
+          department,
+          skills: skills.split(",").map(s => s.trim()).filter(Boolean),
+          languages: languages.split(",").map(l => l.trim()).filter(Boolean),
+        },
+      };
+      
+      await onSave(updatedAgent);
+      
+      if (newPassword) {
+        await onPasswordChange(agent.id, newPassword);
+      }
+      
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-6 w-[500px] max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Edit Agent Profile</h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+          >
+            <XCircle className="h-5 w-5" />
+          </Button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Name</label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Agent name"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Email</label>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="agent@example.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Role</label>
+            <Select
+              value={role}
+              onValueChange={(value: AgentRole) => setRole(value)}
+            >
+              <option value="admin">Admin</option>
+              <option value="supervisor">Supervisor</option>
+              <option value="agent">Agent</option>
+            </Select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Department</label>
+            <Input
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              placeholder="e.g., Support, Sales"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Skills (comma-separated)</label>
+            <Input
+              value={skills}
+              onChange={(e) => setSkills(e.target.value)}
+              placeholder="e.g., Technical Support, Customer Service"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Languages (comma-separated)</label>
+            <Input
+              value={languages}
+              onChange={(e) => setLanguages(e.target.value)}
+              placeholder="e.g., English, Spanish"
+            />
+          </div>
+
+          <div className="border-t pt-4 mt-4">
+            <h3 className="font-medium mb-2">Change Password</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium mb-1">New Password</label>
+                <Input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter new password"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Confirm Password</label>
+                <Input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm new password"
+                />
+              </div>
+            </div>
+          </div>
+
+          {error && (
+            <div className="text-red-500 text-sm">{error}</div>
+          )}
+
+          <div className="flex justify-end gap-2 mt-6">
+            <Button
+              variant="outline"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={isLoading}
+            >
+              {isLoading ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+} 
+----
+FILENAME: src/components/modals/ReassignTicketModal.tsx
+
+import { XCircle, Check } from "lucide-react";
+import { Button } from "@/components/ui/ButtonComponent";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Agent, AgentStatus } from "@/types";
+
+interface ReassignTicketModalProps {
+  showReassignModal: boolean;
+  setShowReassignModal: (show: boolean) => void;
+  currentAgent: Agent | null;
+  setCurrentAgent: (agent: Agent) => void;
+  agents: Agent[];
+}
+
+export function ReassignTicketModal({
+  showReassignModal,
+  setShowReassignModal,
+  currentAgent,
+  setCurrentAgent,
+  agents,
+}: ReassignTicketModalProps) {
+  if (!showReassignModal) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-6 w-[480px] max-h-[600px] overflow-hidden flex flex-col">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Reassign Ticket</h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowReassignModal(false)}
+          >
+            <XCircle className="h-5 w-5" />
+          </Button>
+        </div>
+        <div className="mb-4">
+          <p className="text-sm text-gray-500">
+            Current agent:{" "}
+            <span className="font-medium text-gray-900">
+              {currentAgent?.name}
+            </span>
+          </p>
+        </div>
+        <div className="flex-1 overflow-auto">
+          <div className="space-y-2">
+            {agents.map((agent) => (
+              <div
+                key={agent.id}
+                className={`p-3 rounded-lg border hover:bg-gray-50 cursor-pointer flex items-center justify-between ${
+                  currentAgent?.id === agent.id ? "border-blue-500 bg-blue-50" : ""
+                }`}
+                onClick={() => {
+                  setCurrentAgent(agent);
+                  setShowReassignModal(false);
+                }}
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                    <span className="text-sm font-medium text-gray-600">
+                      {agent.avatar}
+                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium">{agent.name}</h3>
+                    <p className="text-sm text-gray-500">{agent.role}</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full ${
+                      agent.status === AgentStatus.ONLINE
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {agent.status}
+                  </span>
+                  {currentAgent?.id === agent.id && (
+                    <Check className="h-5 w-5 text-blue-500" />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+} 
+----
+FILENAME: src/components/ui/index.tsx
+
+export * from './ButtonComponent'
+export * from './InputComponent'
+export * from './label'
+export * from './select'
+
+----
+FILENAME: src/components/ui/label.tsx
+
+import * as React from "react";
+import * as LabelPrimitive from "@radix-ui/react-label";
+import { cn } from "@/lib/utils";
+
+const Label = React.forwardRef<
+  React.ElementRef<typeof LabelPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <LabelPrimitive.Root
+    ref={ref}
+    className={cn(
+      "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+      className
+    )}
+    {...props}
+  />
+));
+Label.displayName = LabelPrimitive.Root.displayName;
+
+export { Label }; 
+----
+FILENAME: src/components/ui/select.tsx
+
+import * as React from "react";
+import * as SelectPrimitive from "@radix-ui/react-select";
+import { Check, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const Select = SelectPrimitive.Root;
+
+const SelectGroup = SelectPrimitive.Group;
+
+const SelectValue = SelectPrimitive.Value;
+
+const SelectTrigger = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
+>(({ className, children, ...props }, ref) => (
+  <SelectPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+      className
+    )}
+    {...props}
+  >
+    {children}
+    <ChevronDown className="h-4 w-4 opacity-50" />
+  </SelectPrimitive.Trigger>
+));
+SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
+
+const SelectContent = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
+>(({ className, children, position = "popper", ...props }, ref) => (
+  <SelectPrimitive.Portal>
+    <SelectPrimitive.Content
+      ref={ref}
+      className={cn(
+        "relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        position === "popper" &&
+          "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+        className
+      )}
+      position={position}
+      {...props}
+    >
+      <SelectPrimitive.Viewport
+        className={cn(
+          "p-1",
+          position === "popper" &&
+            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+        )}
+      >
+        {children}
+      </SelectPrimitive.Viewport>
+    </SelectPrimitive.Content>
+  </SelectPrimitive.Portal>
+));
+SelectContent.displayName = SelectPrimitive.Content.displayName;
+
+const SelectLabel = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Label>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.Label
+    ref={ref}
+    className={cn("py-1.5 pl-8 pr-2 text-sm font-semibold", className)}
+    {...props}
+  />
+));
+SelectLabel.displayName = SelectPrimitive.Label.displayName;
+
+const SelectItem = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
+>(({ className, children, ...props }, ref) => (
+  <SelectPrimitive.Item
+    ref={ref}
+    className={cn(
+      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      className
+    )}
+    {...props}
+  >
+    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+      <SelectPrimitive.ItemIndicator>
+        <Check className="h-4 w-4" />
+      </SelectPrimitive.ItemIndicator>
+    </span>
+
+    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+  </SelectPrimitive.Item>
+));
+SelectItem.displayName = SelectPrimitive.Item.displayName;
+
+const SelectSeparator = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Separator>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.Separator
+    ref={ref}
+    className={cn("-mx-1 my-1 h-px bg-muted", className)}
+    {...props}
+  />
+));
+SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
+
+export {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+}; 
+----
+FILENAME: src/env.d.ts
+
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  readonly VITE_SUPABASE_URL: string;
+  readonly VITE_SUPABASE_ANON_KEY: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+} 
+----
+FILENAME: src/index.css
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --ring: 215 20.2% 65.1%;
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+    --muted: 223 47% 11%;
+    --muted-foreground: 215.4 16.3% 56.9%;
+    --accent: 216 34% 17%;
+    --accent-foreground: 210 40% 98%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 215 20.2% 65.1%;
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+    --card: 224 71% 4%;
+    --card-foreground: 213 31% 91%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 1.2%;
+    --secondary: 222.2 47.4% 11.2%;
+    --secondary-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --ring: 216 34% 17%;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+----
+FILENAME: src/index.tsx
+
+import './index.css'
+import { createRoot } from "react-dom/client";
+import App from "./App";
+
+const rootElement = document.getElementById("root");
+if (!rootElement) throw new Error("Failed to find the root element");
+createRoot(rootElement).render(<App />);
+
+----
+FILENAME: src/lib/supabase.ts
+
+import { createClient } from '@supabase/supabase-js';
+import { Database } from '../types/supabase';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables');
+}
+
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+}); 
+----
+FILENAME: src/lib/tickets.ts
+
+import { supabase } from './supabase';
+import type { Database } from '../types/supabase';
+import { type Ticket, type Message, createTicketId, createCustomerId, createAgentId, createMessageId } from '../types';
+import type { Json } from '../types/supabase';
+
+export type TicketData = Database['public']['Tables']['tickets']['Row'];
+export type TicketInsert = Database['public']['Tables']['tickets']['Insert'];
+export type TicketUpdate = Database['public']['Tables']['tickets']['Update'];
+
+interface DatabaseMessage {
+  id: string;
+  isFromCustomer: boolean;
+  message: string;
+  timestamp: string;
+  attachments?: Array<{
+    url: string;
+    name: string;
+    type: string;
+    size: number;
+  }>;
+  metadata?: Json;
+}
+
+// Transform database ticket to frontend ticket
+function transformTicket(data: TicketData): Ticket {
+  // Ensure conversation is properly initialized and typed
+  const conversation = Array.isArray(data.conversation) 
+    ? data.conversation.map((msg): Message => {
+        const dbMsg = msg as Record<string, Json>;
+        return {
+          id: createMessageId(String(dbMsg.id)),
+          isFromCustomer: Boolean(dbMsg.isFromCustomer),
+          message: String(dbMsg.message),
+          timestamp: new Date(String(dbMsg.timestamp)),
+          attachments: dbMsg.attachments as Message['attachments'],
+          metadata: dbMsg.metadata as Record<string, unknown>
+        };
+      })
+    : [];
+
+  return {
+    id: createTicketId(data.number),
+    number: data.number,
+    title: data.title,
+    priority: data.priority as Ticket['priority'],
+    status: data.status as Ticket['status'],
+    createdAt: new Date(data.created_at),
+    lastUpdated: new Date(data.last_updated),
+    assignedTo: data.assigned_to ? createAgentId(data.assigned_to) : undefined,
+    customer_id: createCustomerId(data.customer_id),
+    conversation,
+    metadata: data.metadata as Record<string, unknown> | undefined
+  };
+}
+
+export async function getTickets(filters?: {
+  status?: TicketData['status'][];
+  assigned_to?: string;
+  customer_id?: string;
+}) {
+  let query = supabase.from('tickets').select('*');
+
+  if (filters?.status) {
+    query = query.in('status', filters.status);
+  }
+  if (filters?.assigned_to) {
+    query = query.eq('assigned_to', filters.assigned_to);
+  }
+  if (filters?.customer_id) {
+    query = query.eq('customer_id', filters.customer_id);
+  }
+
+  console.log('Filters:', filters);
+  const { data, error } = await query.order('created_at', { ascending: false });
+  console.log('Query result:', { data, error });
+  if (error) throw error;
+  return data.map(transformTicket);
+}
+
+export async function getTicketById(number: number) {
+  const { data, error } = await supabase
+    .from('tickets')
+    .select('*')
+    .eq('number', number)
+    .single();
+
+  if (error) throw error;
+  if (!data) throw new Error(`Ticket with number ${number} not found`);
+  
+  return transformTicket(data);
+}
+
+export async function createTicket(ticket: TicketInsert) {
+  const { data, error } = await supabase
+    .from('tickets')
+    .insert(ticket)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function updateTicket(number: number, updates: TicketUpdate) {
+  const { data, error } = await supabase
+    .from('tickets')
+    .update(updates)
+    .eq('number', number)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function addMessageToTicket(
+  ticketNumber: number,
+  message: DatabaseMessage
+) {
+  const { data: ticket } = await supabase
+    .from('tickets')
+    .select('conversation')
+    .eq('number', ticketNumber)
+    .single();
+
+  if (!ticket) return null;
+
+  const conversation = Array.isArray(ticket.conversation) ? ticket.conversation : [];
+  const updatedConversation = [...conversation, {
+    id: message.id,
+    isFromCustomer: message.isFromCustomer,
+    message: message.message,
+    timestamp: message.timestamp,
+    attachments: message.attachments,
+    metadata: message.metadata
+  }];
+
+  const { data } = await supabase
+    .from('tickets')
+    .update({ 
+      conversation: updatedConversation,
+      last_updated: new Date().toISOString()
+    })
+    .eq('number', ticketNumber)
+    .select()
+    .single();
+
+  return data ? transformTicket(data) : null;
+}
+
+export async function updateTicketPriority(number: number, priority: string) {
+  return updateTicket(number, {
+    priority
+  });
+}
+
+export async function closeTicket(number: number) {
+  return updateTicket(number, {
+    status: 'closed'
+  });
+}
+
+// Optional: Real-time subscriptions
+export function subscribeToTicketUpdates(
+  ticketNumber: number,
+  callback: (ticket: TicketData) => void
+) {
+  return supabase
+    .channel(`ticket:${ticketNumber}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'tickets',
+        filter: `number=eq.${ticketNumber}`,
+      },
+      (payload) => callback(payload.new as TicketData)
+    )
+    .subscribe();
+}
+
+export type UnauthenticatedTicketData = {
+  title: string;
+  priority: TicketData['priority'];
+  email?: string;
+  name?: string;
+  firstMessage: string; // The initial message from the customer
+};
+
+export async function createUnauthenticatedTicket(ticket: UnauthenticatedTicketData) {
+  console.log('Creating unauthenticated ticket:', ticket);
+  const response = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/customer_ticket`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        action: 'create',
+        ...ticket
+      }),
+    }
+  );
+
+  console.log('Response status:', response.status);
+  console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+  
+  const { data, error } = await response.json();
+  console.log('Response data:', data);
+  if (error) {
+    console.error('Error creating ticket:', error);
+    throw new Error(error);
+  }
+  return data;
+} 
+----
+FILENAME: src/lib/utils.ts
+
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+----
+FILENAME: src/types.ts
+
+// Common Types and Interfaces
+
+/**
+ * Enum for ticket priority levels
+ * @readonly
+ */
+export const TicketPriority = {
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+  URGENT: "urgent"
+} as const;
+
+export type TicketPriority = typeof TicketPriority[keyof typeof TicketPriority];
+
+/**
+ * Enum for ticket status
+ * @readonly
+ */
+export const TicketStatus = {
+  OPEN: "open",
+  WAITING_CUSTOMER_REPLY: "waiting_customer_reply",
+  RESOLVED: "resolved",
+  CLOSED: "closed"
+} as const;
+
+export type TicketStatus = typeof TicketStatus[keyof typeof TicketStatus];
+
+/**
+ * Enum for agent status
+ * @readonly
+ */
+export const AgentStatus = {
+  ONLINE: "online",
+  OFFLINE: "offline",
+  BUSY: "busy",
+  AWAY: "away"
+} as const;
+
+export type AgentStatus = typeof AgentStatus[keyof typeof AgentStatus];
+
+/**
+ * Enum for agent roles
+ * @readonly
+ */
+export const AgentRole = {
+  ADMIN: "admin",
+  AGENT: "agent",
+  SUPERVISOR: "supervisor"
+} as const;
+
+export type AgentRole = typeof AgentRole[keyof typeof AgentRole];
+
+// Custom type aliases for better type safety
+export type TicketId = number & { readonly brand: unique symbol };
+export type AgentId = string & { readonly brand: unique symbol };
+export type MessageId = string & { readonly brand: unique symbol };
+export type CustomerId = string & { readonly brand: unique symbol };
+
+// Utility functions to create branded types
+export const createTicketId = (id: number): TicketId => id as TicketId;
+export const createAgentId = (id: string): AgentId => id as AgentId;
+export const createMessageId = (id: string): MessageId => id as MessageId;
+export const createCustomerId = (id: string): CustomerId => id as CustomerId;
+
+/**
+ * Represents a customer in the system
+ */
+export interface Customer {
+  id: CustomerId;
+  email: string;
+  name: string;
+  createdAt: Date;
+  avatar?: string;
+  phone?: string;
+  company?: string;
+  metadata?: {
+    lastLogin?: Date;
+    preferences?: {
+      language?: string;
+      notifications?: boolean;
+    };
+    [key: string]: unknown;
+  };
+}
+
+/**
+ * Represents a support ticket in the system
+ */
+export interface Ticket {
+  id: TicketId;
+  title: string;
+  priority: TicketPriority;
+  status: TicketStatus;
+  number: number;
+  createdAt: Date;
+  conversation: Message[];
+  assignedTo?: AgentId;
+  lastUpdated: Date;
+  metadata?: Record<string, unknown>;
+  customer_id: CustomerId;
+}
+
+/**
+ * Represents a message in a ticket conversation
+ */
+export interface Message {
+  id: MessageId;
+  isFromCustomer: boolean;  // true if from customer, false if from agent
+  message: string;
+  timestamp: Date;
+  attachments?: Array<{
+    url: string;
+    name: string;
+    type: string;
+    size: number;
+  }>;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Form data structure for ticket submission
+ */
+export interface TicketFormData {
+  title: string;
+  priority: TicketPriority;
+  attachments?: File[];
+}
+
+/**
+ * Represents an agent in the system
+ */
+export interface Agent {
+  id: AgentId;
+  name: string;
+  role: AgentRole;
+  status: AgentStatus;
+  avatar: string;
+  email: string;
+  metadata?: {
+    department?: string;
+    skills?: string[];
+    languages?: string[];
+    [key: string]: unknown;
+  };
+}
+
+/**
+ * Available views in the application
+ * @readonly
+ */
+export const Views = {
+  TICKETS: "tickets",
+  DASHBOARD: "dashboard",
+  AGENTS: "agents",
+  CHAT: "chat",
+  CUSTOMER_PROFILE: "customer_profile",
+} as const;
+
+export type ViewType = typeof Views[keyof typeof Views];
+
+// Utility type for making all properties in an object readonly
+export type DeepReadonly<T> = T extends (infer U)[]
+  ? ReadonlyArray<DeepReadonly<U>>
+  : T extends Function
+  ? T
+  : T extends object
+  ? { readonly [P in keyof T]: DeepReadonly<T[P]> }
+  : T;
+
+// Special handling for branded types
+export type UnwrapReadonly<T> = T extends DeepReadonly<infer U> ? U : T;
+
+/**
+ * Props for the Sidebar component
+ */
+export interface SidebarProps {
+  readonly currentView: ViewType;
+  readonly setCurrentView: (view: ViewType) => void;
+  readonly isMobileMenuOpen: boolean;
+}
+
+/**
+ * Props for the Layout component
+ */
+export interface LayoutProps {
+  readonly currentView: ViewType;
+  readonly setCurrentView: (view: ViewType) => void;
+  readonly isMobileMenuOpen: boolean;
+  readonly setIsMobileMenuOpen: (isOpen: boolean) => void;
+  readonly children: React.ReactNode;
+  readonly setShowSettings: (show: boolean) => void;
+}
+
+/**
+ * Props for the TicketQueue component
+ */
+export interface TicketQueueProps {
+  readonly tickets: ReadonlyArray<Ticket>;
+  readonly setActiveTicket: (ticket: Ticket | null) => void;
+}
+
+/**
+ * Props for the TicketDetail component
+ */
+export interface TicketDetailProps {
+  readonly ticket: DeepReadonly<Ticket>;
+  readonly setActiveTicket: (ticket: Ticket | null) => void;
+  readonly ticketPriority: TicketPriority;
+  readonly setTicketPriority: (priority: TicketPriority) => void;
+  readonly ticketStatus: TicketStatus;
+  readonly setTicketStatus: (status: TicketStatus) => void;
+  readonly setShowReassignModal: (show: boolean) => void;
+  readonly response: string;
+  readonly setResponse: (response: string) => void;
+  readonly customer: DeepReadonly<Customer>;
+  readonly customerTickets: ReadonlyArray<Ticket>;
+}
+
+/**
+ * Props for the RichTextEditor component
+ */
+export interface RichTextEditorProps {
+  readonly content: string;
+  readonly onChange: (content: string) => void;
+  readonly placeholder?: string;
+  readonly readOnly?: boolean;
+  readonly maxLength?: number;
+}
+
+/**
+ * Props for the CustomerProfile components
+ */
+export interface CustomerProfileProps {
+  readonly customer: DeepReadonly<Customer>;
+  readonly customerTickets: ReadonlyArray<Ticket>;
+  readonly onClose: () => void;
+  readonly isExpanded?: boolean;
+  readonly onTicketSelect?: (ticket: Ticket) => void;
+}
+
+export interface CustomerTicketListProps {
+  readonly tickets: ReadonlyArray<Ticket>;
+  readonly onTicketSelect: (ticket: Ticket) => void;
+} 
+----
+FILENAME: src/types/supabase.ts
+
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export interface Database {
+  public: {
+    Tables: {
+      agents: {
+        Row: {
+          avatar: string | null
+          created_at: string
+          email: string
+          id: string
+          metadata: Json | null
+          name: string
+          role: Database["public"]["Enums"]["agent_role"]
+          status: Database["public"]["Enums"]["agent_status"]
+          updated_at: string
+        }
+        Insert: {
+          avatar?: string | null
+          created_at?: string
+          email: string
+          id: string
+          metadata?: Json | null
+          name: string
+          role?: Database["public"]["Enums"]["agent_role"]
+          status?: Database["public"]["Enums"]["agent_status"]
+          updated_at?: string
+        }
+        Update: {
+          avatar?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          metadata?: Json | null
+          name?: string
+          role?: Database["public"]["Enums"]["agent_role"]
+          status?: Database["public"]["Enums"]["agent_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tickets: {
+        Row: {
+          assigned_to: string | null
+          conversation: Json[]
+          created_at: string
+          customer_id: string
+          last_updated: string
+          metadata: Json | null
+          number: number
+          priority: string
+          status: string
+          title: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          conversation?: Json[]
+          created_at?: string
+          customer_id: string
+          last_updated?: string
+          metadata?: Json | null
+          number?: number
+          priority: string
+          status: string
+          title: string
+        }
+        Update: {
+          assigned_to?: string | null
+          conversation?: Json[]
+          created_at?: string
+          customer_id?: string
+          last_updated?: string
+          metadata?: Json | null
+          number?: number
+          priority?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          avatar: string | null
+          company: string | null
+          created_at: string
+          email: string
+          id: string
+          metadata: Json | null
+          name: string
+          phone: string | null
+        }
+        Insert: {
+          avatar?: string | null
+          company?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          metadata?: Json | null
+          name: string
+          phone?: string | null
+        }
+        Update: {
+          avatar?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          metadata?: Json | null
+          name?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      get_ticket_by_hash: {
+        Args: { hash: string }
+        Returns: {
+          number: number
+          title: string
+          priority: string
+          status: string
+          created_at: string
+          last_updated: string
+          assigned_to: string | null
+          customer_id: string
+          conversation: Json[]
+          metadata: Json | null
+        }
+      }
+      validate_conversation_format: {
+        Args: { conversation: Json[] }
+        Returns: boolean
+      }
+    }
+    Enums: {
+      agent_role: "admin" | "agent" | "supervisor"
+      agent_status: "online" | "offline" | "busy" | "away"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type PublicSchema = Database[Extract<keyof Database, "public">]
+
+export type Tables<
+  PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
+    | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+----
+FILENAME: src/views/AgentsView/index.tsx
+
+import { useState, type FC } from 'react';
+import { Button } from "@/components/ui/ButtonComponent";
+import { type Agent, AgentStatus, AgentRole } from '@/types';
+import { EditAgentModal } from '@/components/modals/EditAgentModal';
+import { CreateAgentModal } from '@/components/modals/CreateAgentModal';
+import { updateAgentProfile, changeAgentPassword } from '@/lib/agentService';
+import { toast } from 'sonner';
+import { UserPlus } from 'lucide-react';
+
+interface AgentsViewProps {
+  agents: Agent[];
+  onAgentUpdated: () => void; // Callback to refresh the agents list
+}
+
+export const AgentsView: FC<AgentsViewProps> = ({ agents, onAgentUpdated }) => {
+  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const getStatusStyle = (status: AgentStatus) => {
+    switch (status) {
+      case AgentStatus.ONLINE:
+        return "bg-green-100 text-green-800";
+      case AgentStatus.BUSY:
+        return "bg-yellow-100 text-yellow-800";
+      case AgentStatus.AWAY:
+        return "bg-orange-100 text-orange-800";
+      case AgentStatus.OFFLINE:
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getRoleStyle = (role: AgentRole) => {
+    switch (role) {
+      case AgentRole.ADMIN:
+        return "bg-purple-100 text-purple-800";
+      case AgentRole.SUPERVISOR:
+        return "bg-blue-100 text-blue-800";
+      case AgentRole.AGENT:
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const handleUpdateAgent = async (updates: Partial<Agent>) => {
+    if (!selectedAgent) return;
+    
+    setIsUpdating(true);
+    try {
+      await updateAgentProfile(selectedAgent.id, updates);
+      toast.success('Agent profile updated successfully');
+      onAgentUpdated();
+    } catch (error) {
+      console.error('Error updating agent:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to update agent profile');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handlePasswordChange = async (agentId: string, newPassword: string) => {
+    setIsUpdating(true);
+    try {
+      await changeAgentPassword(agentId, newPassword);
+      toast.success('Password changed successfully');
+    } catch (error) {
+      console.error('Error changing password:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to change password');
+      throw error; // Re-throw to be handled by the modal
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Agent Management</h2>
+        <Button
+          onClick={() => setShowCreateModal(true)}
+          className="flex items-center gap-2"
+        >
+          <UserPlus className="h-4 w-4" />
+          Add Agent
+        </Button>
+      </div>
+      <div className="space-y-4">
+        {agents.map((agent) => (
+          <div
+            key={agent.id}
+            className="border rounded-lg p-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center">
+              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                {agent.avatar ? (
+                  <img 
+                    src={agent.avatar} 
+                    alt={agent.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement!.innerText = agent.name.substring(0, 2).toUpperCase();
+                    }}
+                  />
+                ) : (
+                  <span className="text-sm font-medium text-gray-600">
+                    {agent.name.substring(0, 2).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div className="ml-4">
+                <h3 className="font-medium">{agent.name}</h3>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 text-xs rounded-full ${getRoleStyle(agent.role)}`}>
+                    {agent.role.replace("_", " ")}
+                  </span>
+                  <span className={`px-2 py-0.5 text-xs rounded-full ${getStatusStyle(agent.status)}`}>
+                    {agent.status.replace("_", " ")}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500 mt-1">{agent.email}</p>
+                {agent.metadata?.department && (
+                  <p className="text-sm text-gray-500">Department: {agent.metadata.department}</p>
+                )}
+              </div>
+            </div>
+            <Button 
+              variant="outline"
+              onClick={() => setSelectedAgent(agent)}
+              disabled={isUpdating}
+            >
+              Edit Profile
+            </Button>
+          </div>
+        ))}
+      </div>
+
+      {selectedAgent && (
+        <EditAgentModal
+          agent={selectedAgent}
+          onClose={() => setSelectedAgent(null)}
+          onSave={handleUpdateAgent}
+          onPasswordChange={handlePasswordChange}
+        />
+      )}
+
+      <CreateAgentModal
+        show={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onAgentCreated={onAgentUpdated}
+      />
+    </div>
+  );
+};
+
+----
+FILENAME: src/views/ChatView/index.tsx
+
+import { MessageSquare } from "lucide-react";
+export function ChatView() {
+  return (
+    <div className="bg-white rounded-lg shadow p-6">
+      <h2 className="text-xl font-semibold mb-4">Live Chat</h2>
+      <div className="text-center text-gray-500 py-8">
+        <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+        <p>No active chat sessions</p>
+      </div>
+    </div>
+  );
+}
+
+----
+FILENAME: src/views/CustomerProfileView/index.tsx
+
+import React from 'react';
+import { CustomerProfileProps, CustomerTicketListProps } from '../../types';
+
+const CustomerTicketList: React.FC<CustomerTicketListProps> = ({ tickets, onTicketSelect }) => {
+  return (
+    <div className="mt-8">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Tickets</h3>
+      <div className="space-y-3">
+        {tickets.map((ticket) => (
+          <div
+            key={ticket.id}
+            className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+            onClick={() => onTicketSelect(ticket)}
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <h4 className="font-medium">{ticket.title}</h4>
+                {ticket.conversation[0] && (
+                  <p className="text-sm text-gray-500">{ticket.conversation[0].message}</p>
+                )}
+              </div>
+              <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+                {ticket.priority}
+              </span>
+            </div>
+            <div className="mt-2 flex items-center text-sm text-gray-500">
+              <span>Ticket #{ticket.number}</span>
+              <span className="mx-2">•</span>
+              <span>{new Date(ticket.createdAt).toLocaleString()}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const CustomerProfileView: React.FC<CustomerProfileProps> = ({
+  customer: propCustomer,
+  customerTickets: propCustomerTickets = [],
+  onClose,
+  isExpanded = false,
+  onTicketSelect,
+}) => {
+  return (
+    <div className={`bg-white rounded-lg shadow p-6 ${isExpanded ? 'w-full' : 'w-96'}`}>
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <h2 className="text-xl font-semibold">{propCustomer.name}</h2>
+          <p className="text-sm text-gray-500">{propCustomer.email}</p>
+        </div>
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-gray-500"
+        >
+          ×
+        </button>
+      </div>
+      <div className="space-y-4">
+        {propCustomer.phone && (
+          <div>
+            <h3 className="text-sm font-medium text-gray-500">Phone</h3>
+            <p>{propCustomer.phone}</p>
+          </div>
+        )}
+        {propCustomer.company && (
+          <div>
+            <h3 className="text-sm font-medium text-gray-500">Company</h3>
+            <p>{propCustomer.company}</p>
+          </div>
+        )}
+        <div>
+          <h3 className="text-sm font-medium text-gray-500">Customer Since</h3>
+          <p>{new Date(propCustomer.createdAt).toLocaleDateString()}</p>
+        </div>
+      </div>
+      {onTicketSelect && (
+        <CustomerTicketList
+          tickets={propCustomerTickets}
+          onTicketSelect={onTicketSelect}
+        />
+      )}
+    </div>
+  );
+};
+
+export default CustomerProfileView; 
+----
+FILENAME: src/views/DashboardView/index.tsx
+
+export function DashboardView() {
+  return (
+    <div className="bg-white rounded-lg shadow p-6">
+      <h2 className="text-xl font-semibold mb-4">Analytics Dashboard</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {["Open Tickets", "Avg Response Time", "Customer Satisfaction"].map(
+          (metric) => (
+            <div key={metric} className="border rounded-lg p-4">
+              <h3 className="text-sm text-gray-500">{metric}</h3>
+              <p className="text-2xl font-semibold mt-1">
+                {metric === "Open Tickets"
+                  ? "23"
+                  : metric === "Avg Response Time"
+                    ? "1.5h"
+                    : "94%"}
+              </p>
+            </div>
+          ),
+        )}
+      </div>
+    </div>
+  );
+}
+
+----
+FILENAME: src/views/LoginView/index.tsx
+
+import { useState } from 'react';
+import { signIn, getAgentProfile } from '@/lib/authService';
+import { Button } from "@/components/ui/ButtonComponent";
+
+export function LoginView() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showSecret, setShowSecret] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      console.log('Attempting to sign in with:', { email });
+      const result = await signIn(email, password);
+      console.log('Sign in result:', result);
+      
+      if (result.user) {
+        // Get agent profile to confirm they are an agent
+        const agentProfile = await getAgentProfile(result.user.id);
+        if (agentProfile) {
+          // Force a page reload to update the app state
+          window.location.reload();
+        } else {
+          setError('Access denied: Not an agent account');
+        }
+      }
+    } catch (err) {
+      console.error('Detailed login error:', err);
+      setError(err instanceof Error ? err.message : 'Invalid email or password');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-6">Support Desk Login</h1>
+        {error && (
+          <div className="bg-red-50 text-red-800 rounded-md p-3 mb-4">
+            {error}
+          </div>
+        )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={loading}
+          >
+            {loading ? 'Signing in...' : 'Sign in'}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full mt-2"
+            onClick={() => setShowSecret(!showSecret)}
+          >
+            psst
+          </Button>
+          {showSecret && (
+            <p className="text-sm text-gray-600 mt-2 text-center italic">
+              Hey there, curious one! 👋 admin@buddhaboard.com, password123
+            </p>
+          )}
+        </form>
+        <div className="mt-6 text-center border-t pt-6">
+          <p className="text-sm text-gray-600">
+            Need help? {' '}
+            <a 
+              href="/submit-ticket" 
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Submit a Support Ticket
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+} 
+----
+FILENAME: src/views/TicketLookupView/index.tsx
+
+import { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/lib/supabase";
+import type { TicketData } from "@/lib/tickets";
+import { RichTextEditor } from "@/RichTextEditor";
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+
+export function TicketLookupView() {
+  const [ticket, setTicket] = useState<TicketData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [response, setResponse] = useState("");
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const ticketHash = window.location.pathname.split('/ticket/')[1];
+
+  // Scroll to bottom when conversation updates
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [ticket?.conversation]);
+
+  useEffect(() => {
+    async function lookupTicket() {
+      try {
+        console.log('Looking up ticket with hash:', ticketHash);
+        
+        if (!ticketHash) {
+          console.error('No ticket hash provided');
+          setError('No ticket hash provided');
+          setLoading(false);
+          return;
+        }
+
+        // Use the new database function to lookup the ticket
+        const { data, error: ticketError } = await supabase
+          .rpc('get_ticket_by_hash', { hash: ticketHash });
+
+        if (ticketError) {
+          console.error('Error looking up ticket:', ticketError);
+          throw ticketError;
+        }
+
+        if (!data || !Array.isArray(data) || data.length === 0) {
+          console.error('No ticket found');
+          throw new Error('Ticket not found');
+        }
+
+        console.log('Ticket found:', data);
+        // Take the first ticket from the array
+        setTicket(data[0]);
+      } catch (err) {
+        console.error('Error looking up ticket:', err);
+        setError('Invalid ticket hash or ticket not found');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    lookupTicket();
+  }, [ticketHash]);
+
+  const handleSendMessage = async () => {
+    if (!response.trim() || !ticketHash) return;
+
+    try {
+      const { data, error } = await fetch(`${supabaseUrl}/functions/v1/customer_ticket`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          action: 'append_message',
+          ticketHash,
+          message: response
+        })
+      }).then(res => res.json());
+
+      if (error) throw error;
+
+      // Update local state
+      setTicket(data);
+      setResponse("");
+    } catch (err) {
+      console.error('Error sending message:', err);
+      setError('Failed to send message. Please try again.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="text-center">Loading ticket...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              Error
+            </h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <Button onClick={() => window.location.href = '/submit-ticket'}>
+              Submit New Ticket
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!ticket) return null;
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full flex flex-col h-[calc(100vh-8rem)]">
+        <div className="mb-6 flex-shrink-0">
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+            Ticket #{ticket.number}
+          </h1>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span className="capitalize">Status: {ticket.status}</span>
+            <span>•</span>
+            <span className="capitalize">Priority: {ticket.priority}</span>
+          </div>
+        </div>
+
+        <div className="flex-grow overflow-y-auto mb-6" ref={chatContainerRef}>
+          <div className="space-y-6">
+            <div>
+              <h2 className="font-medium text-gray-900">{ticket.title}</h2>
+            </div>
+
+            {ticket.conversation && ticket.conversation.length > 0 && (
+              <div className="space-y-4">
+                {ticket.conversation.map((msg: any) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${msg.isFromCustomer ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-lg p-4 ${
+                        msg.isFromCustomer ? "bg-blue-100" : "bg-green-100"
+                      }`}
+                    >
+                      <div className="font-medium text-sm mb-1">
+                        {msg.isFromCustomer ? "You" : "Support Agent"}
+                      </div>
+                      <div
+                        className="prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{
+                          __html: msg.message,
+                        }}
+                      />
+                      <div className="text-xs text-gray-500 mt-2">
+                        {new Date(msg.timestamp).toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="border-t border-gray-200 pt-4 flex-shrink-0">
+          <div className="space-y-2">
+            <RichTextEditor content={response} onChange={setResponse} />
+            <div className="flex justify-end">
+              <Button onClick={handleSendMessage}>
+                Send Message
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+} 
+----
+FILENAME: src/views/UserTicketView/index.tsx
+
+import { useState } from "react";
+import { Send, Copy } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { type TicketFormData, TicketPriority } from "@/types";
+import { createUnauthenticatedTicket } from "@/lib/tickets";
+
+// Extend TicketFormData to include firstMessage for this form
+interface UserTicketFormData extends TicketFormData {
+  firstMessage: string;
+  email?: string;
+  name?: string;
+}
+
+export function UserTicketView() {
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [ticketHash, setTicketHash] = useState<string>("");
+  const [formData, setFormData] = useState<UserTicketFormData>({
+    title: "",
+    firstMessage: "",
+    priority: TicketPriority.MEDIUM,
+    email: "",
+    name: "",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const result = await createUnauthenticatedTicket({
+        title: formData.title,
+        priority: formData.priority,
+        email: formData.email || undefined,
+        name: formData.name || undefined,
+        firstMessage: formData.firstMessage
+      });
+      setTicketHash(result.ticketHash);
+      setShowSuccess(true);
+    } catch (error) {
+      console.error('Error submitting ticket:', error);
+      alert('Failed to submit ticket. Please try again.');
+    }
+  };
+
+  const ticketUrl = `${window.location.origin}/ticket/${ticketHash}`;
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(ticketUrl);
+      alert('Ticket link copied to clipboard!');
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  if (showSuccess) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+          <div className="text-center">
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Send className="h-6 w-6 text-green-600" />
+            </div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              Ticket Submitted Successfully
+            </h2>
+            <p className="text-gray-600 mb-6">
+              We'll review your ticket and get back to you as soon as possible.
+              {formData.email && " We'll send updates to your email address."}
+            </p>
+            <div className="mb-6">
+              <p className="text-sm text-gray-500 mb-2">Your ticket link:</p>
+              <div className="flex items-center gap-2 bg-gray-50 p-3 rounded-lg">
+                <code className="text-sm flex-1 break-all">{ticketUrl}</code>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={copyToClipboard}
+                  title="Copy to clipboard"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Save this link to check your ticket status later
+              </p>
+            </div>
+            <div className="space-x-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowSuccess(false);
+                  setFormData({
+                    title: "",
+                    firstMessage: "",
+                    priority: TicketPriority.MEDIUM,
+                    email: "",
+                    name: "",
+                  });
+                }}
+              >
+                Submit Another Ticket
+              </Button>
+              <Button onClick={() => window.location.href = ticketUrl}>
+                View Ticket
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Submit a Support Ticket
+          </h1>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Your Name (Optional)
+              </label>
+              <input
+                type="text"
+                id="name"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="John Doe"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    name: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Your Email (Optional)
+              </label>
+              <input
+                type="email"
+                id="email"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="john@example.com"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    email: e.target.value,
+                  })
+                }
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Brief summary of your issue"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  title: e.target.value,
+                })
+              }
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="firstMessage"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Message
+            </label>
+            <textarea
+              id="firstMessage"
+              required
+              rows={6}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Please provide as much detail as possible about your issue"
+              value={formData.firstMessage}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  firstMessage: e.target.value,
+                })
+              }
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="priority"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Priority
+            </label>
+            <select
+              id="priority"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={formData.priority}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  priority: e.target.value as TicketPriority,
+                })
+              }
+            >
+              <option value={TicketPriority.LOW}>Low - General inquiry or minor issue</option>
+              <option value={TicketPriority.MEDIUM}>
+                Medium - Issue affecting functionality
+              </option>
+              <option value={TicketPriority.HIGH}>High - Serious issue affecting work</option>
+              <option value={TicketPriority.URGENT}>
+                Urgent - Critical issue affecting business
+              </option>
+            </select>
+          </div>
+          <div className="flex items-center justify-between pt-4">
+            <p className="text-sm text-gray-500">
+              Our support team typically responds within 24 hours.
+              {!formData.email && " Add your email to receive updates."}
+            </p>
+            <Button type="submit">
+              Submit Ticket
+              <Send className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+----
+FILENAME: supabase/.gitignore
+
+# Supabase
+.branches
+.temp
+.env
+
+----
+FILENAME: supabase/config.toml
+
+# For detailed configuration reference documentation, visit:
+# https://supabase.com/docs/guides/local-development/cli/config
+# A string used to distinguish different Supabase projects on the same host. Defaults to the
+# working directory name when running `supabase init`.
+project_id = "buddhaboard4"
+
+[api]
+enabled = true
+# Port to use for the API URL.
+port = 54321
+# Schemas to expose in your API. Tables, views and stored procedures in this schema will get API
+# endpoints. `public` and `graphql_public` schemas are included by default.
+schemas = ["public", "storage", "graphql_public"]
+# Extra schemas to add to the search_path of every request.
+extra_search_path = ["public", "extensions"]
+# The maximum number of rows returns from a view, table, or stored procedure. Limits payload size
+# for accidental or malicious requests.
+max_rows = 1000
+
+[api.tls]
+# Enable HTTPS endpoints locally using a self-signed certificate.
+enabled = false
+
+[db]
+# Port to use for the local database URL.
+port = 54322
+# Port used by db diff command to initialize the shadow database.
+shadow_port = 54320
+# The database major version to use. This has to be the same as your remote database's. Run `SHOW
+# server_version;` on the remote database to check.
+major_version = 15
+
+[db.pooler]
+enabled = false
+# Port to use for the local connection pooler.
+port = 54329
+# Specifies when a server connection can be reused by other clients.
+# Configure one of the supported pooler modes: `transaction`, `session`.
+pool_mode = "transaction"
+# How many server connections to allow per user/database pair.
+default_pool_size = 20
+# Maximum number of client connections allowed.
+max_client_conn = 100
+
+[db.seed]
+# If enabled, seeds the database after migrations during a db reset.
+enabled = true
+# Specifies an ordered list of seed files to load during db reset.
+# Supports glob patterns relative to supabase directory: "./seeds/*.sql"
+sql_paths = ["./seed.sql"]
+
+[realtime]
+enabled = true
+# Bind realtime via either IPv4 or IPv6. (default: IPv4)
+# ip_version = "IPv6"
+# The maximum length in bytes of HTTP request headers. (default: 4096)
+# max_header_length = 4096
+
+[studio]
+enabled = true
+# Port to use for Supabase Studio.
+port = 54323
+# External URL of the API server that frontend connects to.
+api_url = "http://127.0.0.1"
+# OpenAI API Key to use for Supabase AI in the Supabase Studio.
+openai_api_key = "env(OPENAI_API_KEY)"
+
+# Email testing server. Emails sent with the local dev setup are not actually sent - rather, they
+# are monitored, and you can view the emails that would have been sent from the web interface.
+[inbucket]
+enabled = true
+# Port to use for the email testing server web interface.
+port = 54324
+smtp_port = 54325
+pop3_port = 54326
+# admin_email = "admin@email.com"
+# sender_name = "Admin"
+
+[storage]
+enabled = true
+# The maximum file size allowed (e.g. "5MB", "500KB").
+file_size_limit = "50MiB"
+
+# Image transformation API is available to Supabase Pro plan.
+# [storage.image_transformation]
+# enabled = true
+
+# Uncomment to configure local storage buckets
+# [storage.buckets.images]
+# public = false
+# file_size_limit = "50MiB"
+# allowed_mime_types = ["image/png", "image/jpeg"]
+# objects_path = "./images"
+
+[auth]
+enabled = true
+# The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
+# in emails.
+site_url = "http://localhost:3000"
+# A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
+additional_redirect_urls = ["https://localhost:3000"]
+# How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 seconds (one
+# week).
+jwt_expiry = 3600
+# If disabled, the refresh token will never expire.
+enable_refresh_token_rotation = true
+# Allows refresh tokens to be reused after expiry, up to the specified interval in seconds.
+# Requires enable_refresh_token_rotation = true.
+refresh_token_reuse_interval = 10
+# Allow/disallow new user signups to your project.
+enable_signup = true
+# Allow/disallow anonymous sign-ins to your project.
+enable_anonymous_sign_ins = false
+# Allow/disallow testing manual linking of accounts
+enable_manual_linking = false
+# Passwords shorter than this value will be rejected as weak. Minimum 6, recommended 8 or more.
+minimum_password_length = 6
+# Passwords that do not meet the following requirements will be rejected as weak. Supported values
+# are: `letters_digits`, `lower_upper_letters_digits`, `lower_upper_letters_digits_symbols`
+password_requirements = ""
+
+[auth.email]
+# Allow/disallow new user signups via email to your project.
+enable_signup = true
+# If enabled, a user will be required to confirm any email change on both the old, and new email
+# addresses. If disabled, only the new email is required to confirm.
+double_confirm_changes = true
+# If enabled, users need to confirm their email address before signing in.
+enable_confirmations = false
+# If enabled, users will need to reauthenticate or have logged in recently to change their password.
+secure_password_change = false
+# Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
+max_frequency = "1s"
+# Number of characters used in the email OTP.
+otp_length = 6
+# Number of seconds before the email OTP expires (defaults to 1 hour).
+otp_expiry = 3600
+
+# Use a production-ready SMTP server
+# [auth.email.smtp]
+# enabled = true
+# host = "smtp.sendgrid.net"
+# port = 587
+# user = "apikey"
+# pass = "env(SENDGRID_API_KEY)"
+# admin_email = "admin@email.com"
+# sender_name = "Admin"
+
+# Uncomment to customize email template
+# [auth.email.template.invite]
+# subject = "You have been invited"
+# content_path = "./supabase/templates/invite.html"
+
+[auth.sms]
+# Allow/disallow new user signups via SMS to your project.
+enable_signup = false
+# If enabled, users need to confirm their phone number before signing in.
+enable_confirmations = false
+# Template for sending OTP to users
+template = "Your code is {{ .Code }}"
+# Controls the minimum amount of time that must pass before sending another sms otp.
+max_frequency = "5s"
+
+# Use pre-defined map of phone number to OTP for testing.
+# [auth.sms.test_otp]
+# 4152127777 = "123456"
+
+# Configure logged in session timeouts.
+# [auth.sessions]
+# Force log out after the specified duration.
+# timebox = "24h"
+# Force log out if the user has been inactive longer than the specified duration.
+# inactivity_timeout = "8h"
+
+# This hook runs before a token is issued and allows you to add additional claims based on the authentication method used.
+# [auth.hook.custom_access_token]
+# enabled = true
+# uri = "pg-functions://<database>/<schema>/<hook_name>"
+
+# Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
+[auth.sms.twilio]
+enabled = false
+account_sid = ""
+message_service_sid = ""
+# DO NOT commit your Twilio auth token to git. Use environment variable substitution instead:
+auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
+
+# Multi-factor-authentication is available to Supabase Pro plan.
+[auth.mfa]
+# Control how many MFA factors can be enrolled at once per user.
+max_enrolled_factors = 10
+
+# Control MFA via App Authenticator (TOTP)
+[auth.mfa.totp]
+enroll_enabled = false
+verify_enabled = false
+
+# Configure MFA via Phone Messaging
+[auth.mfa.phone]
+enroll_enabled = false
+verify_enabled = false
+otp_length = 6
+template = "Your code is {{ .Code }}"
+max_frequency = "5s"
+
+# Configure MFA via WebAuthn
+# [auth.mfa.web_authn]
+# enroll_enabled = true
+# verify_enabled = true
+
+# Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
+# `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
+# `twitter`, `slack`, `spotify`, `workos`, `zoom`.
+[auth.external.apple]
+enabled = false
+client_id = ""
+# DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
+secret = ""
+# Overrides the default auth redirectUrl.
+redirect_uri = ""
+# Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,
+# or any other third-party OIDC providers.
+url = ""
+# If enabled, the nonce check will be skipped. Required for local sign in with Google auth.
+skip_nonce_check = false
+
+# Use Firebase Auth as a third-party provider alongside Supabase Auth.
+[auth.third_party.firebase]
+enabled = false
+# project_id = "my-firebase-project"
+
+# Use Auth0 as a third-party provider alongside Supabase Auth.
+[auth.third_party.auth0]
+enabled = false
+# tenant = "my-auth0-tenant"
+# tenant_region = "us"
+
+# Use AWS Cognito (Amplify) as a third-party provider alongside Supabase Auth.
+[auth.third_party.aws_cognito]
+enabled = false
+# user_pool_id = "my-user-pool-id"
+# user_pool_region = "us-east-1"
+
+[edge_runtime]
+enabled = true
+# Configure one of the supported request policies: `oneshot`, `per_worker`.
+# Use `oneshot` for hot reload, or `per_worker` for load testing.
+policy = "oneshot"
+# Port to attach the Chrome inspector for debugging edge functions.
+inspector_port = 8083
+
+# Use these configurations to customize your Edge Function.
+# [functions.MY_FUNCTION_NAME]
+# enabled = true
+# verify_jwt = true
+# import_map = "./functions/MY_FUNCTION_NAME/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+# entrypoint = "./functions/MY_FUNCTION_NAME/index.ts"
+
+[analytics]
+enabled = true
+port = 54327
+# Configure one of the supported backends: `postgres`, `bigquery`.
+backend = "postgres"
+
+# Experimental features may be deprecated any time
+[experimental]
+# Configures Postgres storage engine to use OrioleDB (S3)
+orioledb_version = ""
+# Configures S3 bucket URL, eg. <bucket_name>.s3-<region>.amazonaws.com
+s3_host = "env(S3_HOST)"
+# Configures S3 bucket region, eg. us-east-1
+s3_region = "env(S3_REGION)"
+# Configures AWS_ACCESS_KEY_ID for S3 bucket
+s3_access_key = "env(S3_ACCESS_KEY)"
+# Configures AWS_SECRET_ACCESS_KEY for S3 bucket
+s3_secret_key = "env(S3_SECRET_KEY)"
+
+----
+FILENAME: supabase/functions/_shared/cors.ts
+
+export const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS'
+} 
+----
+FILENAME: supabase/functions/customer_ticket/index.ts
+
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { corsHeaders } from '../_shared/cors.ts'
+
+serve(async (req) => {
+  // Handle CORS
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  try {
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    const body = await req.json()
+    const { action } = body
+
+    if (action === 'create') {
+      const { title, firstMessage, priority, email, name } = body
+
+      // Check if user exists in public.users table
+      const { data: existingUser, error: userLookupError } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .eq('email', email)
+        .single()
+
+      if (userLookupError && userLookupError.code !== 'PGRST116') {
+        throw userLookupError
+      }
+
+      let userId: string
+      if (existingUser) {
+        userId = existingUser.id
+        // Update the user's name if provided
+        if (name) {
+          await supabaseAdmin
+            .from('users')
+            .update({ name })
+            .eq('id', userId)
+        }
+      } else {
+        // Create new user in public.users table
+        const { data: newUser, error: createUserError } = await supabaseAdmin
+          .from('users')
+          .insert({
+            email: email || `anonymous-${Date.now()}@temp.buddhaboard.com`,
+            name: name || 'Anonymous User',
+            metadata: { is_anonymous: !email }
+          })
+          .select()
+          .single()
+
+        if (createUserError) throw createUserError
+        userId = newUser.id
+      }
+
+      // Find the least busy online agent
+      const { data: leastBusyAgent, error: agentError } = await supabaseAdmin.rpc(
+        'get_least_busy_agent'
+      )
+
+      if (agentError) throw agentError
+      
+      console.log('Least busy agent:', leastBusyAgent?.[0]?.agent_id || 'No agent available')
+      if (leastBusyAgent?.[0]) {
+        console.log('Current open tickets:', leastBusyAgent[0].open_tickets)
+      }
+
+      // Create the ticket
+      const { data, error } = await supabaseAdmin
+        .from('tickets')
+        .insert({
+          title,
+          priority,
+          status: 'open',
+          customer_id: userId,
+          conversation: [{
+            id: `msg_${Date.now()}`,
+            isFromCustomer: true,
+            message: firstMessage,
+            timestamp: new Date().toISOString()
+          }],
+          assigned_to: leastBusyAgent?.[0]?.agent_id || null
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Create a hash from the ticket number and user ID
+      const ticketHash = btoa(`${data.number}:${userId}`).replace(/=/g, '')
+
+      return new Response(
+        JSON.stringify({ 
+          data: { 
+            ...data,
+            ticketHash
+          }, 
+          error: null 
+        }),
+        {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+          status: 200,
+        }
+      )
+    } else if (action === 'append_message') {
+      const { ticketHash, message } = body
+
+      // Decode the hash to get ticket number and user ID
+      const decoded = atob(ticketHash)
+      const [ticketNumber, userId] = decoded.split(':')
+
+      // Verify the ticket belongs to this user
+      const { data: ticket, error: ticketError } = await supabaseAdmin
+        .from('tickets')
+        .select('*')
+        .eq('number', ticketNumber)
+        .eq('customer_id', userId)
+        .single()
+
+      if (ticketError || !ticket) {
+        throw new Error('Invalid ticket hash or ticket not found')
+      }
+
+      // Append the message to the conversation
+      const newMessage = {
+        id: `msg_${Date.now()}`,
+        isFromCustomer: true,
+        message,
+        timestamp: new Date().toISOString()
+      }
+
+      const updatedConversation = [...(ticket.conversation || []), newMessage]
+
+      const { data, error } = await supabaseAdmin
+        .from('tickets')
+        .update({ 
+          conversation: updatedConversation,
+          last_updated: new Date().toISOString()
+        })
+        .eq('number', ticketNumber)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      return new Response(
+        JSON.stringify({ data, error: null }),
+        {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+          status: 200,
+        }
+      )
+    } else {
+      throw new Error('Invalid action')
+    }
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ data: null, error: error.message }),
+      {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+        status: 400,
+      }
+    )
+  }
+}) 
+----
+FILENAME: supabase/migrations/20240321000000_create_users_and_agents.sql
+
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Create users table for customers
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    avatar TEXT,
+    phone TEXT,
+    company TEXT,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    CONSTRAINT users_email_check CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+);
+
+-- Create agents table that extends auth.users
+CREATE TYPE agent_role AS ENUM ('admin', 'agent', 'supervisor');
+CREATE TYPE agent_status AS ENUM ('online', 'offline', 'busy', 'away');
+
+CREATE TABLE agents (
+    id UUID PRIMARY KEY REFERENCES auth.users(id),
+    name TEXT NOT NULL,
+    role agent_role NOT NULL DEFAULT 'agent',
+    status agent_status NOT NULL DEFAULT 'offline',
+    avatar TEXT,
+    email TEXT UNIQUE NOT NULL,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT agents_email_check CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+);
+
+-- Create trigger to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_agents_updated_at
+    BEFORE UPDATE ON agents
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Create RLS policies
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE agents ENABLE ROW LEVEL SECURITY;
+
+-- Users policies
+DROP POLICY IF EXISTS "Users can view their own data" ON users;
+CREATE POLICY "Users can view their own data"
+    ON users FOR SELECT
+    USING (
+        auth.uid() = id -- User can view their own data
+        OR 
+        EXISTS (SELECT 1 FROM agents WHERE agents.id = auth.uid()) -- Agents can view all users
+    );
+
+CREATE POLICY "Only agents can insert users"
+    ON users FOR INSERT
+    TO authenticated
+    WITH CHECK (auth.uid() IN (SELECT id FROM agents));
+
+CREATE POLICY "Only agents can update users"
+    ON users FOR UPDATE
+    TO authenticated
+    USING (auth.uid() IN (SELECT id FROM agents));
+
+-- Agents policies
+CREATE POLICY "Agents can view other agents"
+    ON agents FOR SELECT
+    TO authenticated
+    USING (true);
+
+CREATE POLICY "Only admins can insert agents"
+    ON agents FOR INSERT
+    TO authenticated
+    WITH CHECK (
+        auth.uid() IN (
+            SELECT id FROM agents WHERE role = 'admin'
+        )
+    );
+
+CREATE POLICY "Only admins can update agents"
+    ON agents FOR UPDATE
+    TO authenticated
+    USING (
+        auth.uid() IN (
+            SELECT id FROM agents WHERE role = 'admin'
+        )
+    ); 
+----
+FILENAME: supabase/migrations/20250121222047_create_tickets_table.sql
+
+-- Create or replace a function to validate each conversation item
+CREATE OR REPLACE FUNCTION validate_conversation_format(conversation JSONB[])
+  RETURNS BOOLEAN
+  LANGUAGE plpgsql
+  AS $$
+DECLARE
+  item JSONB;
+BEGIN
+  IF conversation IS NULL THEN
+    RETURN TRUE;
+  END IF;
+
+  FOREACH item IN ARRAY conversation
+  LOOP
+    IF jsonb_typeof(item) <> 'object'
+      OR NOT (item ? 'id')
+      OR NOT (item ? 'isFromCustomer')
+      OR NOT (item ? 'message')
+      OR NOT (item ? 'timestamp')
+    THEN
+      RETURN FALSE;
+    END IF;
+
+    -- Additional type check for isFromCustomer
+    IF jsonb_typeof(item->'isFromCustomer') <> 'boolean' THEN
+      RETURN FALSE;
+    END IF;
+  END LOOP;
+
+  RETURN TRUE;
+END;
+$$;
+
+-- Create tickets table
+CREATE TABLE tickets (
+    number BIGSERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    priority TEXT NOT NULL CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
+    status TEXT NOT NULL CHECK (status IN ('open', 'waiting_customer_reply', 'resolved', 'closed')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_updated TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    assigned_to UUID REFERENCES auth.users(id),
+    customer_id UUID NOT NULL REFERENCES public.users(id),
+    conversation JSONB[] NOT NULL DEFAULT '{}',
+    metadata JSONB,
+
+    -- Reference the validation function in a CHECK constraint
+    CONSTRAINT valid_conversation_format
+      CHECK (validate_conversation_format(conversation))
+);
+
+-- Create indexes for common query patterns
+CREATE INDEX tickets_status_idx ON tickets(status);
+CREATE INDEX tickets_assigned_to_idx ON tickets(assigned_to);
+CREATE INDEX tickets_customer_id_idx ON tickets(customer_id);
+CREATE INDEX tickets_created_at_idx ON tickets(created_at DESC);
+
+-- Create a function to automatically update last_updated timestamp
+CREATE OR REPLACE FUNCTION update_ticket_last_updated()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.last_updated = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create a trigger to call the function before each update
+CREATE TRIGGER update_ticket_last_updated_trigger
+    BEFORE UPDATE ON tickets
+    FOR EACH ROW
+    EXECUTE FUNCTION update_ticket_last_updated();
+
+-- Enable RLS on tickets table
+ALTER TABLE tickets ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for tickets
+CREATE POLICY "Allow customers and agents to view tickets they are involved with"
+    ON tickets FOR SELECT
+    USING (
+        auth.uid() = customer_id -- Customer can view their own tickets
+        OR
+        auth.uid() = assigned_to -- Assigned agent can view
+        OR
+        EXISTS (SELECT 1 FROM agents WHERE agents.id = auth.uid()) -- All agents can view all tickets
+    );
+
+CREATE POLICY "Allow agents and customers to create their own tickets"
+    ON tickets FOR INSERT
+    TO authenticated
+    WITH CHECK (
+        EXISTS (SELECT 1 FROM agents WHERE agents.id = auth.uid())
+        OR
+        auth.uid() = customer_id -- Allow customers to create their own tickets
+    );
+
+CREATE POLICY "Allow agents to update any ticket and customers to update their open tickets"
+    ON tickets FOR UPDATE
+    TO authenticated
+    USING (
+        EXISTS (SELECT 1 FROM agents WHERE agents.id = auth.uid())
+        OR
+        (auth.uid() = customer_id) -- Customers can update their open tickets
+    );
+
+-- Create a secure function to view tickets by hash
+CREATE OR REPLACE FUNCTION public.get_ticket_by_hash(hash text)
+RETURNS TABLE (
+    number BIGINT,
+    title TEXT,
+    priority TEXT,
+    status TEXT,
+    created_at TIMESTAMPTZ,
+    last_updated TIMESTAMPTZ,
+    assigned_to UUID,
+    customer_id UUID,
+    conversation JSONB[],
+    metadata JSONB
+) 
+SECURITY DEFINER -- Run with privileges of defining user (typically service role)
+SET search_path = public -- Set search path for security
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    decoded text;
+    ticket_number bigint;
+    user_id uuid;
+BEGIN
+    -- Decode base64 hash
+    BEGIN
+        decoded := convert_from(decode(hash, 'base64'), 'UTF8');
+    EXCEPTION WHEN OTHERS THEN
+        RAISE EXCEPTION 'Invalid hash format';
+    END;
+
+    -- Split decoded string into ticket number and user ID
+    ticket_number := split_part(decoded, ':', 1)::bigint;
+    user_id := split_part(decoded, ':', 2)::uuid;
+
+    -- Return matching ticket if it exists and belongs to the user
+    RETURN QUERY
+    SELECT t.*
+    FROM tickets t
+    WHERE t.number = ticket_number
+    AND t.customer_id = user_id;
+END;
+$$;
+
+-- Grant execute permission to public (anonymous) users
+GRANT EXECUTE ON FUNCTION public.get_ticket_by_hash(text) TO public;
+
+-- Create function to get least busy agent
+CREATE OR REPLACE FUNCTION get_least_busy_agent()
+RETURNS TABLE (agent_id UUID, open_tickets BIGINT) 
+LANGUAGE SQL
+AS $$
+    WITH agent_counts AS (
+        SELECT 
+            a.id as agent_id,
+            COUNT(t.number) as open_tickets
+        FROM agents a
+        LEFT JOIN tickets t ON t.assigned_to = a.id AND t.status = 'open'
+        WHERE a.status = 'online'
+        GROUP BY a.id
+        ORDER BY COUNT(t.number) ASC
+        LIMIT 1
+    )
+    SELECT * FROM agent_counts;
+$$;
+
+-- Grant execute permission to authenticated users
+GRANT EXECUTE ON FUNCTION public.get_least_busy_agent() TO authenticated; 
+----

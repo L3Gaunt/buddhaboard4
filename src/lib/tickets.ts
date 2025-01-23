@@ -216,4 +216,15 @@ export async function createUnauthenticatedTicket(ticket: UnauthenticatedTicketD
     throw new Error(error);
   }
   return data;
+}
+
+export async function getAllCustomerTickets(customerId: string) {
+  const { data, error } = await supabase
+    .from('tickets')
+    .select('*')
+    .eq('customer_id', customerId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data.map(transformTicket);
 } 

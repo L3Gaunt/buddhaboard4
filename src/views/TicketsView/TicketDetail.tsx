@@ -1,10 +1,10 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import type { FC } from 'react';
 import { ArrowLeft, UserPlus, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "../../RichTextEditor";
 import CustomerProfileView from '../CustomerProfileView';
-import { addMessageToTicket, updateTicketPriority, updateTicket } from '@/lib/tickets';
+import { addMessageToTicket, updateTicketPriority, updateTicket, getAllCustomerTickets } from '@/lib/tickets';
 import { 
   type Ticket, 
   type TicketDetailProps, 
@@ -26,10 +26,19 @@ export const TicketDetail: FC<TicketDetailProps> = ({
   response,
   setResponse,
   customer,
-  customerTickets,
 }) => {
   const [showCustomerProfile, setShowCustomerProfile] = React.useState(false);
+  const [customerTickets, setCustomerTickets] = useState<Ticket[]>([]);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  // Fetch all customer tickets when showing profile
+  useEffect(() => {
+    if (showCustomerProfile && customer) {
+      getAllCustomerTickets(customer.id.toString())
+        .then(tickets => setCustomerTickets(tickets))
+        .catch(error => console.error('Error fetching customer tickets:', error));
+    }
+  }, [showCustomerProfile, customer]);
 
   // Scroll to bottom when conversation updates
   useEffect(() => {
@@ -229,6 +238,10 @@ export const TicketDetail: FC<TicketDetailProps> = ({
           customerTickets={customerTickets}
           onClose={() => setShowCustomerProfile(false)}
           isExpanded={false}
+          onTicketSelect={(selectedTicket) => {
+            setActiveTicket(selectedTicket);
+            setShowCustomerProfile(false);
+          }}
         />
       )}
     </div>
