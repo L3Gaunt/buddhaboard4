@@ -1,6 +1,9 @@
-import { XCircle, Check } from "lucide-react";
+import { XCircle, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Agent, AgentStatus } from "@/types";
+import { Agent } from "@/types";
+import { AgentCard } from "@/components/AgentCard";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 interface ReassignTicketModalProps {
   showReassignModal: boolean;
@@ -17,7 +20,18 @@ export function ReassignTicketModal({
   setCurrentAgent,
   agents,
 }: ReassignTicketModalProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+
   if (!showReassignModal) return null;
+
+  const filteredAgents = agents.filter(agent => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      agent.name.toLowerCase().includes(searchLower) ||
+      agent.email.toLowerCase().includes(searchLower) ||
+      agent.metadata?.department?.toLowerCase().includes(searchLower)
+    );
+  });
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
@@ -40,46 +54,34 @@ export function ReassignTicketModal({
             </span>
           </p>
         </div>
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            type="text"
+            placeholder="Search agents by name, email, or department..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
         <div className="flex-1 overflow-auto">
           <div className="space-y-2">
-            {agents.map((agent) => (
-              <div
+            {filteredAgents.map((agent) => (
+              <AgentCard
                 key={agent.id}
-                className={`p-3 rounded-lg border hover:bg-gray-50 cursor-pointer flex items-center justify-between ${
-                  currentAgent?.id === agent.id ? "border-blue-500 bg-blue-50" : ""
-                }`}
+                agent={agent}
+                isSelected={currentAgent?.id === agent.id}
                 onClick={() => {
                   setCurrentAgent(agent);
                   setShowReassignModal(false);
                 }}
-              >
-                <div className="flex items-center space-x-3">
-                  <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                    <span className="text-sm font-medium text-gray-600">
-                      {agent.avatar}
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium">{agent.name}</h3>
-                    <p className="text-sm text-gray-500">{agent.role}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full ${
-                      agent.status === AgentStatus.ONLINE
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    {agent.status}
-                  </span>
-                  {currentAgent?.id === agent.id && (
-                    <Check className="h-5 w-5 text-blue-500" />
-                  )}
-                </div>
-              </div>
+              />
             ))}
+            {filteredAgents.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                No agents found matching your search.
+              </div>
+            )}
           </div>
         </div>
       </div>
