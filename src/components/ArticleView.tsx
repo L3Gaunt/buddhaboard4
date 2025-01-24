@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ArrowLeft, Edit2, Save, X } from 'lucide-react';
+import { ArrowLeft, Edit2, Save, X, Trash2 } from 'lucide-react';
 import type { KBArticle, KBTag } from '../types/knowledge-base';
 import { getTagStyles } from '../views/KnowledgeBaseView';
 import { ArticleEditor, ArticleEditorRef } from './ArticleEditor';
@@ -9,10 +9,11 @@ interface ArticleViewProps {
   article: KBArticle;
   onBack?: () => void;
   onSave?: (article: Partial<KBArticle>) => Promise<void>;
+  onDelete?: () => Promise<void>;
   canEdit?: boolean;
 }
 
-export function ArticleView({ article, onBack, onSave, canEdit = false }: ArticleViewProps) {
+export function ArticleView({ article, onBack, onSave, onDelete, canEdit = false }: ArticleViewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(article.title);
   const [editedDescription, setEditedDescription] = useState(article.description || '');
@@ -91,13 +92,24 @@ export function ArticleView({ article, onBack, onSave, canEdit = false }: Articl
                   </button>
                 </>
               ) : (
-                <button
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors duration-200 hover:bg-gray-50"
-                >
-                  <Edit2 className="h-4 w-4" />
-                  Edit Article
-                </button>
+                <>
+                  <button
+                    onClick={() => setIsEditing(!isEditing)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors duration-200 hover:bg-gray-50"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                    Edit Article
+                  </button>
+                  {onDelete && (
+                    <button
+                      onClick={onDelete}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg border border-red-200 text-red-600 transition-colors duration-200 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete
+                    </button>
+                  )}
+                </>
               )}
             </div>
           )}

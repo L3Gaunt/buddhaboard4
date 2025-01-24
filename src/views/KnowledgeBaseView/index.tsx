@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
-import { getArticles, getTags, getArticle, updateArticle, updateArticleTags } from '../../services/knowledge-base';
+import { getArticles, getTags, getArticle, updateArticle, updateArticleTags, deleteArticle } from '../../services/knowledge-base';
 import { getCurrentUser, getAgentProfile } from '../../lib/auth';
 import type { KBArticle, KBTag } from '../../types/knowledge-base';
 import { ArticleView } from '../../components/ArticleView';
@@ -173,6 +173,25 @@ export function KnowledgeBaseView() {
     }
   };
 
+  const handleArticleDelete = async () => {
+    if (!currentArticle) return;
+    
+    // Show confirmation dialog
+    const confirmed = window.confirm(`Are you sure you want to delete the article "${currentArticle.title}"? This action cannot be undone.`);
+    if (!confirmed) return;
+    
+    try {
+      setIsLoading(true);
+      await deleteArticle(currentArticle.id);
+      handleBack(); // Go back to article list after deletion
+      loadData(currentPage); // Reload the articles list
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete article');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (error) {
     return (
       <div className="flex-1 p-8">
@@ -200,6 +219,7 @@ export function KnowledgeBaseView() {
           article={currentArticle} 
           onBack={handleBack}
           onSave={handleArticleSave}
+          onDelete={handleArticleDelete}
           canEdit={isAgent}
         />
       </div>

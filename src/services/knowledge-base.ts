@@ -105,4 +105,15 @@ export async function updateArticleTags(articleId: string, tagIds: string[]) {
 
   if (error) throw error;
   return data;
+}
+
+export async function deleteArticle(id: string) {
+  const { error } = await supabase.functions.invoke('knowledge-base', {
+    body: {
+      method: 'DELETE',
+      path: `articles/${id}`
+    }
+  });
+
+  if (error) throw error;
 } 
