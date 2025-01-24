@@ -12,7 +12,13 @@ interface Article {
   slug: string
   content: string
   status: 'draft' | 'published'
+  tags?: string[] // Array of tag IDs
 }
+
+const generateUniqueSlug = (baseSlug: string) => {
+  const randomSuffix = Math.random().toString(36).substring(2, 8);
+  return `${baseSlug}-${randomSuffix}`;
+};
 
 serve(async (req) => {
   console.log('Request received:', {
@@ -178,17 +184,64 @@ serve(async (req) => {
 
           case 'POST': {
             // Create article
-            const article: Article = body.body
-            const { data, error } = await supabase
-              .from('kb_articles')
-              .insert([article])
-              .select()
+            console.log('Starting article creation with body:', body);
+            const article: Article = body.body;
+            console.log('Parsed article data:', article);
 
-            if (error) throw error
-            return new Response(JSON.stringify(data[0]), {
+            // Validate required fields
+            if (!article.title || !article.content || !article.slug) {
+              console.log('Validation failed - missing required fields');
+              throw new Error('Title, content and slug are required');
+            }
+
+            // Extract tags before inserting article
+            const { tags, ...articleData } = article;
+            
+            // Generate unique slug
+            const uniqueSlug = generateUniqueSlug(articleData.slug);
+            console.log('Generated unique slug:', uniqueSlug);
+            
+            console.log('Attempting to insert article into kb_articles table');
+            const { data: createdArticle, error: articleError } = await supabase
+              .from('kb_articles')
+              .insert([{
+                title: articleData.title,
+                description: articleData.description,
+                slug: uniqueSlug,
+                content: articleData.content,
+                status: articleData.status || 'draft'
+              }])
+              .select('id, title, description, slug, content, status, created_at, updated_at')
+              .single();
+
+            if (articleError) {
+              console.log('Error inserting article:', articleError);
+              throw articleError;
+            }
+
+            // If there are tags, create the relationships
+            if (tags && tags.length > 0) {
+              console.log('Creating tag relationships for article:', createdArticle.id);
+              const { error: tagsError } = await supabase
+                .from('kb_article_tags')
+                .insert(
+                  tags.map(tagId => ({
+                    article_id: createdArticle.id,
+                    tag_id: tagId
+                  }))
+                );
+
+              if (tagsError) {
+                console.log('Error creating tag relationships:', tagsError);
+                // Don't throw here, we'll return the article anyway
+              }
+            }
+
+            console.log('Article created successfully:', createdArticle);
+            return new Response(JSON.stringify(createdArticle), {
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
               status: 201,
-            })
+            });
           }
 
           case 'PUT': {

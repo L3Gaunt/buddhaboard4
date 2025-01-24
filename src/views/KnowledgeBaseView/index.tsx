@@ -1,9 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Search, X } from 'lucide-react';
-import { getArticles, getTags, getArticle, updateArticle, updateArticleTags, deleteArticle } from '../../services/knowledge-base';
+import { Search, X, Plus } from 'lucide-react';
+import { getArticles, getTags, getArticle, updateArticle, updateArticleTags, deleteArticle, createArticle } from '../../services/knowledge-base';
 import { getCurrentUser, getAgentProfile } from '../../lib/auth';
 import type { KBArticle, KBTag } from '../../types/knowledge-base';
 import { ArticleView } from '../../components/ArticleView';
+
+// Helper function to generate a slug from a title
+const generateSlug = (title: string): string => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+};
 
 // Helper function to generate tag styles based on color
 export const getTagStyles = (color: string | null, isSelected: boolean = false) => {
@@ -34,6 +42,7 @@ export function KnowledgeBaseView() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAgent, setIsAgent] = useState(false);
+  const [isCreatingArticle, setIsCreatingArticle] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -137,6 +146,7 @@ export function KnowledgeBaseView() {
     const newUrl = window.location.pathname;
     window.history.pushState({}, '', newUrl);
     setCurrentArticle(null);
+    setIsCreatingArticle(false);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -192,6 +202,41 @@ export function KnowledgeBaseView() {
     }
   };
 
+  const handleCreateArticle = () => {
+    const title = 'New Article';
+    const newArticle: KBArticle = {
+      id: '',
+      title,
+      content: '',
+      description: '',
+      status: 'draft',
+      slug: generateSlug(title),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      kb_article_tags: []
+    };
+    setIsCreatingArticle(true);
+    setCurrentArticle(newArticle);
+  };
+
+  const handleNewArticleSave = async (article: Partial<KBArticle>) => {
+    try {
+      const { id, created_at, updated_at, ...articleData } = article as KBArticle;
+      const createArticleInput = {
+        ...articleData,
+        status: articleData.status === 'archived' ? 'draft' : articleData.status || 'draft',
+        slug: generateSlug(articleData.title)
+      };
+      const createdArticle = await createArticle(createArticleInput);
+      setCurrentArticle(createdArticle);
+      setIsCreatingArticle(false);
+      await loadData(currentPage);
+    } catch (err) {
+      setError('Failed to create article');
+      console.error(err);
+    }
+  };
+
   if (error) {
     return (
       <div className="flex-1 p-8">
@@ -212,41 +257,49 @@ export function KnowledgeBaseView() {
     );
   }
 
-  if (currentArticle) {
+  if (currentArticle || isCreatingArticle) {
     return (
-      <div className="flex-1 p-8">
-        <ArticleView 
-          article={currentArticle} 
-          onBack={handleBack}
-          onSave={handleArticleSave}
-          onDelete={handleArticleDelete}
-          canEdit={isAgent}
-        />
-      </div>
+      <ArticleView
+        article={currentArticle as KBArticle}
+        onBack={handleBack}
+        onSave={isCreatingArticle ? handleNewArticleSave : handleArticleSave}
+        onDelete={!isCreatingArticle ? handleArticleDelete : undefined}
+        canEdit={isAgent}
+        isCreating={isCreatingArticle}
+      />
     );
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <div className="relative">
+      <div className="flex justify-between items-center mb-6">
+        <div className="relative flex-1 max-w-xl">
           <input
             type="text"
             placeholder="Search articles..."
+            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
           {searchQuery && (
             <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-2.5"
             >
-              <X size={20} />
+              <X className="h-5 w-5 text-gray-400" />
             </button>
           )}
         </div>
+        {isAgent && (
+          <button
+            onClick={handleCreateArticle}
+            className="ml-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            New Article
+          </button>
+        )}
       </div>
       
       <div className="mb-8">

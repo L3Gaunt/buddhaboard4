@@ -6,15 +6,44 @@ import { ArticleEditor, ArticleEditorRef } from './ArticleEditor';
 import { TagSelector, CollapsedTagSelector } from './TagSelectorInArticleEditor';
 
 interface ArticleViewProps {
-  article: KBArticle;
+  article: KBArticle | null;
   onBack?: () => void;
   onSave?: (article: Partial<KBArticle>) => Promise<void>;
   onDelete?: () => Promise<void>;
   canEdit?: boolean;
+  isCreating?: boolean;
 }
 
-export function ArticleView({ article, onBack, onSave, onDelete, canEdit = false }: ArticleViewProps) {
-  const [isEditing, setIsEditing] = useState(false);
+export function ArticleView({ article, onBack, onSave, onDelete, canEdit = false, isCreating = false }: ArticleViewProps) {
+  // If article is null, show loading state
+  if (!article) {
+    return (
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-8">
+        <div className="mb-8">
+          {onBack && !isCreating && (
+            <button
+              onClick={onBack}
+              className="text-blue-600 hover:text-blue-800 flex items-center gap-2 mb-4"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Articles
+            </button>
+          )}
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+            <div className="space-y-3">
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded"></div>
+              <div className="h-4 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const [isEditing, setIsEditing] = useState(isCreating);
   const [editedTitle, setEditedTitle] = useState(article.title);
   const [editedDescription, setEditedDescription] = useState(article.description || '');
   const [showTagInput, setShowTagInput] = useState(false);
@@ -27,18 +56,19 @@ export function ArticleView({ article, onBack, onSave, onDelete, canEdit = false
   const editorRef = useRef<ArticleEditorRef>(null);
 
   const handleSave = async (content: string) => {
-    if (onSave) {
-      await onSave({
-        ...article,
-        title: editedTitle,
-        description: editedDescription,
-        content,
-        kb_article_tags: editedTags.map(tagId => ({
-          kb_tags: tagData[tagId]
-        }))
-      });
+    if (!onSave) return;
+    await onSave({
+      ...article,
+      title: editedTitle,
+      description: editedDescription,
+      content,
+      kb_article_tags: editedTags.map(tagId => ({
+        kb_tags: tagData[tagId]
+      }))
+    });
+    if (!isCreating) {
+      setIsEditing(false);
     }
-    setIsEditing(false);
   };
 
   const toggleTag = (tagId: string, tag: KBTag) => {
@@ -60,7 +90,7 @@ export function ArticleView({ article, onBack, onSave, onDelete, canEdit = false
     <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-8">
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          {onBack && (
+          {onBack && !isCreating && (
             <button
               onClick={onBack}
               className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
@@ -81,10 +111,16 @@ export function ArticleView({ article, onBack, onSave, onDelete, canEdit = false
                     className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
                   >
                     <Save className="h-4 w-4" />
-                    Save
+                    {isCreating ? "Create Article" : "Save"}
                   </button>
                   <button
-                    onClick={() => setIsEditing(false)}
+                    onClick={() => {
+                      if (isCreating && onBack) {
+                        onBack();
+                      } else {
+                        setIsEditing(false);
+                      }
+                    }}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors duration-200 hover:bg-gray-50"
                   >
                     <X className="h-4 w-4" />
