@@ -1,11 +1,12 @@
 import type { FC } from 'react';
-import { Inbox, Users, MessageSquare, Book, Star, Menu } from "lucide-react";
+import { Inbox, Users, Book, Star, Menu, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type SidebarProps, Views, type Agent } from '@/types';
 
 interface ExtendedSidebarProps extends SidebarProps {
   currentAgent: Agent | null;
   setIsMobileMenuOpen: (isOpen: boolean) => void;
+  setShowSettings: (show: boolean) => void;
 }
 
 const Sidebar: FC<ExtendedSidebarProps> = ({
@@ -14,6 +15,7 @@ const Sidebar: FC<ExtendedSidebarProps> = ({
   isMobileMenuOpen,
   currentAgent,
   setIsMobileMenuOpen,
+  setShowSettings,
 }) => {
   const isCustomer = !currentAgent;
 
@@ -32,54 +34,60 @@ const Sidebar: FC<ExtendedSidebarProps> = ({
         </Button>
         <h1 className="text-xl font-bold text-gray-800">BuddhaBoard</h1>
       </div>
-      <nav className="p-4 space-y-2">
-        <Button
-          variant={currentView === Views.TICKETS ? "secondary" : "ghost"}
-          className="w-full justify-start"
-          onClick={() => setCurrentView(Views.TICKETS)}
-        >
-          <Inbox className="mr-2 h-4 w-4" />
-          Tickets
-        </Button>
+      
+      <div className="flex flex-col h-[calc(100%-4rem)]">
+        <nav className="p-4 space-y-2 flex-1">
+          <Button
+            variant={currentView === Views.TICKETS ? "secondary" : "ghost"}
+            className="w-full justify-start"
+            onClick={() => setCurrentView(Views.TICKETS)}
+          >
+            <Inbox className="mr-2 h-4 w-4" />
+            Tickets
+          </Button>
 
-        {!isCustomer && (
-          <>
-            <Button
-              variant={currentView === Views.AGENTS ? "secondary" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => setCurrentView(Views.AGENTS)}
-            >
-              <Users className="mr-2 h-4 w-4" />
-              Agents
-            </Button>
-            <Button
-              variant={currentView === Views.CHAT ? "secondary" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => setCurrentView(Views.CHAT)}
-            >
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Live Chat
-            </Button>
-            <Button
-              variant={currentView === Views.FEEDBACK ? "secondary" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => setCurrentView(Views.FEEDBACK)}
-            >
-              <Star className="mr-2 h-4 w-4" />
-              Feedback
-            </Button>
-          </>
-        )}
+          {!isCustomer && (
+            <>
+              <Button
+                variant={currentView === Views.AGENTS ? "secondary" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setCurrentView(Views.AGENTS)}
+              >
+                <Users className="mr-2 h-4 w-4" />
+                Agents
+              </Button>
+              <Button
+                variant={currentView === Views.FEEDBACK ? "secondary" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => setCurrentView(Views.FEEDBACK)}
+              >
+                <Star className="mr-2 h-4 w-4" />
+                Feedback
+              </Button>
+            </>
+          )}
 
-        <Button
-          variant={currentView === Views.KNOWLEDGE_BASE ? "secondary" : "ghost"}
-          className="w-full justify-start"
-          onClick={() => setCurrentView(Views.KNOWLEDGE_BASE)}
-        >
-          <Book className="mr-2 h-4 w-4" />
-          Knowledge Base
-        </Button>
-      </nav>
+          <Button
+            variant={currentView === Views.KNOWLEDGE_BASE ? "secondary" : "ghost"}
+            className="w-full justify-start"
+            onClick={() => setCurrentView(Views.KNOWLEDGE_BASE)}
+          >
+            <Book className="mr-2 h-4 w-4" />
+            Knowledge Base
+          </Button>
+        </nav>
+
+        <div className="p-4 border-t">
+          <Button
+            variant="ghost"
+            className="w-full justify-start"
+            onClick={() => setShowSettings(true)}
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            Settings
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
