@@ -23,7 +23,7 @@ interface ArticleEditorProps {
 }
 
 export const ArticleEditor = forwardRef<ArticleEditorRef, ArticleEditorProps>(
-  ({ content, isEditing}, ref) => {
+  ({ content, isEditing }, ref) => {
     const editor = useEditor({
       extensions: [
         StarterKit,
@@ -53,20 +53,18 @@ export const ArticleEditor = forwardRef<ArticleEditorRef, ArticleEditorProps>(
       content: content || '',
       editorProps: {
         attributes: {
-          class: 'prose max-w-none focus:outline-none',
+          class: 'focus:outline-none',
         },
       },
       editable: isEditing,
     });
 
-    // Update content when it changes externally
     useEffect(() => {
       if (editor && editor.getHTML() !== content) {
         editor.commands.setContent(content || '');
       }
     }, [content, editor]);
 
-    // Update editable state when it changes
     useEffect(() => {
       if (editor) {
         editor.setEditable(isEditing);

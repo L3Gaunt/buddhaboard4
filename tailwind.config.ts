@@ -1,6 +1,6 @@
 module.exports = {
   darkMode: "selector",
-  content: ["src/**/*.{ts,tsx,js}"],
+  content: ["./src/**/*.{ts,tsx,js,jsx,html}"],
   theme: {
     container: {
       center: true,
@@ -71,4 +71,7 @@ module.exports = {
       },
     },
   },
+  plugins: [
+    require('@tailwindcss/typography')
+  ],
 }
