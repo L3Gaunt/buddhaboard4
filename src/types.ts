@@ -150,16 +150,17 @@ export interface Agent {
  * Available views in the application
  * @readonly
  */
-export const Views = {
-  TICKETS: "tickets",
-  DASHBOARD: "dashboard",
-  AGENTS: "agents",
-  CHAT: "chat",
-  CUSTOMER_PROFILE: "customer_profile",
-  KNOWLEDGE_BASE: "knowledge_base",
-} as const;
+export enum Views {
+  TICKETS = 'TICKETS',
+  DASHBOARD = 'DASHBOARD',
+  AGENTS = 'AGENTS',
+  CHAT = 'CHAT',
+  CUSTOMER_PROFILE = 'CUSTOMER_PROFILE',
+  KNOWLEDGE_BASE = 'KNOWLEDGE_BASE',
+  FEEDBACK = 'FEEDBACK',
+}
 
-export type ViewType = typeof Views[keyof typeof Views];
+export type ViewType = keyof typeof Views;
 
 // Utility type for making all properties in an object readonly
 export type DeepReadonly<T> = T extends (infer U)[]

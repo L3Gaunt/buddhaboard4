@@ -9,6 +9,7 @@ import { LoginView } from "./views/LoginView";
 import { UserTicketView } from "./views/UserTicketView";
 import { TicketLookupView } from "./views/TicketLookupView";
 import { KnowledgeBaseView } from "./views/KnowledgeBaseView";
+import { FeedbackView } from "./views/FeedbackView";
 import { supabase } from './lib/supabase';
 import { AgentSettingsModal } from "@/components/modals/AgentSettingsModal";
 import { ReassignTicketModal } from "@/components/modals/ReassignTicketModal";
@@ -43,6 +44,7 @@ export default function App() {
   const isAgentsPage = window.location.pathname === '/agents';
   const isChatPage = window.location.pathname === '/chat';
   const isKnowledgeBasePage = window.location.pathname === '/knowledge-base';
+  const isFeedbackPage = window.location.pathname === '/feedback';
   
   // If it's a public route, render the appropriate view without authentication
   if (isSubmitTicketPage) {
@@ -58,6 +60,7 @@ export default function App() {
     isAgentsPage ? Views.AGENTS :
     isChatPage ? Views.CHAT :
     isKnowledgeBasePage ? Views.KNOWLEDGE_BASE :
+    isFeedbackPage ? Views.FEEDBACK :
     Views.TICKETS
   );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -91,6 +94,9 @@ export default function App() {
         break;
       case Views.CHAT:
         newPath = '/chat';
+        break;
+      case Views.FEEDBACK:
+        newPath = '/feedback';
         break;
     }
     
@@ -258,6 +264,8 @@ export default function App() {
         setCurrentView(Views.CHAT);
       } else if (path === '/knowledge-base') {
         setCurrentView(Views.KNOWLEDGE_BASE);
+      } else if (path === '/feedback') {
+        setCurrentView(Views.FEEDBACK);
       }
     };
 
@@ -335,6 +343,7 @@ export default function App() {
                   tickets={tickets} 
                   setActiveTicket={setActiveTicket} 
                   isCustomerView={!currentAgent}
+                  currentAgent={currentAgent}
                 />
               </div>
             ) : customer && (
@@ -370,6 +379,22 @@ export default function App() {
         )}
         {currentView === Views.CHAT && <ChatView />}
         {currentView === Views.KNOWLEDGE_BASE && <KnowledgeBaseView />}
+        {currentView === Views.FEEDBACK && !currentAgent?.role && (
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="text-red-600">You don't have permission to view this page.</div>
+          </div>
+        )}
+        {currentView === Views.FEEDBACK && currentAgent?.role && (
+          <FeedbackView 
+            currentAgent={currentAgent} 
+            setActiveTicket={(ticket) => {
+              if (ticket) {
+                setActiveTicket(ticket);
+                setCurrentView(Views.TICKETS);
+              }
+            }} 
+          />
+        )}
       </Layout>
     </>
   );

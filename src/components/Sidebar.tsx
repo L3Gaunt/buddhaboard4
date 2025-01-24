@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { Inbox, BarChart3, Users, MessageSquare, Book } from "lucide-react";
+import { Inbox, BarChart3, Users, MessageSquare, Book, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type SidebarProps, Views, type Agent } from '@/types';
 
@@ -57,6 +57,14 @@ const Sidebar: FC<ExtendedSidebarProps> = ({
             >
               <MessageSquare className="mr-2 h-4 w-4" />
               Live Chat
+            </Button>
+            <Button
+              variant={currentView === Views.FEEDBACK ? "secondary" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => setCurrentView(Views.FEEDBACK)}
+            >
+              <Star className="mr-2 h-4 w-4" />
+              Feedback
             </Button>
           </>
         )}

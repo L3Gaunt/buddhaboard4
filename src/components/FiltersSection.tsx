@@ -8,16 +8,21 @@ interface TicketFiltersSectionProps {
   setSearchQuery: (query: string) => void;
   filters: {
     assignedTo: string[];
-    status: string[];
-    priority: string[];
+    status?: string[];
+    priority?: string[];
+    rating?: string[];
   };
   setFilters: (filters: any) => void;
   clearFilters: () => void;
-  statusOptions: Array<{
+  statusOptions?: Array<{
     value: string;
     label: string;
   }>;
-  priorityOptions: Array<{
+  priorityOptions?: Array<{
+    value: string;
+    label: string;
+  }>;
+  ratingOptions?: Array<{
     value: string;
     label: string;
   }>;
@@ -39,8 +44,9 @@ export function TicketFiltersSection({
   filters,
   setFilters,
   clearFilters,
-  statusOptions,
-  priorityOptions,
+  statusOptions = [],
+  priorityOptions = [],
+  ratingOptions = [],
   agentOptions,
   getStatusColor,
   getPriorityColor,
@@ -60,31 +66,49 @@ export function TicketFiltersSection({
           />
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <FilterDropdown
-          label="Status"
-          options={statusOptions}
-          selected={filters.status}
-          onChange={(values: string[]) =>
-            setFilters({
-              ...filters,
-              status: values,
-            })
-          }
-          getOptionColor={getStatusColor}
-        />
-        <FilterDropdown
-          label="Priority"
-          options={priorityOptions}
-          selected={filters.priority}
-          onChange={(values: string[]) =>
-            setFilters({
-              ...filters,
-              priority: values,
-            })
-          }
-          getOptionColor={getPriorityColor}
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        {statusOptions.length > 0 && (
+          <FilterDropdown
+            label="Status"
+            options={statusOptions}
+            selected={filters.status || []}
+            onChange={(values: string[]) =>
+              setFilters({
+                ...filters,
+                status: values,
+              })
+            }
+            getOptionColor={getStatusColor}
+          />
+        )}
+        {priorityOptions.length > 0 && (
+          <FilterDropdown
+            label="Priority"
+            options={priorityOptions}
+            selected={filters.priority || []}
+            onChange={(values: string[]) =>
+              setFilters({
+                ...filters,
+                priority: values,
+              })
+            }
+            getOptionColor={getPriorityColor}
+          />
+        )}
+        {ratingOptions.length > 0 && (
+          <FilterDropdown
+            label="Rating"
+            options={ratingOptions}
+            selected={filters.rating || []}
+            onChange={(values: string[]) =>
+              setFilters({
+                ...filters,
+                rating: values,
+              })
+            }
+            getOptionColor={() => "bg-yellow-100 text-yellow-800"}
+          />
+        )}
         <FilterDropdown
           label="Assigned To"
           options={agentOptions}
@@ -101,8 +125,9 @@ export function TicketFiltersSection({
       </div>
       {(searchQuery ||
         filters.assignedTo.length > 0 ||
-        filters.status.length > 0 ||
-        filters.priority.length > 0) && (
+        (filters.status?.length ?? 0) > 0 ||
+        (filters.priority?.length ?? 0) > 0 ||
+        (filters.rating?.length ?? 0) > 0) && (
         <div className="p-3 bg-gray-50 rounded-lg space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-gray-700">
@@ -120,8 +145,9 @@ export function TicketFiltersSection({
           </div>
           <div className="space-y-1">
             <FilterChips type="assignedTo" values={filters.assignedTo} />
-            <FilterChips type="status" values={filters.status} />
-            <FilterChips type="priority" values={filters.priority} />
+            {filters.status && <FilterChips type="status" values={filters.status} />}
+            {filters.priority && <FilterChips type="priority" values={filters.priority} />}
+            {filters.rating && <FilterChips type="rating" values={filters.rating} />}
           </div>
         </div>
       )}

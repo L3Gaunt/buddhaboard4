@@ -18,7 +18,7 @@ import {
   createMessageId
 } from '@/types';
 import { TicketBadge } from '../../components/TicketBadge';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 
 // Add new interface for feedback
 interface TicketFeedback {
