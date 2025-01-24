@@ -24,6 +24,7 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
         setCurrentView={setCurrentView}
         isMobileMenuOpen={isMobileMenuOpen}
         currentAgent={currentAgent}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4">

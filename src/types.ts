@@ -181,6 +181,7 @@ export interface SidebarProps {
   readonly currentView: ViewType;
   readonly setCurrentView: (view: ViewType) => void;
   readonly isMobileMenuOpen: boolean;
+  readonly setIsMobileMenuOpen: (isOpen: boolean) => void;
 }
 
 /**

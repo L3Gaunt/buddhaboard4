@@ -1,10 +1,11 @@
 import type { FC } from 'react';
-import { Inbox, BarChart3, Users, MessageSquare, Book, Star } from "lucide-react";
+import { Inbox, BarChart3, Users, MessageSquare, Book, Star, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type SidebarProps, Views, type Agent } from '@/types';
 
 interface ExtendedSidebarProps extends SidebarProps {
   currentAgent: Agent | null;
+  setIsMobileMenuOpen: (isOpen: boolean) => void;
 }
 
 const Sidebar: FC<ExtendedSidebarProps> = ({
@@ -12,6 +13,7 @@ const Sidebar: FC<ExtendedSidebarProps> = ({
   setCurrentView,
   isMobileMenuOpen,
   currentAgent,
+  setIsMobileMenuOpen,
 }) => {
   const isCustomer = !currentAgent;
 
@@ -19,8 +21,16 @@ const Sidebar: FC<ExtendedSidebarProps> = ({
     <div
       className={`${isMobileMenuOpen ? "block" : "hidden"} md:block fixed md:relative z-40 w-64 h-full bg-white border-r border-gray-200`}
     >
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-gray-200 flex justify-between items-center">
         <h1 className="text-xl font-bold text-gray-800">BuddhaBoard</h1>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
       </div>
       <nav className="p-4 space-y-2">
         <Button
