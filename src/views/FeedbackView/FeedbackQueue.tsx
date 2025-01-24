@@ -28,7 +28,13 @@ interface FeedbackQueueProps {
 }
 
 export const FeedbackQueue: FC<FeedbackQueueProps> = ({ feedbackItems, setActiveTicket, currentAgent }) => {
-  const [agentNames, setAgentNames] = useState<Record<AgentId, string>>({});
+  const [agentNames, setAgentNames] = useState<Record<AgentId, string>>(() => {
+    // Initialize with current agent's name if available
+    if (currentAgent) {
+      return { [currentAgent.id]: currentAgent.name };
+    }
+    return {};
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<{
     assignedTo: string[];
@@ -60,9 +66,12 @@ export const FeedbackQueue: FC<FeedbackQueueProps> = ({ feedbackItems, setActive
     const fetchAgentNames = async () => {
       const uniqueAgentIds = [...new Set(feedbackItems
         .map(item => item.ticket.assignedTo)
-        .filter((id): id is AgentId => id !== null))];
+        .filter((id): id is AgentId => id !== null))]
+        .filter(id => !(id in agentNames)); // Only fetch names we don't already have
 
-      const names: Record<AgentId, string> = {};
+      if (uniqueAgentIds.length === 0) return; // Skip if no new agents to fetch
+
+      const names: Record<AgentId, string> = { ...agentNames };
       for (const agentId of uniqueAgentIds) {
         try {
           const agent = await getAgentProfile(agentId);
@@ -77,33 +86,41 @@ export const FeedbackQueue: FC<FeedbackQueueProps> = ({ feedbackItems, setActive
     };
 
     fetchAgentNames();
-  }, [feedbackItems]);
+  }, [feedbackItems, agentNames]);
 
   // Filter chips component
   const FilterChips: React.FC<{ type: string; values: string[] }> = ({ type, values }) => {
     if (values.length === 0) return null;
     return (
       <div className="flex flex-wrap gap-2">
-        {values.map((value) => (
-          <span
-            key={value}
-            className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs"
-          >
-            {type === 'assignedTo' && value in agentNames ? agentNames[value as AgentId] : `${value} Star${value !== '1' ? 's' : ''}`}
-            <button
-              onClick={() => {
-                const newValues = filters[type as keyof typeof filters].filter(v => v !== value);
-                setFilters({
-                  ...filters,
-                  [type]: newValues,
-                });
-              }}
-              className="ml-1 hover:text-blue-900"
+        {values.map((value) => {
+          let displayText = value;
+          if (type === 'assignedTo') {
+            displayText = value in agentNames ? agentNames[value as AgentId] : 'Loading...';
+          } else {
+            displayText = `${value} Star${value !== '1' ? 's' : ''}`;
+          }
+          return (
+            <span
+              key={value}
+              className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 rounded-full text-xs"
             >
-              ×
-            </button>
-          </span>
-        ))}
+              {displayText}
+              <button
+                onClick={() => {
+                  const newValues = filters[type as keyof typeof filters].filter(v => v !== value);
+                  setFilters({
+                    ...filters,
+                    [type]: newValues,
+                  });
+                }}
+                className="ml-1 hover:text-blue-900"
+              >
+                ×
+              </button>
+            </span>
+          );
+        })}
       </div>
     );
   };
