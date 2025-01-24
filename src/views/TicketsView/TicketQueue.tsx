@@ -13,7 +13,7 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, is
     priority: string[];
   }>({
     assignedTo: currentAgent ? [currentAgent.id] : [],
-    status: ["open"],
+    status: isCustomerView ? [] : ["open"],
     priority: [],
   });
 
@@ -173,19 +173,21 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, is
         </div>
       </div>
 
-      <TicketFiltersSection
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        filters={filters}
-        setFilters={setFilters}
-        clearFilters={clearFilters}
-        statusOptions={statusOptions}
-        priorityOptions={priorityOptions}
-        agentOptions={agentOptions}
-        getStatusColor={getStatusColor}
-        getPriorityColor={getPriorityColor}
-        FilterChips={FilterChips}
-      />
+      {!isCustomerView && (
+        <TicketFiltersSection
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          filters={filters}
+          setFilters={setFilters}
+          clearFilters={clearFilters}
+          statusOptions={statusOptions}
+          priorityOptions={priorityOptions}
+          agentOptions={agentOptions}
+          getStatusColor={getStatusColor}
+          getPriorityColor={getPriorityColor}
+          FilterChips={FilterChips}
+        />
+      )}
 
       <div className="space-y-4">
         {filteredTickets.map((ticket) => (
