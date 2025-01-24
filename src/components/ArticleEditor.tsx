@@ -9,7 +9,6 @@ import TableRow from '@tiptap/extension-table-row';
 import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
 import Highlight from '@tiptap/extension-highlight';
-import Heading from '@tiptap/extension-heading';
 
 export interface ArticleEditorRef {
   getContent: () => string;
@@ -26,9 +25,10 @@ export const ArticleEditor = forwardRef<ArticleEditorRef, ArticleEditorProps>(
   ({ content, isEditing }, ref) => {
     const editor = useEditor({
       extensions: [
-        StarterKit,
-        Heading.configure({
-          levels: [1, 2, 3],
+        StarterKit.configure({
+          heading: {
+            levels: [1, 2, 3],
+          },
         }),
         Link.configure({
           openOnClick: false,
