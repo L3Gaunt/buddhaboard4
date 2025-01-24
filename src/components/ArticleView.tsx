@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { ArrowLeft, Edit2, Save, X } from 'lucide-react';
-import type { KBArticle } from '../types/knowledge-base';
+import type { KBArticle, KBTag } from '../types/knowledge-base';
 import { getTagStyles } from '../views/KnowledgeBaseView';
 import { ArticleEditor, ArticleEditorRef } from './ArticleEditor';
 import { TagSelector, CollapsedTagSelector } from './TagSelectorInArticleEditor';
@@ -18,6 +18,11 @@ export function ArticleView({ article, onBack, onSave, canEdit = false }: Articl
   const [editedDescription, setEditedDescription] = useState(article.description || '');
   const [showTagInput, setShowTagInput] = useState(false);
   const [editedTags, setEditedTags] = useState(article.kb_article_tags?.map(tag => tag.kb_tags.id) || []);
+  const [tagData, setTagData] = useState<Record<string, KBTag>>(
+    Object.fromEntries(
+      (article.kb_article_tags || []).map(tag => [tag.kb_tags.id, tag.kb_tags])
+    )
+  );
   const editorRef = useRef<ArticleEditorRef>(null);
 
   const handleSave = async (content: string) => {
@@ -28,34 +33,27 @@ export function ArticleView({ article, onBack, onSave, canEdit = false }: Articl
         description: editedDescription,
         content,
         kb_article_tags: editedTags.map(tagId => ({
-          kb_tags: {
-            id: tagId,
-            name: article.kb_article_tags?.find(t => t.kb_tags.id === tagId)?.kb_tags.name || '',
-            slug: article.kb_article_tags?.find(t => t.kb_tags.id === tagId)?.kb_tags.slug || '',
-            color: article.kb_article_tags?.find(t => t.kb_tags.id === tagId)?.kb_tags.color || '',
-            created_at: article.kb_article_tags?.find(t => t.kb_tags.id === tagId)?.kb_tags.created_at || new Date().toISOString(),
-            updated_at: article.kb_article_tags?.find(t => t.kb_tags.id === tagId)?.kb_tags.updated_at || new Date().toISOString()
-          }
+          kb_tags: tagData[tagId]
         }))
       });
     }
     setIsEditing(false);
   };
 
-  const toggleTag = (tagId: string) => {
+  const toggleTag = (tagId: string, tag: KBTag) => {
     setEditedTags(prev => 
       prev.includes(tagId) 
         ? prev.filter(id => id !== tagId)
         : [...prev, tagId]
     );
+    
+    if (tag) {
+      setTagData(prev => ({
+        ...prev,
+        [tagId]: tag
+      }));
+    }
   };
-
-  // Transform article tags into the format expected by TagSelector
-  const allTags = article.kb_article_tags?.map(tag => ({
-    id: tag.kb_tags.id,
-    label: tag.kb_tags.name,
-    color: tag.kb_tags.color
-  })) || [];
 
   return (
     <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-8">
@@ -132,8 +130,8 @@ export function ArticleView({ article, onBack, onSave, canEdit = false }: Articl
         )}
 
         <div className="flex flex-wrap gap-2 items-center">
-          {(isEditing ? editedTags : article.kb_article_tags?.map(tag => tag.kb_tags.id) || []).map((tagId) => {
-            const tag = article.kb_article_tags?.find(t => t.kb_tags.id === tagId)?.kb_tags;
+          {editedTags.map((tagId) => {
+            const tag = tagData[tagId];
             if (!tag) return null;
             return (
               <div key={tagId} className="flex items-center gap-1">
@@ -144,7 +142,7 @@ export function ArticleView({ article, onBack, onSave, canEdit = false }: Articl
                   {tag.name}
                   {isEditing && (
                     <button
-                      onClick={() => toggleTag(tagId)}
+                      onClick={() => toggleTag(tagId, tag)}
                       className="hover:text-gray-700 ml-1"
                     >
                       <X className="h-3 w-3" />
@@ -158,7 +156,6 @@ export function ArticleView({ article, onBack, onSave, canEdit = false }: Articl
             <div className="relative">
               {showTagInput ? (
                 <TagSelector
-                  tags={allTags}
                   editedTags={editedTags}
                   toggleTag={toggleTag}
                   setShowTagInput={setShowTagInput}
