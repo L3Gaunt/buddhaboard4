@@ -129,7 +129,14 @@ serve(async (req) => {
               const { page = 1, limit = 10 } = params
               const offset = (page - 1) * limit
 
-              const { data, error, count } = await supabase
+              // Check if user is an agent
+              const { data: agent } = await supabase
+                .from('agents')
+                .select('id')
+                .eq('id', user.data.user.id)
+                .single()
+
+              let query = supabase
                 .from('kb_articles')
                 .select(`
                   id,
@@ -149,7 +156,13 @@ serve(async (req) => {
                     )
                   )
                 `, { count: 'exact' })
-                .eq('status', 'published')
+                
+              // Only filter by published status for non-agents
+              if (!agent) {
+                query = query.eq('status', 'published')
+              }
+
+              const { data, error, count } = await query
                 .order('created_at', { ascending: false })
                 .range(offset, offset + limit - 1)
 

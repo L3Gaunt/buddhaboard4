@@ -113,6 +113,11 @@ export function KnowledgeBaseView() {
 
   const filteredArticles = articles
     .filter((article) => {
+      // Filter by status - only show published articles to non-agents
+      if (!isAgent && article.status !== 'published') {
+        return false;
+      }
+      
       // First filter by tags if any are selected
       const matchesTags = selectedTags.length === 0 || 
         selectedTags.every((tagId) => 
@@ -327,7 +332,14 @@ export function KnowledgeBaseView() {
             onClick={() => handleArticleClick(article)}
             className="text-left block p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
           >
-            <h3 className="text-xl font-semibold mb-2">{article.title}</h3>
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="text-xl font-semibold">{article.title}</h3>
+              {article.status === 'draft' && (
+                <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
+                  Draft
+                </span>
+              )}
+            </div>
             {article.description && (
               <p className="text-gray-600 mb-4 line-clamp-2">{article.description}</p>
             )}

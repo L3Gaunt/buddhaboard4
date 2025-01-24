@@ -181,7 +181,14 @@ export function ArticleView({ article, onBack, onSave, onDelete, canEdit = false
           </>
         ) : (
           <>
-            <h1 className="text-3xl font-semibold mb-4">{article.title}</h1>
+            <div className="flex items-center gap-4 mb-4">
+              <h1 className="text-3xl font-semibold">{article.title}</h1>
+              {article.status === 'draft' && (
+                <span className="px-2 py-1 text-sm font-medium bg-yellow-100 text-yellow-800 rounded-full">
+                  Draft
+                </span>
+              )}
+            </div>
             {article.description && (
               <p className="text-gray-600 mb-4">{article.description}</p>
             )}
