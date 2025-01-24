@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import type { FC } from 'react';
-import { ArrowLeft, UserPlus, User } from "lucide-react";
+import { ArrowLeft, UserPlus, User, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "../../RichTextEditor";
 import CustomerProfileView from '../CustomerProfileView';
@@ -18,6 +18,23 @@ import {
   createMessageId
 } from '@/types';
 import { TicketBadge } from '../../components/TicketBadge';
+import { supabase } from '@/lib/supabaseClient';
+
+// Add new interface for feedback
+interface TicketFeedback {
+  rating: number;
+  feedbackText: string;
+}
+
+interface FeedbackData {
+  rating: number;
+  feedback_text: string | null;
+}
+
+interface FeedbackResponse {
+  data: FeedbackData | null;
+  error?: string;
+}
 
 export const TicketDetail: FC<TicketDetailProps> = ({
   ticket,
@@ -37,6 +54,81 @@ export const TicketDetail: FC<TicketDetailProps> = ({
   const [assignedAgent, setAssignedAgent] = useState<Agent | null>(null);
   const [showAgentCard, setShowAgentCard] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Add new state for feedback
+  const [feedback, setFeedback] = useState<TicketFeedback>({ rating: 5, feedbackText: '' });
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [isEditingFeedback, setIsEditingFeedback] = useState(false);
+
+  // Check if feedback exists
+  useEffect(() => {
+    if (isCustomerView && ['resolved', 'closed'].includes(ticketStatus)) {
+      const fetchFeedback = async () => {
+        try {
+          const response = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit_ticket_feedback?ticketNumber=${ticket.number}`,
+            {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+              },
+            }
+          );
+
+          const { data, error }: FeedbackResponse = await response.json();
+          
+          if (error) {
+            throw new Error(error);
+          }
+
+          if (data) {
+            setFeedback({ rating: data.rating, feedbackText: data.feedback_text || '' });
+            setFeedbackSubmitted(true);
+          }
+        } catch (error) {
+          console.error('Error fetching feedback:', error);
+        }
+      };
+
+      fetchFeedback();
+    }
+  }, [isCustomerView, ticketStatus, ticket.number]);
+
+  // Add feedback submission handler
+  const handleSubmitFeedback = async () => {
+    setIsSubmittingFeedback(true);
+    setFeedbackError(null);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit_ticket_feedback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+        body: JSON.stringify({
+          ticketNumber: ticket.number,
+          rating: feedback.rating,
+          feedbackText: feedback.feedbackText.trim() || null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit feedback');
+      }
+
+      setFeedbackSubmitted(true);
+      setIsEditingFeedback(false);
+    } catch (error) {
+      setFeedbackError(error instanceof Error ? error.message : 'Failed to submit feedback');
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
 
   // Fetch assigned agent when ticket changes
   useEffect(() => {
@@ -156,36 +248,40 @@ export const TicketDetail: FC<TicketDetailProps> = ({
                 </p>
               )}
             </div>
-            {!isCustomerView && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowCustomerProfile(!showCustomerProfile)}
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  {showCustomerProfile ? 'Hide Customer' : 'Show Customer'}
-                </Button>
-                <select
-                  className="px-3 py-1 text-sm border rounded-md"
-                  value={ticketPriority}
-                  onChange={(e) => handlePriorityChange(e.target.value as TicketPriority)}
-                >
-                  <option value={TicketPriority.LOW}>Low Priority</option>
-                  <option value={TicketPriority.MEDIUM}>Medium Priority</option>
-                  <option value={TicketPriority.HIGH}>High Priority</option>
-                  <option value={TicketPriority.URGENT}>Urgent</option>
-                </select>
-                <select
-                  className="px-3 py-1 text-sm border rounded-md"
-                  value={ticketStatus}
-                  onChange={(e) => handleStatusChange(e.target.value as TicketStatus)}
-                >
-                  <option value={TicketStatus.OPEN}>Open</option>
-                  <option value={TicketStatus.WAITING_CUSTOMER_REPLY}>Waiting for Customer Reply</option>
-                  <option value={TicketStatus.RESOLVED}>Resolved</option>
-                  <option value={TicketStatus.CLOSED}>Closed</option>
-                </select>
+            <div className="flex items-center gap-2">
+              {!isCustomerView && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowCustomerProfile(!showCustomerProfile)}
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    {showCustomerProfile ? 'Hide Customer' : 'Show Customer'}
+                  </Button>
+                  <select
+                    className="px-3 py-1 text-sm border rounded-md"
+                    value={ticketPriority}
+                    onChange={(e) => handlePriorityChange(e.target.value as TicketPriority)}
+                  >
+                    <option value={TicketPriority.LOW}>Low Priority</option>
+                    <option value={TicketPriority.MEDIUM}>Medium Priority</option>
+                    <option value={TicketPriority.HIGH}>High Priority</option>
+                    <option value={TicketPriority.URGENT}>Urgent</option>
+                  </select>
+                </>
+              )}
+              <select
+                className="px-3 py-1 text-sm border rounded-md"
+                value={ticketStatus}
+                onChange={(e) => handleStatusChange(e.target.value as TicketStatus)}
+              >
+                <option value={TicketStatus.OPEN}>Open</option>
+                <option value={TicketStatus.WAITING_CUSTOMER_REPLY}>Waiting for Customer Reply</option>
+                <option value={TicketStatus.RESOLVED}>Resolved</option>
+                <option value={TicketStatus.CLOSED}>Closed</option>
+              </select>
+              {!isCustomerView && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -194,8 +290,8 @@ export const TicketDetail: FC<TicketDetailProps> = ({
                   <UserPlus className="h-4 w-4 mr-2" />
                   Reassign
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
           <div className="space-y-4 mt-4">
             <div className="flex gap-2">
@@ -236,6 +332,105 @@ export const TicketDetail: FC<TicketDetailProps> = ({
               </div>
             );
           })}
+
+          {/* Add feedback section for customers when ticket is resolved/closed */}
+          {isCustomerView && ['resolved', 'closed'].includes(ticketStatus) && (
+            <div className="bg-gray-50 rounded-lg p-6 mt-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">
+                  {feedbackSubmitted && !isEditingFeedback ? 'Your Feedback' : 'How was your experience?'}
+                </h3>
+                {feedbackSubmitted && !isEditingFeedback && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditingFeedback(true)}
+                  >
+                    Edit Feedback
+                  </Button>
+                )}
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      onClick={() => (!feedbackSubmitted || isEditingFeedback) && setFeedback(prev => ({ ...prev, rating: star }))}
+                      disabled={feedbackSubmitted && !isEditingFeedback}
+                      className={`text-2xl ${
+                        star <= feedback.rating
+                          ? 'text-yellow-400'
+                          : 'text-gray-300'
+                      } transition-colors hover:text-yellow-400 disabled:cursor-not-allowed`}
+                    >
+                      <Star className="h-6 w-6" fill={star <= feedback.rating ? 'currentColor' : 'none'} />
+                    </button>
+                  ))}
+                </div>
+
+                <textarea
+                  value={feedback.feedbackText}
+                  onChange={(e) => (!feedbackSubmitted || isEditingFeedback) && setFeedback(prev => ({ ...prev, feedbackText: e.target.value }))}
+                  disabled={feedbackSubmitted && !isEditingFeedback}
+                  placeholder="Would you like to add any comments? (optional)"
+                  className="w-full p-2 border rounded-md h-24 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+
+                {(!feedbackSubmitted || isEditingFeedback) && (
+                  <div className="flex gap-2 justify-end">
+                    {isEditingFeedback && (
+                      <Button 
+                        variant="outline"
+                        onClick={async () => {
+                          setIsEditingFeedback(false);
+                          try {
+                            const response = await fetch(
+                              `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit_ticket_feedback?ticketNumber=${ticket.number}`,
+                              {
+                                method: 'GET',
+                                headers: {
+                                  'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+                                },
+                              }
+                            );
+
+                            const { data, error }: FeedbackResponse = await response.json();
+                            
+                            if (error) {
+                              throw new Error(error);
+                            }
+
+                            if (data) {
+                              setFeedback({ 
+                                rating: data.rating, 
+                                feedbackText: data.feedback_text || '' 
+                              });
+                            }
+                          } catch (error) {
+                            console.error('Error resetting feedback:', error);
+                          }
+                        }}
+                        disabled={isSubmittingFeedback}
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                    <Button 
+                      onClick={handleSubmitFeedback}
+                      disabled={isSubmittingFeedback}
+                    >
+                      {isSubmittingFeedback ? 'Submitting...' : (feedbackSubmitted ? 'Update Feedback' : 'Submit Feedback')}
+                    </Button>
+                  </div>
+                )}
+
+                {feedbackError && (
+                  <p className="text-red-500 text-sm">{feedbackError}</p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
         <div className="border-t border-gray-200 p-4 flex-shrink-0 bg-white">
           <div className="space-y-2">
