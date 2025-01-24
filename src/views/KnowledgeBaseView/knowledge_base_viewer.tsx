@@ -34,16 +34,7 @@ export function ArticleView({
   const [editedDescription, setEditedDescription] = useState(article.description);
   const [editedContent, setEditedContent] = useState(
     article.content ||
-    `
-      <h2>Introduction</h2>
-      <p>This comprehensive guide will walk you through everything you need to know about ${article.title}. We'll cover the fundamentals, best practices, and advanced techniques.</p>
-      <h3>Key Concepts</h3>
-      <ul>
-        <li>Understanding the basics</li>
-        <li>Core principles and patterns</li>
-        <li>Advanced implementation strategies</li>
-      </ul>
-    `
+    ``
   );
 
   const handleSave = () => {
