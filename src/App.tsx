@@ -363,7 +363,8 @@ export default function App() {
         {currentView === Views.DASHBOARD && <DashboardView />}
         {currentView === Views.AGENTS && (
           <AgentsView 
-            agents={agents} 
+            agents={agents}
+            currentAgent={currentAgent}
             onAgentUpdated={() => {
               // Reload the agent list
               loadInitialData();

@@ -11,14 +11,17 @@ import { Input } from "@/components/ui/input";
 
 interface AgentsViewProps {
   agents: Agent[];
+  currentAgent: Agent | null;
   onAgentUpdated: () => void; // Callback to refresh the agents list
 }
 
-export const AgentsView: FC<AgentsViewProps> = ({ agents, onAgentUpdated }) => {
+export const AgentsView: FC<AgentsViewProps> = ({ agents, currentAgent, onAgentUpdated }) => {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const isAdmin = currentAgent?.role === 'admin';
 
   const handleUpdateAgent = async (updates: Partial<Agent>) => {
     if (!selectedAgent) return;
@@ -63,13 +66,15 @@ export const AgentsView: FC<AgentsViewProps> = ({ agents, onAgentUpdated }) => {
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Agent Management</h2>
-        <Button
-          onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2"
-        >
-          <UserPlus className="h-4 w-4" />
-          Add Agent
-        </Button>
+        {isAdmin && (
+          <Button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2"
+          >
+            <UserPlus className="h-4 w-4" />
+            Add Agent
+          </Button>
+        )}
       </div>
       <div className="relative mb-4">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -86,7 +91,7 @@ export const AgentsView: FC<AgentsViewProps> = ({ agents, onAgentUpdated }) => {
           <AgentCard
             key={agent.id}
             agent={agent}
-            actionButton={
+            actionButton={isAdmin && (
               <Button 
                 variant="outline"
                 onClick={() => setSelectedAgent(agent)}
@@ -94,7 +99,7 @@ export const AgentsView: FC<AgentsViewProps> = ({ agents, onAgentUpdated }) => {
               >
                 Edit Profile
               </Button>
-            }
+            )}
           />
         ))}
         {filteredAgents.length === 0 && (
@@ -104,7 +109,7 @@ export const AgentsView: FC<AgentsViewProps> = ({ agents, onAgentUpdated }) => {
         )}
       </div>
 
-      {selectedAgent && (
+      {selectedAgent && isAdmin && (
         <EditAgentModal
           agent={selectedAgent}
           onClose={() => setSelectedAgent(null)}
