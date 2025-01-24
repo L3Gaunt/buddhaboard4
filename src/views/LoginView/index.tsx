@@ -54,7 +54,7 @@ export function LoginView() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-6">Support Desk Login</h1>
+        <h1 className="text-2xl font-semibold text-gray-900 mb-6">Login to Buddhaboard</h1>
         {error && (
           <div className="bg-red-50 text-red-800 rounded-md p-3 mb-4">
             {error}
