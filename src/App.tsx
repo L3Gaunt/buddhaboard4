@@ -354,6 +354,7 @@ export default function App() {
                   setResponse={setResponse}
                   customer={customer}
                   customerTickets={tickets.filter(t => t.customer_id === activeTicket.customer_id)}
+                  isCustomerView={!currentAgent}
                 />
               </div>
             )}

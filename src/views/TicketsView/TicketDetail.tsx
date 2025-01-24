@@ -30,6 +30,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
   response,
   setResponse,
   customer,
+  isCustomerView = false,
 }) => {
   const [showCustomerProfile, setShowCustomerProfile] = React.useState(false);
   const [customerTickets, setCustomerTickets] = useState<Ticket[]>([]);
@@ -69,7 +70,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
 
     const newMessage: Message = {
       id: createMessageId(`msg_${Date.now()}`),
-      isFromCustomer: false, // Agent message
+      isFromCustomer: isCustomerView, // Set based on viewer type
       message: response,
       timestamp: new Date()
     };
@@ -143,7 +144,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
             <div>
               <h2 className="text-xl font-semibold">{ticket.title}</h2>
               <p className="text-sm text-gray-500">Ticket #{ticket.number}</p>
-              {assignedAgent && (
+              {assignedAgent && !isCustomerView && (
                 <p className="text-sm text-gray-500 mt-1">
                   Assigned to:{' '}
                   <button
@@ -155,44 +156,46 @@ export const TicketDetail: FC<TicketDetailProps> = ({
                 </p>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowCustomerProfile(!showCustomerProfile)}
-              >
-                <User className="h-4 w-4 mr-2" />
-                {showCustomerProfile ? 'Hide Customer' : 'Show Customer'}
-              </Button>
-              <select
-                className="px-3 py-1 text-sm border rounded-md"
-                value={ticketPriority}
-                onChange={(e) => handlePriorityChange(e.target.value as TicketPriority)}
-              >
-                <option value={TicketPriority.LOW}>Low Priority</option>
-                <option value={TicketPriority.MEDIUM}>Medium Priority</option>
-                <option value={TicketPriority.HIGH}>High Priority</option>
-                <option value={TicketPriority.URGENT}>Urgent</option>
-              </select>
-              <select
-                className="px-3 py-1 text-sm border rounded-md"
-                value={ticketStatus}
-                onChange={(e) => handleStatusChange(e.target.value as TicketStatus)}
-              >
-                <option value={TicketStatus.OPEN}>Open</option>
-                <option value={TicketStatus.WAITING_CUSTOMER_REPLY}>Waiting for Customer Reply</option>
-                <option value={TicketStatus.RESOLVED}>Resolved</option>
-                <option value={TicketStatus.CLOSED}>Closed</option>
-              </select>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowReassignModal(true)}
-              >
-                <UserPlus className="h-4 w-4 mr-2" />
-                Reassign
-              </Button>
-            </div>
+            {!isCustomerView && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCustomerProfile(!showCustomerProfile)}
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  {showCustomerProfile ? 'Hide Customer' : 'Show Customer'}
+                </Button>
+                <select
+                  className="px-3 py-1 text-sm border rounded-md"
+                  value={ticketPriority}
+                  onChange={(e) => handlePriorityChange(e.target.value as TicketPriority)}
+                >
+                  <option value={TicketPriority.LOW}>Low Priority</option>
+                  <option value={TicketPriority.MEDIUM}>Medium Priority</option>
+                  <option value={TicketPriority.HIGH}>High Priority</option>
+                  <option value={TicketPriority.URGENT}>Urgent</option>
+                </select>
+                <select
+                  className="px-3 py-1 text-sm border rounded-md"
+                  value={ticketStatus}
+                  onChange={(e) => handleStatusChange(e.target.value as TicketStatus)}
+                >
+                  <option value={TicketStatus.OPEN}>Open</option>
+                  <option value={TicketStatus.WAITING_CUSTOMER_REPLY}>Waiting for Customer Reply</option>
+                  <option value={TicketStatus.RESOLVED}>Resolved</option>
+                  <option value={TicketStatus.CLOSED}>Closed</option>
+                </select>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowReassignModal(true)}
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Reassign
+                </Button>
+              </div>
+            )}
           </div>
           <div className="space-y-4 mt-4">
             <div className="flex gap-2">
@@ -204,18 +207,21 @@ export const TicketDetail: FC<TicketDetailProps> = ({
         <div ref={chatContainerRef} className="p-6 space-y-6 flex-grow overflow-y-auto">
           {ticket.conversation.map((message, index) => {
             const messageDate = new Date(message.timestamp);
+            const isOwnMessage = isCustomerView ? message.isFromCustomer : !message.isFromCustomer;
             return (
               <div
                 key={index}
-                className={`flex ${message.isFromCustomer ? "justify-start" : "justify-end"}`}
+                className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`max-w-[80%] rounded-lg p-4 ${
-                    message.isFromCustomer ? "bg-blue-100" : "bg-green-100"
+                    isOwnMessage ? "bg-green-100" : "bg-blue-100"
                   }`}
                 >
                   <div className="font-medium text-sm mb-1">
-                    {message.isFromCustomer ? "Customer" : "Agent"}
+                    {isCustomerView ? 
+                      (message.isFromCustomer ? "Me" : "Support") : 
+                      (message.isFromCustomer ? "Customer" : "Agent")}
                   </div>
                   <div
                     className="prose prose-sm max-w-none"

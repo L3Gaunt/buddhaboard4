@@ -217,7 +217,8 @@ export interface TicketDetailProps {
   readonly response: string;
   readonly setResponse: (response: string) => void;
   readonly customer: DeepReadonly<Customer>;
-  readonly customerTickets: ReadonlyArray<Ticket>;
+  readonly customerTickets?: ReadonlyArray<Ticket>;
+  readonly isCustomerView?: boolean;
 }
 
 /**
