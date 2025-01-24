@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { ArrowLeft, Edit2, Save } from "lucide-react";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Heading from "@tiptap/extension-heading";
-import CodeBlock from "@tiptap/extension-code-block";
+import { ArticleEditor } from "./ArticleEditor";
+
 interface Tag {
   id: string;
   label: string;
   color: string;
 }
+
 interface Article {
   id: number;
   title: string;
@@ -16,12 +15,14 @@ interface Article {
   tags: string[];
   content?: string;
 }
+
 interface ArticleViewProps {
   article: Article;
   tags: Tag[];
   onBack: () => void;
   onSave?: (article: Article) => void;
 }
+
 export function ArticleView({
   article,
   tags,
@@ -30,20 +31,10 @@ export function ArticleView({
 }: ArticleViewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(article.title);
-  const [editedDescription, setEditedDescription] = useState(
-    article.description,
-  );
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Heading.configure({
-        levels: [1, 2, 3],
-      }),
-      CodeBlock,
-    ],
-    content:
-      article.content ||
-      `
+  const [editedDescription, setEditedDescription] = useState(article.description);
+  const [editedContent, setEditedContent] = useState(
+    article.content ||
+    `
       <h2>Introduction</h2>
       <p>This comprehensive guide will walk you through everything you need to know about ${article.title}. We'll cover the fundamentals, best practices, and advanced techniques.</p>
       <h3>Key Concepts</h3>
@@ -52,20 +43,21 @@ export function ArticleView({
         <li>Core principles and patterns</li>
         <li>Advanced implementation strategies</li>
       </ul>
-    `,
-    editable: isEditing,
-  });
+    `
+  );
+
   const handleSave = () => {
-    if (onSave && editor) {
+    if (onSave) {
       onSave({
         ...article,
         title: editedTitle,
         description: editedDescription,
-        content: editor.getHTML(),
+        content: editedContent,
       });
     }
     setIsEditing(false);
   };
+
   return (
     <div className="bg-white rounded-lg border border-gray-200">
       <div className="border-b border-gray-200 p-6">
@@ -134,85 +126,11 @@ export function ArticleView({
         ) : (
           <p className="text-gray-600 mb-6">{article.description}</p>
         )}
-        {editor && (
-          <div
-            className={`prose max-w-none ${isEditing ? "border border-gray-200 rounded-lg" : ""}`}
-          >
-            {isEditing && (
-              <div className="border-b border-gray-200 p-2 bg-gray-50 flex gap-2">
-                <button
-                  onClick={() =>
-                    editor
-                      .chain()
-                      .focus()
-                      .toggleHeading({
-                        level: 2,
-                      })
-                      .run()
-                  }
-                  className={`p-1 rounded ${
-                    editor.isActive("heading", {
-                      level: 2,
-                    })
-                      ? "bg-gray-200"
-                      : "hover:bg-gray-200"
-                  }`}
-                >
-                  H2
-                </button>
-                <button
-                  onClick={() =>
-                    editor
-                      .chain()
-                      .focus()
-                      .toggleHeading({
-                        level: 3,
-                      })
-                      .run()
-                  }
-                  className={`p-1 rounded ${
-                    editor.isActive("heading", {
-                      level: 3,
-                    })
-                      ? "bg-gray-200"
-                      : "hover:bg-gray-200"
-                  }`}
-                >
-                  H3
-                </button>
-                <button
-                  onClick={() => editor.chain().focus().toggleBold().run()}
-                  className={`p-1 rounded ${editor.isActive("bold") ? "bg-gray-200" : "hover:bg-gray-200"}`}
-                >
-                  Bold
-                </button>
-                <button
-                  onClick={() => editor.chain().focus().toggleItalic().run()}
-                  className={`p-1 rounded ${editor.isActive("italic") ? "bg-gray-200" : "hover:bg-gray-200"}`}
-                >
-                  Italic
-                </button>
-                <button
-                  onClick={() =>
-                    editor.chain().focus().toggleBulletList().run()
-                  }
-                  className={`p-1 rounded ${editor.isActive("bulletList") ? "bg-gray-200" : "hover:bg-gray-200"}`}
-                >
-                  • List
-                </button>
-                <button
-                  onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-                  className={`p-1 rounded ${editor.isActive("codeBlock") ? "bg-gray-200" : "hover:bg-gray-200"}`}
-                >
-                  Code
-                </button>
-              </div>
-            )}
-            <div className={isEditing ? "p-4" : ""}>
-              <EditorContent editor={editor} />
-            </div>
-          </div>
-        )}
+        <ArticleEditor
+          content={editedContent}
+          isEditing={isEditing}
+          onChange={setEditedContent}
+        />
       </div>
     </div>
   );
