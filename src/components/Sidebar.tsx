@@ -20,7 +20,7 @@ const Sidebar: FC<ExtendedSidebarProps> = ({
       className={`${isMobileMenuOpen ? "block" : "hidden"} md:block fixed md:relative z-40 w-64 h-full bg-white border-r border-gray-200`}
     >
       <div className="p-4 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-gray-800">Support Desk</h1>
+        <h1 className="text-xl font-bold text-gray-800">BuddhaBoard</h1>
       </div>
       <nav className="p-4 space-y-2">
         <Button
