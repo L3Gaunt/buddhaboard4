@@ -170,9 +170,17 @@ export const FeedbackQueue: FC<FeedbackQueueProps> = ({ feedbackItems, setActive
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Customer Feedback</h2>
-        <span className="text-sm text-gray-500">
-          {filteredFeedback.length} feedback items
-        </span>
+        <div className="text-sm text-gray-500 flex items-center gap-4">
+          {filteredFeedback.length > 0 && (
+            <div className="flex items-center">
+              <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
+              <span>
+                {(filteredFeedback.reduce((acc, item) => acc + item.rating, 0) / filteredFeedback.length).toFixed(1)} avg
+              </span>
+            </div>
+          )}
+          <span>{filteredFeedback.length} feedback items</span>
+        </div>
       </div>
 
       <TicketFiltersSection
