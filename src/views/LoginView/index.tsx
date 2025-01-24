@@ -104,7 +104,7 @@ export function LoginView() {
           </Button>
           {showSecret && (
             <p className="text-sm text-gray-600 mt-2 text-center italic">
-              Hey there, curious one! 👋 admin@buddhaboard.com, password123
+              Hey there, curious one! 👋 admin@buddhaboard.com, n1rvana
             </p>
           )}
         </form>

@@ -51,19 +51,19 @@ beforeAll(async () => {
 
 export const testUsers = {
   admins: [
-    { email: 'admin@buddhaboard.com', password: 'password123', name: 'Main Admin' },
-    { email: 'admin2@buddhaboard.com', password: 'password123', name: 'Secondary Admin' }
+    { email: 'admin@buddhaboard.com', password: 'n1rvana', name: 'Main Admin' },
+    { email: 'admin2@buddhaboard.com', password: 'n1rvana', name: 'Secondary Admin' }
   ],
   agents: [
-    { email: 'agent1@buddhaboard.com', password: 'password123', name: 'Sarah Johnson' },
-    { email: 'agent2@buddhaboard.com', password: 'password123', name: 'Michael Chen' },
-    { email: 'agent3@buddhaboard.com', password: 'password123', name: 'Emma Rodriguez' }
+    { email: 'agent1@buddhaboard.com', password: 'n1rvana', name: 'Sarah Johnson' },
+    { email: 'agent2@buddhaboard.com', password: 'n1rvana', name: 'Michael Chen' },
+    { email: 'agent3@buddhaboard.com', password: 'n1rvana', name: 'Emma Rodriguez' }
   ],
   customers: [
-    { email: 'john.doe@example.com', password: 'password123', name: 'John Doe' },
-    { email: 'jane.smith@example.com', password: 'password123', name: 'Jane Smith' },
-    { email: 'maria.garcia@example.com', password: 'password123', name: 'Maria Garcia' },
-    { email: 'david.wilson@example.com', password: 'password123', name: 'David Wilson' },
+    { email: 'john.doe@example.com', password: 'n1rvana', name: 'John Doe' },
+    { email: 'jane.smith@example.com', password: 'n1rvana', name: 'Jane Smith' },
+    { email: 'maria.garcia@example.com', password: 'n1rvana', name: 'Maria Garcia' },
+    { email: 'david.wilson@example.com', password: 'n1rvana', name: 'David Wilson' },
   ]
 };
 
