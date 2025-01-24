@@ -30,20 +30,41 @@ serve(async (req) => {
         throw new Error('Email and password are required')
       }
 
-      // First create the auth user
-      const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true
-      })
+      // First check if user already exists
+      const { data: { users: existingUsers }, error: existingUserError } = await supabaseAdmin.auth.admin.listUsers()
+      const existingUser = existingUsers.find(user => user.email === email)
 
-      if (authError) throw authError
+      let userId
+
+      if (existingUser) {
+        // If user exists, verify their password
+        const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+          email,
+          password
+        })
+
+        if (signInError) {
+          throw new Error('Invalid credentials')
+        }
+
+        userId = existingUser.id
+      } else {
+        // Create new auth user if they don't exist
+        const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true
+        })
+
+        if (authError) throw authError
+        userId = authUser.user.id
+      }
 
       // Create or update user in public.users table
       const { data: user, error: userError } = await supabaseAdmin
         .from('users')
         .upsert({
-          id: authUser.user.id,
+          id: userId,
           email: email,
           name: name || 'Anonymous User',
           metadata: { is_anonymous: false }

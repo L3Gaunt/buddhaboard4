@@ -77,7 +77,7 @@ export function UserTicketView() {
       setShowSuccess(true);
     } catch (error) {
       console.error('Error submitting ticket:', error);
-      alert('Failed to submit ticket. Please try again.');
+      alert(error instanceof Error ? error.message : 'Failed to submit ticket. Please try again.');
     }
   };
 
@@ -105,7 +105,6 @@ export function UserTicketView() {
             </h2>
             <p className="text-gray-600 mb-6">
               We'll review your ticket and get back to you as soon as possible.
-              {formData.email && " We'll send updates to your email address."}
             </p>
             <div className="mb-6">
               <p className="text-sm text-gray-500 mb-2">Your ticket link:</p>
@@ -228,7 +227,7 @@ export function UserTicketView() {
                     htmlFor="password"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Password
+                    Create or enter your Password
                     <span className="text-red-500">*</span>
                   </label>
                   <input
