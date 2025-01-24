@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ArrowLeft, Edit2, Save, X, Trash2 } from 'lucide-react';
+import { ArrowLeft, Edit2, Save, X, Trash2, FileText } from 'lucide-react';
 import type { KBArticle, KBTag } from '../types/knowledge-base';
 import { getTagStyles } from '../views/KnowledgeBaseView';
 import { ArticleEditor, ArticleEditorRef } from './ArticleEditor';
@@ -55,13 +55,14 @@ export function ArticleView({ article, onBack, onSave, onDelete, canEdit = false
   );
   const editorRef = useRef<ArticleEditorRef>(null);
 
-  const handleSave = async (content: string) => {
+  const handleSave = async (content: string, status: 'draft' | 'published' | 'archived' = 'published') => {
     if (!onSave) return;
     await onSave({
       ...article,
       title: editedTitle,
       description: editedDescription,
       content,
+      status,
       kb_article_tags: editedTags.map(tagId => ({
         kb_tags: tagData[tagId]
       }))
@@ -112,6 +113,16 @@ export function ArticleView({ article, onBack, onSave, onDelete, canEdit = false
                   >
                     <Save className="h-4 w-4" />
                     {isCreating ? "Create Article" : "Save"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      const content = editorRef.current?.getContent() || article.content;
+                      handleSave(content, 'draft');
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-500 text-white hover:bg-gray-600"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Save as draft
                   </button>
                   <button
                     onClick={() => {
