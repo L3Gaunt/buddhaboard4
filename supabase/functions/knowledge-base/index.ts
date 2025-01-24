@@ -282,7 +282,7 @@ serve(async (req) => {
         if (method === 'GET') {
           const { data, error } = await supabase
             .from('kb_tags')
-            .select('id, name, slug')
+            .select('id, name, slug, color')
             .order('name')
 
           if (error) throw error
