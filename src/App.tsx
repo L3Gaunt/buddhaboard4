@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { TicketQueue } from "./views/TicketsView/TicketQueue";
 import { TicketDetail } from "./views/TicketsView/TicketDetail";
-import { DashboardView } from "./views/DashboardView";
 import { AgentsView } from "./views/AgentsView";
 import { ChatView } from "./views/ChatView";
 import { LoginView } from "./views/LoginView";
@@ -40,7 +39,6 @@ export default function App() {
   const isSubmitTicketPage = window.location.pathname === '/submit-ticket';
   const isTicketLookupPage = window.location.pathname.startsWith('/ticket/');
   const isInternalTicketPage = window.location.pathname.startsWith('/tickets/');
-  const isDashboardPage = window.location.pathname === '/dashboard';
   const isAgentsPage = window.location.pathname === '/agents';
   const isChatPage = window.location.pathname === '/chat';
   const isKnowledgeBasePage = window.location.pathname === '/knowledge-base';
@@ -56,7 +54,6 @@ export default function App() {
   }
 
   const [currentView, setCurrentView] = useState<ViewType>(
-    isDashboardPage ? Views.DASHBOARD : 
     isAgentsPage ? Views.AGENTS :
     isChatPage ? Views.CHAT :
     isKnowledgeBasePage ? Views.KNOWLEDGE_BASE :
@@ -83,9 +80,6 @@ export default function App() {
     let newPath = '/tickets'; // default path
     
     switch (view) {
-      case Views.DASHBOARD:
-        newPath = '/dashboard';
-        break;
       case Views.AGENTS:
         newPath = '/agents';
         break;
@@ -256,8 +250,6 @@ export default function App() {
       } else if (path === '/tickets') {
         setActiveTicket(null);
         setCurrentView(Views.TICKETS);
-      } else if (path === '/dashboard') {
-        setCurrentView(Views.DASHBOARD);
       } else if (path === '/agents') {
         setCurrentView(Views.AGENTS);
       } else if (path === '/chat') {
@@ -366,7 +358,6 @@ export default function App() {
             )}
           </div>
         )}
-        {currentView === Views.DASHBOARD && <DashboardView />}
         {currentView === Views.AGENTS && (
           <AgentsView 
             agents={agents}

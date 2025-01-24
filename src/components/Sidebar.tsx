@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { Inbox, BarChart3, Users, MessageSquare, Book, Star, Menu } from "lucide-react";
+import { Inbox, Users, MessageSquare, Book, Star, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type SidebarProps, Views, type Agent } from '@/types';
 
@@ -44,14 +44,6 @@ const Sidebar: FC<ExtendedSidebarProps> = ({
 
         {!isCustomer && (
           <>
-            <Button
-              variant={currentView === Views.DASHBOARD ? "secondary" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => setCurrentView(Views.DASHBOARD)}
-            >
-              <BarChart3 className="mr-2 h-4 w-4" />
-              Dashboard
-            </Button>
             <Button
               variant={currentView === Views.AGENTS ? "secondary" : "ghost"}
               className="w-full justify-start"

@@ -152,7 +152,6 @@ export interface Agent {
  */
 export enum Views {
   TICKETS = 'TICKETS',
-  DASHBOARD = 'DASHBOARD',
   AGENTS = 'AGENTS',
   CHAT = 'CHAT',
   CUSTOMER_PROFILE = 'CUSTOMER_PROFILE',
