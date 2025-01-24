@@ -2,15 +2,20 @@ import React from "react";
 import { Bell, Settings, Globe, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Sidebar from "./Sidebar";
-import { type LayoutProps } from '@/types';
+import { type LayoutProps, type Agent } from '@/types';
 
-const Layout: React.FC<LayoutProps> = ({
+interface ExtendedLayoutProps extends LayoutProps {
+  currentAgent: Agent | null;
+}
+
+const Layout: React.FC<ExtendedLayoutProps> = ({
   currentView,
   setCurrentView,
   isMobileMenuOpen,
   setIsMobileMenuOpen,
   children,
   setShowSettings,
+  currentAgent,
 }) => {
   return (
     <div className="flex h-screen w-full bg-gray-50">
@@ -18,6 +23,7 @@ const Layout: React.FC<LayoutProps> = ({
         currentView={currentView}
         setCurrentView={setCurrentView}
         isMobileMenuOpen={isMobileMenuOpen}
+        currentAgent={currentAgent}
       />
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4">

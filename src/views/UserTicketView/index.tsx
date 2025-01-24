@@ -1,38 +1,79 @@
-import { useState } from "react";
-import { Send, Copy } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Send, Copy, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type TicketFormData, TicketPriority } from "@/types";
-import { createUnauthenticatedTicket } from "@/lib/tickets";
+import { createUnauthenticatedTicket, createAuthenticatedTicket } from "@/lib/tickets";
+import { getCurrentUser, getUserProfile, signOut } from "@/lib/auth";
+import type { Customer } from "@/types";
 
 // Extend TicketFormData to include firstMessage for this form
 interface UserTicketFormData extends TicketFormData {
   firstMessage: string;
-  email?: string;
+  email: string;
+  password: string;
   name?: string;
 }
 
 export function UserTicketView() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [ticketHash, setTicketHash] = useState<string>("");
+  const [currentUser, setCurrentUser] = useState<Customer | null>(null);
   const [formData, setFormData] = useState<UserTicketFormData>({
     title: "",
     firstMessage: "",
     priority: TicketPriority.MEDIUM,
     email: "",
+    password: "",
     name: "",
   });
+
+  useEffect(() => {
+    async function loadUser() {
+      const user = await getCurrentUser();
+      if (user) {
+        const profile = await getUserProfile(user.id);
+        setCurrentUser(profile);
+        setFormData(prev => ({
+          ...prev,
+          email: profile?.email || "",
+          name: profile?.name || ""
+        }));
+      }
+    }
+    loadUser();
+  }, []);
+
+  const handleLogout = async () => {
+    await signOut();
+    setCurrentUser(null);
+    window.location.reload();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const result = await createUnauthenticatedTicket({
-        title: formData.title,
-        priority: formData.priority,
-        email: formData.email || undefined,
-        name: formData.name || undefined,
-        firstMessage: formData.firstMessage
-      });
-      setTicketHash(result.ticketHash);
+      let result;
+      if (currentUser) {
+        // For authenticated users
+        result = await createAuthenticatedTicket({
+          title: formData.title,
+          priority: formData.priority,
+          firstMessage: formData.firstMessage,
+          customer_id: currentUser.id
+        });
+        setTicketHash(btoa(`${result.number}:${currentUser.id}`));
+      } else {
+        // For unauthenticated users
+        result = await createUnauthenticatedTicket({
+          title: formData.title,
+          priority: formData.priority,
+          email: formData.email,
+          password: formData.password,
+          name: formData.name || undefined,
+          firstMessage: formData.firstMessage
+        });
+        setTicketHash(result.ticketHash);
+      }
       setShowSuccess(true);
     } catch (error) {
       console.error('Error submitting ticket:', error);
@@ -80,7 +121,7 @@ export function UserTicketView() {
                 </Button>
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                Save this link to check your ticket status later
+                Save this link to check your ticket status later, or log in to your new account to view your ticket.
               </p>
             </div>
             <div className="space-x-4">
@@ -93,6 +134,7 @@ export function UserTicketView() {
                     firstMessage: "",
                     priority: TicketPriority.MEDIUM,
                     email: "",
+                    password: "",
                     name: "",
                   });
                 }}
@@ -116,51 +158,108 @@ export function UserTicketView() {
           <h1 className="text-2xl font-semibold text-gray-900">
             Submit a Support Ticket
           </h1>
+          {currentUser && (
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-600">
+                Logged in as {currentUser.name}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="flex items-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Log Out
+              </Button>
+            </div>
+          )}
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Your Name (Optional)
-              </label>
-              <input
-                type="text"
-                id="name"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="John Doe"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    name: e.target.value,
-                  })
-                }
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Your Email (Optional)
-              </label>
-              <input
-                type="email"
-                id="email"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="john@example.com"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    email: e.target.value,
-                  })
-                }
-              />
-            </div>
+            {!currentUser ? (
+              <>
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Your Name (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="John Doe"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        name: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Your Email
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="john@example.com"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        email: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Password
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Choose a password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        password: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="col-span-2">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="text-sm text-gray-600">
+                    <div><strong>Name:</strong> {currentUser.name}</div>
+                    <div><strong>Email:</strong> {currentUser.email}</div>
+                    {currentUser.company && (
+                      <div><strong>Company:</strong> {currentUser.company}</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           <div>
             <label

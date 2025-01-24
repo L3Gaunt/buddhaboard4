@@ -24,44 +24,34 @@ serve(async (req) => {
     const { action } = body
 
     if (action === 'create') {
-      const { title, firstMessage, priority, email, name } = body
+      const { title, firstMessage, priority, email, password, name } = body
 
-      // Check if user exists in public.users table
-      const { data: existingUser, error: userLookupError } = await supabaseAdmin
+      if (!email || !password) {
+        throw new Error('Email and password are required')
+      }
+
+      // First create the auth user
+      const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true
+      })
+
+      if (authError) throw authError
+
+      // Create or update user in public.users table
+      const { data: user, error: userError } = await supabaseAdmin
         .from('users')
-        .select('id')
-        .eq('email', email)
+        .upsert({
+          id: authUser.user.id,
+          email: email,
+          name: name || 'Anonymous User',
+          metadata: { is_anonymous: false }
+        })
+        .select()
         .single()
 
-      if (userLookupError && userLookupError.code !== 'PGRST116') {
-        throw userLookupError
-      }
-
-      let userId: string
-      if (existingUser) {
-        userId = existingUser.id
-        // Update the user's name if provided
-        if (name) {
-          await supabaseAdmin
-            .from('users')
-            .update({ name })
-            .eq('id', userId)
-        }
-      } else {
-        // Create new user in public.users table
-        const { data: newUser, error: createUserError } = await supabaseAdmin
-          .from('users')
-          .insert({
-            email: email || `anonymous-${Date.now()}@temp.buddhaboard.com`,
-            name: name || 'Anonymous User',
-            metadata: { is_anonymous: !email }
-          })
-          .select()
-          .single()
-
-        if (createUserError) throw createUserError
-        userId = newUser.id
-      }
+      if (userError) throw userError
 
       // Find the least busy online agent
       const { data: leastBusyAgent, error: agentError } = await supabaseAdmin.rpc(
@@ -82,7 +72,7 @@ serve(async (req) => {
           title,
           priority,
           status: 'open',
-          customer_id: userId,
+          customer_id: user.id,
           conversation: [{
             id: `msg_${Date.now()}`,
             isFromCustomer: true,
@@ -97,7 +87,7 @@ serve(async (req) => {
       if (error) throw error
 
       // Create a hash from the ticket number and user ID
-      const ticketHash = btoa(`${data.number}:${userId}`).replace(/=/g, '')
+      const ticketHash = btoa(`${data.number}:${user.id}`).replace(/=/g, '')
 
       return new Response(
         JSON.stringify({ 
@@ -158,6 +148,38 @@ serve(async (req) => {
 
       return new Response(
         JSON.stringify({ data, error: null }),
+        {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+          status: 200,
+        }
+      )
+    } else if (action === 'list_tickets') {
+      const { user_id } = body
+
+      if (!user_id) {
+        throw new Error('User ID is required')
+      }
+
+      // Fetch all tickets for the user
+      const { data: tickets, error: ticketsError } = await supabaseAdmin
+        .from('tickets')
+        .select('*')
+        .eq('customer_id', user_id)
+        .order('last_updated', { ascending: false })
+
+      if (ticketsError) throw ticketsError
+
+      // Add ticket hashes to each ticket
+      const ticketsWithHashes = tickets.map(ticket => ({
+        ...ticket,
+        ticketHash: btoa(`${ticket.number}:${user_id}`).replace(/=/g, '')
+      }))
+
+      return new Response(
+        JSON.stringify({ data: ticketsWithHashes, error: null }),
         {
           headers: {
             ...corsHeaders,

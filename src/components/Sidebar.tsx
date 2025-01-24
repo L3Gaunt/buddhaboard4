@@ -1,9 +1,20 @@
 import type { FC } from 'react';
 import { Inbox, BarChart3, Users, MessageSquare, Book } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { type SidebarProps, Views } from '@/types';
+import { type SidebarProps, Views, type Agent } from '@/types';
 
-const Sidebar: FC<SidebarProps> = ({ currentView, setCurrentView, isMobileMenuOpen }) => {
+interface ExtendedSidebarProps extends SidebarProps {
+  currentAgent: Agent | null;
+}
+
+const Sidebar: FC<ExtendedSidebarProps> = ({
+  currentView,
+  setCurrentView,
+  isMobileMenuOpen,
+  currentAgent,
+}) => {
+  const isCustomer = !currentAgent;
+
   return (
     <div
       className={`${isMobileMenuOpen ? "block" : "hidden"} md:block fixed md:relative z-40 w-64 h-full bg-white border-r border-gray-200`}
@@ -20,30 +31,36 @@ const Sidebar: FC<SidebarProps> = ({ currentView, setCurrentView, isMobileMenuOp
           <Inbox className="mr-2 h-4 w-4" />
           Tickets
         </Button>
-        <Button
-          variant={currentView === Views.DASHBOARD ? "secondary" : "ghost"}
-          className="w-full justify-start"
-          onClick={() => setCurrentView(Views.DASHBOARD)}
-        >
-          <BarChart3 className="mr-2 h-4 w-4" />
-          Dashboard
-        </Button>
-        <Button
-          variant={currentView === Views.AGENTS ? "secondary" : "ghost"}
-          className="w-full justify-start"
-          onClick={() => setCurrentView(Views.AGENTS)}
-        >
-          <Users className="mr-2 h-4 w-4" />
-          Agents
-        </Button>
-        <Button
-          variant={currentView === Views.CHAT ? "secondary" : "ghost"}
-          className="w-full justify-start"
-          onClick={() => setCurrentView(Views.CHAT)}
-        >
-          <MessageSquare className="mr-2 h-4 w-4" />
-          Live Chat
-        </Button>
+
+        {!isCustomer && (
+          <>
+            <Button
+              variant={currentView === Views.DASHBOARD ? "secondary" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => setCurrentView(Views.DASHBOARD)}
+            >
+              <BarChart3 className="mr-2 h-4 w-4" />
+              Dashboard
+            </Button>
+            <Button
+              variant={currentView === Views.AGENTS ? "secondary" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => setCurrentView(Views.AGENTS)}
+            >
+              <Users className="mr-2 h-4 w-4" />
+              Agents
+            </Button>
+            <Button
+              variant={currentView === Views.CHAT ? "secondary" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => setCurrentView(Views.CHAT)}
+            >
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Live Chat
+            </Button>
+          </>
+        )}
+
         <Button
           variant={currentView === Views.KNOWLEDGE_BASE ? "secondary" : "ghost"}
           className="w-full justify-start"
@@ -55,6 +72,6 @@ const Sidebar: FC<SidebarProps> = ({ currentView, setCurrentView, isMobileMenuOp
       </nav>
     </div>
   );
-};
+}
 
 export default Sidebar;

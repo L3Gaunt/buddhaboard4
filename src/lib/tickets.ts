@@ -183,7 +183,8 @@ export function subscribeToTicketUpdates(
 export type UnauthenticatedTicketData = {
   title: string;
   priority: TicketData['priority'];
-  email?: string;
+  email: string;
+  password: string;
   name?: string;
   firstMessage: string; // The initial message from the customer
 };
@@ -227,4 +228,31 @@ export async function getAllCustomerTickets(customerId: string) {
 
   if (error) throw error;
   return data.map(transformTicket);
+}
+
+export async function createAuthenticatedTicket(ticket: {
+  title: string;
+  priority: string;
+  firstMessage: string;
+  customer_id: string;
+}) {
+  const { data, error } = await supabase
+    .from('tickets')
+    .insert({
+      title: ticket.title,
+      priority: ticket.priority,
+      status: 'open',
+      customer_id: ticket.customer_id,
+      conversation: [{
+        id: `msg_${Date.now()}`,
+        isFromCustomer: true,
+        message: ticket.firstMessage,
+        timestamp: new Date().toISOString()
+      }]
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 } 

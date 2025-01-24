@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
 import { getArticles, getTags, getArticle, updateArticle, updateArticleTags } from '../../services/knowledge-base';
+import { getCurrentUser, getAgentProfile } from '../../lib/auth';
 import type { KBArticle, KBTag } from '../../types/knowledge-base';
 import { ArticleView } from '../../components/ArticleView';
 
@@ -32,6 +33,7 @@ export function KnowledgeBaseView() {
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAgent, setIsAgent] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -41,6 +43,14 @@ export function KnowledgeBaseView() {
     } else {
       loadData(currentPage);
     }
+
+    // Check if user is an agent
+    getCurrentUser().then(async (user) => {
+      if (user) {
+        const agentProfile = await getAgentProfile(user.id);
+        setIsAgent(!!agentProfile);
+      }
+    });
 
     // Listen for browser back/forward navigation
     const handlePopState = () => {
@@ -190,7 +200,7 @@ export function KnowledgeBaseView() {
           article={currentArticle} 
           onBack={handleBack}
           onSave={handleArticleSave}
-          canEdit={true}
+          canEdit={isAgent}
         />
       </div>
     );

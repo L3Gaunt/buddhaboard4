@@ -3,7 +3,7 @@ import { TicketQueueProps, AgentId } from '../../types';
 import { getAgentProfile } from '../../lib/auth';
 import { TicketBadge } from '../../components/TicketBadge';
 
-export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket }) => {
+export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, isCustomerView = false }) => {
   const [agentNames, setAgentNames] = useState<Record<AgentId, string>>({});
 
   useEffect(() => {
@@ -36,7 +36,15 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket }) 
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold mb-4">Ticket Queue</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">{isCustomerView ? "My Tickets" : "Ticket Queue"}</h2>
+        <button
+          onClick={() => window.location.href = '/submit-ticket'}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
+        >
+          Submit New Ticket
+        </button>
+      </div>
       <div className="space-y-4">
         {tickets.map((ticket) => (
           <div
@@ -64,7 +72,7 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket }) 
               <span>Ticket #{ticket.number}</span>
               <span className="mx-2">•</span>
               <span>{formatDate(ticket.createdAt)}</span>
-              {ticket.assignedTo && (
+              {ticket.assignedTo && !isCustomerView && (
                 <>
                   <span className="mx-2">•</span>
                   <span>Assigned to: {agentNames[ticket.assignedTo] || 'Loading...'}</span>

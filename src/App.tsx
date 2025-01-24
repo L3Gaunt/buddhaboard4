@@ -24,7 +24,10 @@ import {
   AgentStatus,
   createAgentId,
   createCustomerId,
+  createTicketId,
+  createMessageId,
 } from '@/types';
+import type { Database } from './types/supabase';
 
 // Import Supabase services
 import { getCurrentUser, getAgentProfile, updateAgentStatus } from '@/lib/auth';
@@ -107,62 +110,123 @@ export default function App() {
 
       setIsAuthenticated(true);
 
-      // Load all agents
-      const allAgents = await getAllAgents();
-      setAgents(allAgents);
-      
-      const agentProfile = await getAgentProfile(user.id);
-      console.log('Agent profile:', agentProfile);
+      let agentProfile = null;
+      // Load all agents only if we're an agent
+      try {
+        agentProfile = await getAgentProfile(user.id);
+        console.log('Agent profile:', agentProfile);
+        
+        if (agentProfile) {
+          // Load all agents since we're an agent
+          const allAgents = await getAllAgents();
+          setAgents(allAgents);
+          
+          const metadata = agentProfile.metadata as { 
+            department?: string; 
+            skills?: string[]; 
+            languages?: string[]; 
+          } | null;
+
+          setCurrentAgent({
+            id: createAgentId(agentProfile.id),
+            name: agentProfile.name,
+            role: agentProfile.role,
+            status: agentProfile.status,
+            avatar: agentProfile.avatar || agentProfile.name.substring(0, 2).toUpperCase(),
+            email: agentProfile.email,
+            metadata: metadata || undefined
+          });
+        }
+      } catch (error) {
+        console.log('Not an agent profile, continuing as customer');
+        // Reset agent-specific state when error occurs
+        setCurrentAgent(null);
+        setAgents([]);
+      }
+
+      // Load tickets based on user role
+      let ticketData;
       if (agentProfile) {
-        const metadata = agentProfile.metadata as { 
-          department?: string; 
-          skills?: string[]; 
-          languages?: string[]; 
-        } | null;
-
-        setCurrentAgent({
-          id: createAgentId(agentProfile.id),
-          name: agentProfile.name,
-          role: agentProfile.role,
-          status: agentProfile.status,
-          avatar: agentProfile.avatar || agentProfile.name.substring(0, 2).toUpperCase(),
-          email: agentProfile.email,
-          metadata: metadata || undefined
-        });
-
-        // Load tickets assigned to current agent
-        const ticketData = await getTickets({ 
+        // If user is an agent, use regular getTickets function
+        ticketData = await getTickets({ 
           assigned_to: user.id,
           status: [TicketStatus.OPEN, TicketStatus.WAITING_CUSTOMER_REPLY]
         });
-        console.log('Ticket data:', ticketData);
-
-        setTickets(ticketData);
-
-        // Load customer data if there's an active ticket
-        if (activeTicket) {
-          const { data: customerData } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', activeTicket.customer_id)
-            .single();
-
-          if (customerData) {
-            setCustomer({
-              id: createCustomerId(customerData.id),
-              email: customerData.email,
-              name: customerData.name,
-              createdAt: new Date(customerData.created_at),
-              avatar: customerData.avatar || undefined,
-              phone: customerData.phone || undefined,
-              company: customerData.company || undefined,
-              metadata: typeof customerData.metadata === 'object' && customerData.metadata ? {
-                ...Object.fromEntries(
-                  Object.entries(customerData.metadata).map(([key, value]) => [key, value])
-                )
-              } : undefined
-            });
+      } else {
+        // If user is a customer, use the edge function
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/customer_ticket`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              action: 'list_tickets',
+              user_id: user.id
+            })
           }
+        );
+        const { data, error } = await response.json();
+        if (error) throw new Error(error);
+        ticketData = data.map((ticket: Database['public']['Tables']['tickets']['Row']) => ({
+          ...ticket,
+          createdAt: new Date(ticket.created_at),
+          lastUpdated: new Date(ticket.last_updated),
+          id: createTicketId(ticket.number),
+          customer_id: createCustomerId(ticket.customer_id),
+          assignedTo: ticket.assigned_to ? createAgentId(ticket.assigned_to) : undefined,
+          conversation: (ticket.conversation || []).map((msg) => {
+            const message = msg as {
+              id: string;
+              isFromCustomer: boolean;
+              message: string;
+              timestamp: string;
+              attachments?: Array<{
+                url: string;
+                name: string;
+                type: string;
+                size: number;
+              }>;
+              metadata?: Record<string, unknown>;
+            };
+            return {
+              ...message,
+              id: createMessageId(message.id),
+              timestamp: new Date(message.timestamp)
+            };
+          })
+        }));
+      }
+      
+      console.log('Ticket data:', ticketData);
+      setTickets(ticketData);
+
+      // Load customer data if there's an active ticket
+      if (activeTicket) {
+        const { data: customerData } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', activeTicket.customer_id)
+          .single();
+
+        if (customerData) {
+          setCustomer({
+            id: createCustomerId(customerData.id),
+            email: customerData.email,
+            name: customerData.name,
+            createdAt: new Date(customerData.created_at),
+            avatar: customerData.avatar || undefined,
+            phone: customerData.phone || undefined,
+            company: customerData.company || undefined,
+            metadata: typeof customerData.metadata === 'object' && customerData.metadata ? {
+              ...Object.fromEntries(
+                Object.entries(customerData.metadata).map(([key, value]) => [key, value])
+              )
+            } : undefined
+          });
         }
       }
     } catch (error) {
@@ -264,12 +328,17 @@ export default function App() {
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
         setShowSettings={setShowSettings}
+        currentAgent={currentAgent}
       >
         {currentView === Views.TICKETS && (
           <div className="flex flex-1 overflow-hidden">
             {!activeTicket ? (
               <div className="w-full overflow-auto">
-                <TicketQueue tickets={tickets} setActiveTicket={setActiveTicket} />
+                <TicketQueue 
+                  tickets={tickets} 
+                  setActiveTicket={setActiveTicket} 
+                  isCustomerView={!currentAgent}
+                />
               </div>
             ) : customer && (
               <div className="w-full overflow-auto">

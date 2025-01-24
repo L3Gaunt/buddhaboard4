@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { signIn, getAgentProfile } from '@/lib/auth';
 import { Button } from "@/components/ui/button";
+import { supabase } from '@/lib/supabase';
 
 export function LoginView() {
   const [email, setEmail] = useState('');
@@ -20,14 +21,27 @@ export function LoginView() {
       console.log('Sign in result:', result);
       
       if (result.user) {
-        // Get agent profile to confirm they are an agent
-        const agentProfile = await getAgentProfile(result.user.id);
-        if (agentProfile) {
-          // Force a page reload to update the app state
-          window.location.reload();
-        } else {
-          setError('Access denied: Not an agent account');
+        // First check if this email exists in the agents table without fetching the full profile
+        const { count, error: countError } = await supabase
+          .from('agents')
+          .select('*', { count: 'exact', head: true })
+          .eq('email', email);
+        
+        if (countError) {
+          console.error('Error checking agent status:', countError);
         }
+        
+        // Only try to get agent profile if the email exists in agents table
+        if (count && count > 0) {
+          const agentProfile = await getAgentProfile(result.user.id);
+          if (agentProfile) {
+            window.location.reload();
+            return;
+          }
+        }
+        
+        // If not an agent or error occurred, proceed as customer
+        window.location.href = '/customer';
       }
     } catch (err) {
       console.error('Detailed login error:', err);
@@ -101,7 +115,7 @@ export function LoginView() {
               href="/submit-ticket" 
               className="text-blue-600 hover:text-blue-800 font-medium"
             >
-              Submit a Support Ticket
+              Submit your first Support Ticket
             </a>
           </p>
         </div>
