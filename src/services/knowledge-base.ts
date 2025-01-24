@@ -38,6 +38,24 @@ export async function getTags() {
   return data;
 }
 
+type CreateTagInput = {
+  name: string;
+  color?: string;
+}
+
+export async function createTag(tag: CreateTagInput) {
+  const { data, error } = await supabase.functions.invoke<KBTag>('knowledge-base', {
+    body: {
+      method: 'POST',
+      path: 'tags',
+      body: tag
+    }
+  });
+
+  if (error) throw error;
+  return data;
+}
+
 type CreateArticleInput = Omit<
   KBArticle,
   'id' | 'created_at' | 'updated_at'

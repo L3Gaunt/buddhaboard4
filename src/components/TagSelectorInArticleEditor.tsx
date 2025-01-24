@@ -1,40 +1,70 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
-interface Tag {
-  id: string;
-  label: string;
-  color: string;
-}
+import { getTags, createTag } from "../services/knowledge-base";
+import type { KBTag } from "../types/knowledge-base";
+
 interface TagSelectorProps {
-  tags: Tag[];
   editedTags: string[];
   toggleTag: (tagId: string) => void;
   setShowTagInput: (show: boolean) => void;
-  onCreateTag?: (label: string) => void;
 }
+
 interface CollapsedTagSelectorProps {
   onClick: () => void;
 }
+
 export function TagSelector({
-  tags,
   editedTags,
   toggleTag,
   setShowTagInput,
-  onCreateTag,
 }: TagSelectorProps) {
   const [newTagInput, setNewTagInput] = useState("");
-  const handleCreateTag = () => {
-    if (newTagInput.trim() && onCreateTag) {
-      onCreateTag(newTagInput.trim());
-      setNewTagInput("");
+  const [tags, setTags] = useState<KBTag[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    loadTags();
+  }, []);
+
+  const loadTags = async () => {
+    try {
+      const tagsData = await getTags();
+      if (tagsData) {
+        setTags(tagsData);
+      }
+    } catch (error) {
+      console.error("Failed to load tags:", error);
     }
   };
+
+  const handleCreateTag = async () => {
+    if (!newTagInput.trim()) return;
+    
+    setIsLoading(true);
+    try {
+      const newTag = await createTag({ 
+        name: newTagInput.trim(),
+        color: "text-gray-700" // Default color, you might want to add color selection later
+      });
+      if (newTag) {
+        setTags([...tags, newTag]);
+        setNewTagInput("");
+        toggleTag(newTag.id);
+      }
+    } catch (error) {
+      console.error("Failed to create tag:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
       handleCreateTag();
     }
   };
+
   return (
     <div className="absolute top-0 left-0 z-10 w-64 bg-white border rounded-lg shadow-lg p-2">
       <div className="space-y-2">
@@ -46,13 +76,14 @@ export function TagSelector({
             onKeyDown={handleKeyDown}
             placeholder="Create new tag..."
             className="flex-1 px-2 py-1 text-sm border rounded focus:outline-none focus:border-blue-500"
+            disabled={isLoading}
           />
           <button
             onClick={handleCreateTag}
-            disabled={!newTagInput.trim()}
+            disabled={!newTagInput.trim() || isLoading}
             className="px-2 py-1 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Add
+            {isLoading ? "..." : "Add"}
           </button>
         </div>
         <div className="space-y-1">
@@ -67,7 +98,7 @@ export function TagSelector({
                 }}
                 className={`w-full text-left px-2 py-1 rounded hover:bg-gray-50 ${tag.color}`}
               >
-                {tag.label}
+                {tag.name}
               </button>
             ))}
         </div>
@@ -75,6 +106,7 @@ export function TagSelector({
     </div>
   );
 }
+
 export function CollapsedTagSelector({ onClick }: CollapsedTagSelectorProps) {
   return (
     <button

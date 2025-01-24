@@ -279,17 +279,38 @@ serve(async (req) => {
       }
 
       case 'tags': {
-        if (method === 'GET') {
-          const { data, error } = await supabase
-            .from('kb_tags')
-            .select('id, name, slug, color')
-            .order('name')
+        switch (method) {
+          case 'GET': {
+            const { data, error } = await supabase
+              .from('kb_tags')
+              .select('id, name, slug, color')
+              .order('name')
 
-          if (error) throw error
-          return new Response(JSON.stringify(data), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 200,
-          })
+            if (error) throw error
+            return new Response(JSON.stringify(data), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              status: 200,
+            })
+          }
+
+          case 'POST': {
+            console.log('Creating new tag');
+            const { name, color } = body;
+            if (!name) {
+              throw new Error('Tag name is required');
+            }
+            const slug = name.toLowerCase().replace(/\s+/g, '-');
+            const { data, error } = await supabase
+              .from('kb_tags')
+              .insert({ name, slug, color })
+              .single();
+            if (error) {
+              console.log('Error inserting tag:', error);
+              throw new Error('Failed to create tag');
+            }
+            console.log('Tag created:', data);
+            return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });
+          }
         }
       }
     }
