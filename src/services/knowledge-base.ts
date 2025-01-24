@@ -74,4 +74,17 @@ export async function updateArticle(id: string, article: UpdateArticleInput) {
 
   if (error) throw error;
   return data;
+}
+
+export async function updateArticleTags(articleId: string, tagIds: string[]) {
+  const { data, error } = await supabase.functions.invoke<KBArticle>('knowledge-base', {
+    body: {
+      method: 'PUT',
+      path: `articles/${articleId}/tags`,
+      body: { tagIds }
+    }
+  });
+
+  if (error) throw error;
+  return data;
 } 

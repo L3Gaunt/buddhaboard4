@@ -193,6 +193,61 @@ serve(async (req) => {
 
           case 'PUT': {
             if (!id) throw new Error('Article ID is required')
+            
+            // Handle tag updates
+            if (path.endsWith('/tags')) {
+              const { tagIds } = body.body
+              
+              // First delete existing tags
+              await supabase
+                .from('kb_article_tags')
+                .delete()
+                .eq('article_id', id)
+              
+              // Then insert new tags
+              if (tagIds.length > 0) {
+                await supabase
+                  .from('kb_article_tags')
+                  .insert(
+                    tagIds.map(tagId => ({
+                      article_id: id,
+                      tag_id: tagId
+                    }))
+                  )
+              }
+              
+              // Return updated article
+              const { data, error } = await supabase
+                .from('kb_articles')
+                .select(`
+                  id,
+                  title,
+                  description,
+                  slug,
+                  content,
+                  status,
+                  created_at,
+                  updated_at,
+                  kb_article_tags (
+                    kb_tags (
+                      id,
+                      name,
+                      slug,
+                      color
+                    )
+                  )
+                `)
+                .eq('id', id)
+                .single()
+
+              if (error) throw error
+              return new Response(JSON.stringify(data), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                status: 200,
+              })
+            }
+            
+            // Handle regular article updates
             const article: Partial<Article> = body.body
             const { data, error } = await supabase
               .from('kb_articles')

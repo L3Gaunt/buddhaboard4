@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
-import { getArticles, getTags, getArticle, updateArticle } from '../../services/knowledge-base';
+import { getArticles, getTags, getArticle, updateArticle, updateArticleTags } from '../../services/knowledge-base';
 import type { KBArticle, KBTag } from '../../types/knowledge-base';
 import { ArticleView } from '../../components/ArticleView';
 
@@ -136,12 +136,20 @@ export function KnowledgeBaseView() {
   const handleArticleSave = async (updatedArticle: Partial<KBArticle>) => {
     try {
       setIsLoading(true);
+      
+      // Update article content
       await updateArticle(updatedArticle.id!, {
         title: updatedArticle.title!,
         description: updatedArticle.description,
         content: updatedArticle.content!,
         status: updatedArticle.status || 'published'
       });
+
+      // Update tags if they were changed
+      if (updatedArticle.kb_article_tags) {
+        const tagIds = updatedArticle.kb_article_tags.map(tag => tag.kb_tags.id);
+        await updateArticleTags(updatedArticle.id!, tagIds);
+      }
       
       // Refresh the article
       if (currentArticle) {
