@@ -201,6 +201,7 @@ export interface TicketQueueProps {
   readonly tickets: ReadonlyArray<Ticket>;
   readonly setActiveTicket: (ticket: Ticket | null) => void;
   readonly isCustomerView?: boolean;
+  readonly currentAgent?: Agent | null;
 }
 
 /**

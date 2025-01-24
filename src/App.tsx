@@ -147,11 +147,8 @@ export default function App() {
       // Load tickets based on user role
       let ticketData;
       if (agentProfile) {
-        // If user is an agent, use regular getTickets function
-        ticketData = await getTickets({ 
-          assigned_to: user.id,
-          status: [TicketStatus.OPEN, TicketStatus.WAITING_CUSTOMER_REPLY]
-        });
+        // If user is an agent, load all tickets
+        ticketData = await getTickets();
       } else {
         // If user is a customer, use the edge function
         const response = await fetch(
