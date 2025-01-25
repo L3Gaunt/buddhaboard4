@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, X, Plus } from 'lucide-react';
+import { Search, X, Plus, Filter } from 'lucide-react';
 import { getArticles, getTags, getArticle, updateArticle, updateArticleTags, deleteArticle, createArticle } from '../../services/knowledge-base';
 import { getCurrentUser, getAgentProfile } from '../../lib/auth';
 import type { KBArticle, KBTag } from '../../types/knowledge-base';
@@ -33,6 +33,7 @@ export const getTagStyles = (color: string | null, isSelected: boolean = false) 
 
 export function KnowledgeBaseView() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [filterMode, setFilterMode] = useState<'AND' | 'OR'>('AND');
   const [articles, setArticles] = useState<KBArticle[]>([]);
   const [currentArticle, setCurrentArticle] = useState<KBArticle | null>(null);
   const [tags, setTags] = useState<KBTag[]>([]);
@@ -119,10 +120,15 @@ export function KnowledgeBaseView() {
       }
       
       // First filter by tags if any are selected
-      const matchesTags = selectedTags.length === 0 || 
-        selectedTags.every((tagId) => 
-          article.kb_article_tags?.some(at => at.kb_tags.id === tagId)
-        );
+      const matchesTags = selectedTags.length === 0 || (
+        filterMode === 'AND' 
+          ? selectedTags.every((tagId) => 
+              article.kb_article_tags?.some(at => at.kb_tags.id === tagId)
+            )
+          : selectedTags.some((tagId) => 
+              article.kb_article_tags?.some(at => at.kb_tags.id === tagId)
+            )
+      );
       
       // Then filter by search query if one exists
       const matchesSearch = !searchQuery || 
@@ -308,7 +314,18 @@ export function KnowledgeBaseView() {
       </div>
       
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4">Knowledge Base</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-semibold">Knowledge Base</h2>
+          {selectedTags.length > 0 && (
+            <button
+              onClick={() => setFilterMode(mode => mode === 'AND' ? 'OR' : 'AND')}
+              className="flex items-center gap-2 px-3 py-1 text-sm font-medium text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100"
+            >
+              <Filter className="h-4 w-4" />
+              {filterMode === 'AND' ? 'Match all tags' : 'Match any tag'}
+            </button>
+          )}
+        </div>
         <div className="flex flex-wrap gap-2 mb-6">
           {tags.map((tag) => (
             <button
