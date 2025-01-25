@@ -141,6 +141,11 @@ export const TicketDetail: FC<TicketDetailProps> = ({
     }
   }, [ticket.assignedTo]);
 
+  // Update ticket status when ticket changes
+  useEffect(() => {
+    setTicketStatus(ticket.status);
+  }, [ticket.status]);
+
   // Fetch all customer tickets when showing profile
   useEffect(() => {
     if (showCustomerProfile && customer) {

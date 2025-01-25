@@ -2,7 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 interface FeedbackRequest {
-  ticketNumber: number;
+  ticketNumber?: number;
+  ticketHash?: string;
   rating: number;
   feedbackText?: string;
 }
@@ -43,48 +44,75 @@ serve(async (req) => {
       }
     )
 
-    // Get the current user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseClient.auth.getUser()
-
-    if (userError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      )
-    }
+    // Try to get authenticated user, but don't require it
+    const { data: { user } } = await supabaseClient.auth.getUser()
 
     if (req.method === 'GET') {
-      // Extract ticket number from URL
+      // Extract ticket info from URL
       const url = new URL(req.url);
       const ticketNumber = url.searchParams.get('ticketNumber');
+      const ticketHash = url.searchParams.get('ticketHash');
 
-      if (!ticketNumber) {
+      if (!ticketNumber && !ticketHash) {
         return new Response(
-          JSON.stringify({ error: 'Ticket number is required' }),
+          JSON.stringify({ error: 'Ticket number or hash is required' }),
           { status: 400, headers: { 'Content-Type': 'application/json' } }
         )
       }
 
-      // Verify the ticket belongs to the user
-      const { data: ticket, error: ticketError } = await serviceRoleClient
-        .from('tickets')
-        .select('customer_id')
-        .eq('number', ticketNumber)
-        .single()
+      let ticket;
+      if (ticketHash) {
+        // Decode the hash to get ticket number and user ID
+        try {
+          const decoded = atob(ticketHash);
+          const [decodedTicketNumber] = decoded.split(':');
+          
+          const { data: ticketData, error: ticketError } = await serviceRoleClient
+            .from('tickets')
+            .select('number, customer_id')
+            .eq('number', decodedTicketNumber)
+            .single();
 
-      if (ticketError || !ticket) {
-        return new Response(
-          JSON.stringify({ error: 'Ticket not found' }),
-          { status: 404, headers: { 'Content-Type': 'application/json' } }
-        )
-      }
+          if (ticketError || !ticketData) {
+            return new Response(
+              JSON.stringify({ error: 'Ticket not found' }),
+              { status: 404, headers: { 'Content-Type': 'application/json' } }
+            )
+          }
+          
+          ticket = ticketData;
+        } catch {
+          return new Response(
+            JSON.stringify({ error: 'Invalid ticket hash' }),
+            { status: 400, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
+      } else if (user) {
+        // Verify the ticket belongs to the authenticated user
+        const { data: ticketData, error: ticketError } = await serviceRoleClient
+          .from('tickets')
+          .select('number, customer_id')
+          .eq('number', ticketNumber)
+          .single();
 
-      if (ticket.customer_id !== user.id) {
+        if (ticketError || !ticketData) {
+          return new Response(
+            JSON.stringify({ error: 'Ticket not found' }),
+            { status: 404, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
+
+        if (ticketData.customer_id !== user.id) {
+          return new Response(
+            JSON.stringify({ error: 'Unauthorized' }),
+            { status: 401, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
+
+        ticket = ticketData;
+      } else {
         return new Response(
-          JSON.stringify({ error: 'Unauthorized' }),
+          JSON.stringify({ error: 'Authentication or ticket hash required' }),
           { status: 401, headers: { 'Content-Type': 'application/json' } }
         )
       }
@@ -93,7 +121,7 @@ serve(async (req) => {
       const { data: feedback, error: feedbackError } = await serviceRoleClient
         .from('ticket_feedback')
         .select('rating, feedback_text')
-        .eq('ticket_number', ticketNumber)
+        .eq('ticket_number', ticket.number)
         .single()
 
       if (feedbackError && feedbackError.code !== 'PGRST116') { // PGRST116 is "not found" error
@@ -117,33 +145,69 @@ serve(async (req) => {
 
     if (req.method === 'POST') {
       // Parse request body
-      const { ticketNumber, rating, feedbackText }: FeedbackRequest = await req.json()
+      const { ticketNumber, ticketHash, rating, feedbackText }: FeedbackRequest = await req.json()
 
       // Validate input
-      if (!ticketNumber || !rating || rating < 1 || rating > 5) {
+      if ((!ticketNumber && !ticketHash) || !rating || rating < 1 || rating > 5) {
         return new Response(
           JSON.stringify({ error: 'Invalid input' }),
           { status: 400, headers: { 'Content-Type': 'application/json' } }
         )
       }
 
-      // Verify the ticket belongs to the user and is resolved/closed
-      const { data: ticket, error: ticketError } = await serviceRoleClient
-        .from('tickets')
-        .select('customer_id, status')
-        .eq('number', ticketNumber)
-        .single()
+      let ticket;
+      if (ticketHash) {
+        // Decode the hash to get ticket number and user ID
+        try {
+          const decoded = atob(ticketHash);
+          const [decodedTicketNumber] = decoded.split(':');
+          
+          const { data: ticketData, error: ticketError } = await serviceRoleClient
+            .from('tickets')
+            .select('number, customer_id, status')
+            .eq('number', decodedTicketNumber)
+            .single();
 
-      if (ticketError || !ticket) {
-        return new Response(
-          JSON.stringify({ error: 'Ticket not found' }),
-          { status: 404, headers: { 'Content-Type': 'application/json' } }
-        )
-      }
+          if (ticketError || !ticketData) {
+            return new Response(
+              JSON.stringify({ error: 'Ticket not found' }),
+              { status: 404, headers: { 'Content-Type': 'application/json' } }
+            )
+          }
+          
+          ticket = ticketData;
+        } catch {
+          return new Response(
+            JSON.stringify({ error: 'Invalid ticket hash' }),
+            { status: 400, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
+      } else if (user) {
+        // Verify the ticket belongs to the authenticated user
+        const { data: ticketData, error: ticketError } = await serviceRoleClient
+          .from('tickets')
+          .select('number, customer_id, status')
+          .eq('number', ticketNumber)
+          .single();
 
-      if (ticket.customer_id !== user.id) {
+        if (ticketError || !ticketData) {
+          return new Response(
+            JSON.stringify({ error: 'Ticket not found' }),
+            { status: 404, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
+
+        if (ticketData.customer_id !== user.id) {
+          return new Response(
+            JSON.stringify({ error: 'Unauthorized' }),
+            { status: 401, headers: { 'Content-Type': 'application/json' } }
+          )
+        }
+
+        ticket = ticketData;
+      } else {
         return new Response(
-          JSON.stringify({ error: 'Unauthorized' }),
+          JSON.stringify({ error: 'Authentication or ticket hash required' }),
           { status: 401, headers: { 'Content-Type': 'application/json' } }
         )
       }
@@ -159,7 +223,7 @@ serve(async (req) => {
       const { data: existingFeedback } = await serviceRoleClient
         .from('ticket_feedback')
         .select('id')
-        .eq('ticket_number', ticketNumber)
+        .eq('ticket_number', ticket.number)
         .single()
 
       let result;
@@ -177,7 +241,7 @@ serve(async (req) => {
         result = await serviceRoleClient
           .from('ticket_feedback')
           .insert({
-            ticket_number: ticketNumber,
+            ticket_number: ticket.number,
             rating,
             feedback_text: feedbackText
           })

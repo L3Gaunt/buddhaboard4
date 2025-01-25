@@ -107,7 +107,7 @@ export function UserTicketView() {
               We'll review your ticket and get back to you as soon as possible.
             </p>
             <div className="mb-6">
-              <p className="text-sm text-gray-500 mb-2">Your ticket link:</p>
+              <p className="text-sm text-gray-500 mb-2">View your ticket by logging in to your new account or clicking this link:</p>
               <div className="flex items-center gap-2 bg-gray-50 p-3 rounded-lg">
                 <code className="text-sm flex-1 break-all">{ticketUrl}</code>
                 <Button

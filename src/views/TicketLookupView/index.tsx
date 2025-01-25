@@ -3,8 +3,22 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import type { TicketData } from "@/lib/tickets";
 import { RichTextEditor } from "@/RichTextEditor";
+import { Star } from "lucide-react";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+
+interface TicketFeedback {
+  rating: number;
+  feedbackText: string;
+}
+
+interface FeedbackResponse {
+  data: {
+    rating: number;
+    feedback_text: string | null;
+  } | null;
+  error?: string;
+}
 
 export function TicketLookupView() {
   const [ticket, setTicket] = useState<TicketData | null>(null);
@@ -13,6 +27,13 @@ export function TicketLookupView() {
   const [response, setResponse] = useState("");
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const ticketHash = window.location.pathname.split('/ticket/')[1];
+  
+  // Add feedback state
+  const [feedback, setFeedback] = useState<TicketFeedback>({ rating: 5, feedbackText: '' });
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [isEditingFeedback, setIsEditingFeedback] = useState(false);
 
   // Scroll to bottom when conversation updates
   useEffect(() => {
@@ -20,6 +41,76 @@ export function TicketLookupView() {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [ticket?.conversation]);
+
+  // Check for existing feedback
+  useEffect(() => {
+    if (ticket && ['resolved', 'closed'].includes(ticket.status)) {
+      const fetchFeedback = async () => {
+        try {
+          const response = await fetch(
+            `${supabaseUrl}/functions/v1/submit_ticket_feedback?ticketHash=${ticketHash}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+
+          const { data, error }: FeedbackResponse = await response.json();
+          
+          if (error) {
+            throw new Error(error);
+          }
+
+          if (data) {
+            setFeedback({ 
+              rating: data.rating, 
+              feedbackText: data.feedback_text || '' 
+            });
+            setFeedbackSubmitted(true);
+          }
+        } catch (error) {
+          console.error('Error fetching feedback:', error);
+        }
+      };
+
+      fetchFeedback();
+    }
+  }, [ticket?.status, ticketHash]);
+
+  // Add feedback submission handler
+  const handleSubmitFeedback = async () => {
+    setIsSubmittingFeedback(true);
+    setFeedbackError(null);
+
+    try {
+      const response = await fetch(`${supabaseUrl}/functions/v1/submit_ticket_feedback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ticketHash,
+          rating: feedback.rating,
+          feedbackText: feedback.feedbackText.trim() || null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit feedback');
+      }
+
+      setFeedbackSubmitted(true);
+      setIsEditingFeedback(false);
+    } catch (error) {
+      setFeedbackError(error instanceof Error ? error.message : 'Failed to submit feedback');
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
 
   useEffect(() => {
     async function lookupTicket() {
@@ -164,6 +255,105 @@ export function TicketLookupView() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Add feedback section */}
+            {ticket && ['resolved', 'closed'].includes(ticket.status) && (
+              <div className="bg-gray-50 rounded-lg p-6 mt-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">
+                    {feedbackSubmitted && !isEditingFeedback ? 'Your Feedback' : 'How was your experience?'}
+                  </h3>
+                  {feedbackSubmitted && !isEditingFeedback && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditingFeedback(true)}
+                    >
+                      Edit Feedback
+                    </Button>
+                  )}
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => (!feedbackSubmitted || isEditingFeedback) && setFeedback(prev => ({ ...prev, rating: star }))}
+                        disabled={feedbackSubmitted && !isEditingFeedback}
+                        className={`text-2xl ${
+                          star <= feedback.rating
+                            ? 'text-yellow-400'
+                            : 'text-gray-300'
+                        } transition-colors hover:text-yellow-400 disabled:cursor-not-allowed`}
+                      >
+                        <Star className="h-6 w-6" fill={star <= feedback.rating ? 'currentColor' : 'none'} />
+                      </button>
+                    ))}
+                  </div>
+
+                  <textarea
+                    value={feedback.feedbackText}
+                    onChange={(e) => (!feedbackSubmitted || isEditingFeedback) && setFeedback(prev => ({ ...prev, feedbackText: e.target.value }))}
+                    disabled={feedbackSubmitted && !isEditingFeedback}
+                    placeholder="Would you like to add any comments? (optional)"
+                    className="w-full p-2 border rounded-md h-24 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  />
+
+                  {(!feedbackSubmitted || isEditingFeedback) && (
+                    <div className="flex gap-2 justify-end">
+                      {isEditingFeedback && (
+                        <Button 
+                          variant="outline"
+                          onClick={async () => {
+                            setIsEditingFeedback(false);
+                            try {
+                              const response = await fetch(
+                                `${supabaseUrl}/functions/v1/submit_ticket_feedback?ticketHash=${ticketHash}`,
+                                {
+                                  method: 'GET',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                  },
+                                }
+                              );
+
+                              const { data, error }: FeedbackResponse = await response.json();
+                              
+                              if (error) {
+                                throw new Error(error);
+                              }
+
+                              if (data) {
+                                setFeedback({ 
+                                  rating: data.rating, 
+                                  feedbackText: data.feedback_text || '' 
+                                });
+                              }
+                            } catch (error) {
+                              console.error('Error resetting feedback:', error);
+                            }
+                          }}
+                          disabled={isSubmittingFeedback}
+                        >
+                          Cancel
+                        </Button>
+                      )}
+                      <Button 
+                        onClick={handleSubmitFeedback}
+                        disabled={isSubmittingFeedback}
+                      >
+                        {isSubmittingFeedback ? 'Submitting...' : (feedbackSubmitted ? 'Update Feedback' : 'Submit Feedback')}
+                      </Button>
+                    </div>
+                  )}
+
+                  {feedbackError && (
+                    <p className="text-red-500 text-sm">{feedbackError}</p>
+                  )}
+                </div>
               </div>
             )}
           </div>
