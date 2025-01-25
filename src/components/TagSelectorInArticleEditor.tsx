@@ -1,13 +1,34 @@
 import { useState, useEffect } from "react";
 import { Plus, X } from "lucide-react";
-import { getTags, createTag } from "../services/knowledge-base";
+import { getTags } from "../services/knowledge-base";
 import type { KBTag } from "../types/knowledge-base";
 import { getTagStyles } from "../views/KnowledgeBaseView";
+
+// Convert HSL to Hex color
+const hslToHex = (h: number, s: number, l: number) => {
+  l /= 100;
+  const a = s * Math.min(l, 1 - l) / 100;
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+};
+
+// Generate a random hex color
+const generateRandomHexColor = () => {
+  const hue = Math.floor(Math.random() * 360);
+  const saturation = Math.floor(Math.random() * 20) + 60; // 60-80% saturation
+  const lightness = Math.floor(Math.random() * 20) + 35; // 35-55% lightness
+  return hslToHex(hue, saturation, lightness);
+};
 
 interface TagSelectorProps {
   editedTags: string[];
   toggleTag: (tagId: string, tag: KBTag) => void;
   setShowTagInput: (show: boolean) => void;
+  onCreateTag?: (tag: Omit<KBTag, 'id' | 'created_at' | 'updated_at'>) => void;
 }
 
 interface CollapsedTagSelectorProps {
@@ -18,10 +39,10 @@ export function TagSelector({
   editedTags,
   toggleTag,
   setShowTagInput,
+  onCreateTag,
 }: TagSelectorProps) {
   const [newTagInput, setNewTagInput] = useState("");
   const [tags, setTags] = useState<KBTag[]>([]);
-  const [isCreatingTag, setIsCreatingTag] = useState(false);
 
   useEffect(() => {
     loadTags();
@@ -38,27 +59,22 @@ export function TagSelector({
     }
   };
 
-  const handleCreateTag = async () => {
-    if (!newTagInput.trim() || isCreatingTag) return;
+  const handleCreateTag = () => {
+    if (!newTagInput.trim()) return;
     
-    setIsCreatingTag(true);
-    try {
-      const newTag = await createTag({
-        name: newTagInput.trim(),
-        color: "text-gray-700"
-      });
-      
-      if (newTag) {
-        setTags(prevTags => [...prevTags, newTag]);
-        setNewTagInput("");
-        toggleTag(newTag.id, newTag);
-        setShowTagInput(false);
-      }
-    } catch (error) {
-      console.error("Failed to create tag:", error);
-    } finally {
-      setIsCreatingTag(false);
+    const newTag = {
+      name: newTagInput.trim(),
+      color: generateRandomHexColor(),
+      slug: newTagInput.trim().toLowerCase().replace(/\s+/g, '-'),
+    };
+
+    // Pass the new tag up to parent component
+    if (onCreateTag) {
+      onCreateTag(newTag);
     }
+    
+    setNewTagInput("");
+    setShowTagInput(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -89,10 +105,10 @@ export function TagSelector({
           />
           <button
             onClick={handleCreateTag}
-            disabled={!newTagInput.trim() || isCreatingTag}
+            disabled={!newTagInput.trim()}
             className="px-3 py-1 text-sm rounded-full bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isCreatingTag ? "Adding..." : "Add"}
+            Add
           </button>
         </div>
         <div className="space-y-1">

@@ -13,6 +13,11 @@ interface Article {
   content: string
   status: 'draft' | 'published'
   tags?: string[] // Array of tag IDs
+  newTags?: Array<{
+    name: string
+    slug: string
+    color: string
+  }>
 }
 
 const generateUniqueSlug = (baseSlug: string) => {
@@ -207,8 +212,8 @@ serve(async (req) => {
               throw new Error('Title, content and slug are required');
             }
 
-            // Extract tags before inserting article
-            const { tags, ...articleData } = article;
+            // Extract tags and newTags before inserting article
+            const { tags, newTags, ...articleData } = article;
             
             // Generate unique slug
             const uniqueSlug = generateUniqueSlug(articleData.slug);
@@ -232,13 +237,30 @@ serve(async (req) => {
               throw articleError;
             }
 
+            // Create new tags if any
+            let allTagIds = tags || [];
+            if (newTags && newTags.length > 0) {
+              console.log('Creating new tags:', newTags);
+              const { data: createdTags, error: newTagsError } = await supabase
+                .from('kb_tags')
+                .insert(newTags)
+                .select('id');
+
+              if (newTagsError) {
+                console.log('Error creating new tags:', newTagsError);
+                throw newTagsError;
+              }
+
+              allTagIds = [...allTagIds, ...createdTags.map(tag => tag.id)];
+            }
+
             // If there are tags, create the relationships
-            if (tags && tags.length > 0) {
+            if (allTagIds.length > 0) {
               console.log('Creating tag relationships for article:', createdArticle.id);
               const { error: tagsError } = await supabase
                 .from('kb_article_tags')
                 .insert(
-                  tags.map(tagId => ({
+                  allTagIds.map(tagId => ({
                     article_id: createdArticle.id,
                     tag_id: tagId
                   }))
@@ -262,7 +284,24 @@ serve(async (req) => {
             
             // Handle tag updates
             if (path.endsWith('/tags')) {
-              const { tagIds } = body.body
+              const { tagIds, newTags } = body.body
+              
+              // Create new tags if any
+              let allTagIds = tagIds || [];
+              if (newTags && newTags.length > 0) {
+                console.log('Creating new tags:', newTags);
+                const { data: createdTags, error: newTagsError } = await supabase
+                  .from('kb_tags')
+                  .insert(newTags)
+                  .select('id');
+
+                if (newTagsError) {
+                  console.log('Error creating new tags:', newTagsError);
+                  throw newTagsError;
+                }
+
+                allTagIds = [...allTagIds, ...createdTags.map(tag => tag.id)];
+              }
               
               // First delete existing tags
               await supabase
@@ -271,11 +310,11 @@ serve(async (req) => {
                 .eq('article_id', id)
               
               // Then insert new tags
-              if (tagIds.length > 0) {
+              if (allTagIds.length > 0) {
                 await supabase
                   .from('kb_article_tags')
                   .insert(
-                    tagIds.map(tagId => ({
+                    allTagIds.map(tagId => ({
                       article_id: id,
                       tag_id: tagId
                     }))

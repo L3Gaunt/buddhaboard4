@@ -8,7 +8,7 @@ import { TagSelector, CollapsedTagSelector } from './TagSelectorInArticleEditor'
 interface ArticleViewProps {
   article: KBArticle | null;
   onBack?: () => void;
-  onSave?: (article: Partial<KBArticle>) => Promise<void>;
+  onSave?: (article: Partial<KBArticle> & { newTags?: Array<{ name: string; slug: string; color: string; }> }) => Promise<void>;
   onDelete?: () => Promise<void>;
   canEdit?: boolean;
   isCreating?: boolean;
@@ -53,20 +53,27 @@ export function ArticleView({ article, onBack, onSave, onDelete, canEdit = false
       (article.kb_article_tags || []).map(tag => [tag.kb_tags.id, tag.kb_tags])
     )
   );
+  const [newTags, setNewTags] = useState<Array<{ name: string; slug: string; color: string; }>>([]);
   const editorRef = useRef<ArticleEditorRef>(null);
 
   const handleSave = async (content: string, status: 'draft' | 'published' | 'archived' = 'published') => {
     if (!onSave) return;
+    
+    // Filter out temporary tag IDs from editedTags
+    const existingTagIds = editedTags.filter(id => !id.startsWith('temp-'));
+    
     await onSave({
       ...article,
       title: editedTitle,
       description: editedDescription,
       content,
       status,
-      kb_article_tags: editedTags.map(tagId => ({
+      kb_article_tags: existingTagIds.map(tagId => ({
         kb_tags: tagData[tagId]
-      }))
+      })),
+      newTags
     });
+    
     if (!isCreating) {
       setIsEditing(false);
     }
@@ -85,6 +92,29 @@ export function ArticleView({ article, onBack, onSave, onDelete, canEdit = false
         [tagId]: tag
       }));
     }
+  };
+
+  const handleCreateTag = (tag: Omit<KBTag, 'id' | 'created_at' | 'updated_at'>) => {
+    // Create a temporary ID for the new tag
+    const tempId = `temp-${Date.now()}`;
+    const newTag: KBTag = {
+      id: tempId,
+      name: tag.name,
+      slug: tag.slug,
+      color: tag.color,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    // Add to new tags list
+    setNewTags(prev => [...prev, tag]);
+    
+    // Add to tag data and edited tags
+    setTagData(prev => ({
+      ...prev,
+      [tempId]: newTag
+    }));
+    setEditedTags(prev => [...prev, tempId]);
   };
 
   return (
@@ -225,6 +255,7 @@ export function ArticleView({ article, onBack, onSave, onDelete, canEdit = false
                   editedTags={editedTags}
                   toggleTag={toggleTag}
                   setShowTagInput={setShowTagInput}
+                  onCreateTag={handleCreateTag}
                 />
               ) : (
                 <CollapsedTagSelector onClick={() => setShowTagInput(true)} />

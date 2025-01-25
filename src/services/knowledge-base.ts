@@ -59,7 +59,13 @@ export async function createTag(tag: CreateTagInput) {
 type CreateArticleInput = Omit<
   KBArticle,
   'id' | 'created_at' | 'updated_at'
->
+> & {
+  newTags?: Array<{
+    name: string;
+    slug: string;
+    color: string;
+  }>;
+}
 
 export async function createArticle(article: CreateArticleInput) {
   const { data, error } = await supabase.functions.invoke<KBArticle>('knowledge-base', {
@@ -94,12 +100,16 @@ export async function updateArticle(id: string, article: UpdateArticleInput) {
   return data;
 }
 
-export async function updateArticleTags(articleId: string, tagIds: string[]) {
+export async function updateArticleTags(articleId: string, tagIds: string[], newTags?: Array<{
+  name: string;
+  slug: string;
+  color: string;
+}>) {
   const { data, error } = await supabase.functions.invoke<KBArticle>('knowledge-base', {
     body: {
       method: 'PUT',
       path: `articles/${articleId}/tags`,
-      body: { tagIds }
+      body: { tagIds, newTags }
     }
   });
 

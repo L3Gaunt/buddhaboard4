@@ -164,7 +164,7 @@ export function KnowledgeBaseView() {
     setCurrentPage(newPage);
   };
 
-  const handleArticleSave = async (updatedArticle: Partial<KBArticle>) => {
+  const handleArticleSave = async (updatedArticle: Partial<KBArticle> & { newTags?: Array<{ name: string; slug: string; color: string; }> }) => {
     try {
       setIsLoading(true);
       
@@ -179,7 +179,7 @@ export function KnowledgeBaseView() {
       // Update tags if they were changed
       if (updatedArticle.kb_article_tags) {
         const tagIds = updatedArticle.kb_article_tags.map(tag => tag.kb_tags.id);
-        await updateArticleTags(updatedArticle.id!, tagIds);
+        await updateArticleTags(updatedArticle.id!, tagIds, updatedArticle.newTags);
       }
       
       // Refresh the article
@@ -230,13 +230,15 @@ export function KnowledgeBaseView() {
     setCurrentArticle(newArticle);
   };
 
-  const handleNewArticleSave = async (article: Partial<KBArticle>) => {
+  const handleNewArticleSave = async (article: Partial<KBArticle> & { newTags?: Array<{ name: string; slug: string; color: string; }> }) => {
     try {
-      const { id, created_at, updated_at, ...articleData } = article as KBArticle;
+      const { id, created_at, updated_at, newTags, kb_article_tags, ...articleData } = article as KBArticle & { newTags?: Array<{ name: string; slug: string; color: string; }> };
       const createArticleInput = {
         ...articleData,
         status: articleData.status === 'archived' ? 'draft' : articleData.status || 'draft',
-        slug: generateSlug(articleData.title)
+        slug: generateSlug(articleData.title),
+        newTags,
+        tags: kb_article_tags?.map(tag => tag.kb_tags.id)
       };
       const createdArticle = await createArticle(createArticleInput);
       setCurrentArticle(createdArticle);
