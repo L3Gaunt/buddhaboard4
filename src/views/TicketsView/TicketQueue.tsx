@@ -163,7 +163,7 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, is
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-6 min-h-screen">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">{isCustomerView ? "My Tickets" : "Ticket Queue"}</h2>
         <div className="flex items-center gap-4">
@@ -195,7 +195,7 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, is
         />
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-4 overflow-auto">
         {filteredTickets.map((ticket) => (
           <div
             key={ticket.id}
