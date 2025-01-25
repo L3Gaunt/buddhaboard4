@@ -1,12 +1,11 @@
 import type { FC } from 'react';
-import { Inbox, Users, Book, Star, Menu, Settings } from "lucide-react";
+import { Inbox, Users, Book, Star, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type SidebarProps, Views, type Agent } from '@/types';
 
 interface ExtendedSidebarProps extends SidebarProps {
   currentAgent: Agent | null;
   setIsMobileMenuOpen: (isOpen: boolean) => void;
-  setShowSettings: (show: boolean) => void;
 }
 
 const Sidebar: FC<ExtendedSidebarProps> = ({
@@ -15,7 +14,6 @@ const Sidebar: FC<ExtendedSidebarProps> = ({
   isMobileMenuOpen,
   currentAgent,
   setIsMobileMenuOpen,
-  setShowSettings,
 }) => {
   const isCustomer = !currentAgent;
 
@@ -76,17 +74,6 @@ const Sidebar: FC<ExtendedSidebarProps> = ({
             Knowledge Base
           </Button>
         </nav>
-
-        <div className="p-4 border-t">
-          <Button
-            variant="ghost"
-            className="w-full justify-start"
-            onClick={() => setShowSettings(true)}
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Button>
-        </div>
       </div>
     </div>
   );

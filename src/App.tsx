@@ -10,7 +10,6 @@ import { TicketLookupView } from "./views/TicketLookupView";
 import { KnowledgeBaseView } from "./views/KnowledgeBaseView";
 import { FeedbackView } from "./views/FeedbackView";
 import { supabase } from './lib/supabase';
-import { AgentSettingsModal } from "@/components/modals/AgentSettingsModal";
 import { ReassignTicketModal } from "@/components/modals/ReassignTicketModal";
 import { Toaster } from 'sonner';
 import {
@@ -30,7 +29,7 @@ import {
 import type { Database } from './types/supabase';
 
 // Import Supabase services
-import { getCurrentUser, getAgentProfile, updateAgentStatus } from '@/lib/auth';
+import { getCurrentUser, getAgentProfile, updateAgentStatus, signOut } from '@/lib/auth';
 import { getTickets, getTicketById } from '@/lib/tickets';
 import { getAllAgents } from '@/lib/agents';
 
@@ -62,7 +61,6 @@ export default function App() {
   );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
   const [isAvailable, setIsAvailable] = useState(true);
   const [response, setResponse] = useState("");
   const [ticketPriority, setTicketPriority] = useState<TicketPriority>(TicketPriority.MEDIUM);
@@ -139,6 +137,9 @@ export default function App() {
             email: agentProfile.email,
             metadata: metadata || undefined
           });
+
+          // Set availability based on agent profile status
+          setIsAvailable(agentProfile.status === AgentStatus.ONLINE);
         }
       } catch (error) {
         console.log('Not an agent profile, continuing as customer');
@@ -297,6 +298,17 @@ export default function App() {
     }
   }, [isAvailable, currentAgent]);
 
+  // Add handleLogout function
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      setIsAuthenticated(false);
+      setCurrentAgent(null);
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -308,13 +320,6 @@ export default function App() {
   return (
     <>
       <Toaster position="top-right" />
-      <AgentSettingsModal
-        isAvailable={isAvailable}
-        setIsAvailable={setIsAvailable}
-        showSettings={showSettings}
-        setShowSettings={setShowSettings}
-        currentAgent={currentAgent}
-      />
       <ReassignTicketModal
         showReassignModal={showReassignModal}
         setShowReassignModal={setShowReassignModal}
@@ -327,7 +332,9 @@ export default function App() {
         setCurrentView={handleViewChange}
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
-        setShowSettings={setShowSettings}
+        onLogout={handleLogout}
+        isAvailable={isAvailable}
+        setIsAvailable={setIsAvailable}
         currentAgent={currentAgent}
       >
         {currentView === Views.TICKETS && (

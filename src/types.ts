@@ -177,22 +177,23 @@ export type UnwrapReadonly<T> = T extends DeepReadonly<infer U> ? U : T;
  * Props for the Sidebar component
  */
 export interface SidebarProps {
-  readonly currentView: ViewType;
-  readonly setCurrentView: (view: ViewType) => void;
-  readonly isMobileMenuOpen: boolean;
-  readonly setIsMobileMenuOpen: (isOpen: boolean) => void;
+  currentView: ViewType;
+  setCurrentView: (view: ViewType) => void;
+  isMobileMenuOpen: boolean;
 }
 
 /**
  * Props for the Layout component
  */
 export interface LayoutProps {
-  readonly currentView: ViewType;
-  readonly setCurrentView: (view: ViewType) => void;
-  readonly isMobileMenuOpen: boolean;
-  readonly setIsMobileMenuOpen: (isOpen: boolean) => void;
-  readonly children: React.ReactNode;
-  readonly setShowSettings: (show: boolean) => void;
+  currentView: ViewType;
+  setCurrentView: (view: ViewType) => void;
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (isOpen: boolean) => void;
+  children: React.ReactNode;
+  onLogout: () => Promise<void>;
+  isAvailable: boolean;
+  setIsAvailable: (available: boolean) => void;
 }
 
 /**
