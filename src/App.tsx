@@ -77,6 +77,9 @@ export default function App() {
 
   const handleViewChange = (view: ViewType) => {
     setCurrentView(view);
+    // Clear active ticket when switching views
+    setActiveTicket(null);
+    
     let newPath = '/tickets'; // default path
     
     switch (view) {

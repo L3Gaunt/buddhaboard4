@@ -5,6 +5,12 @@ import { TicketBadge } from '../../components/TicketBadge';
 import { TicketFiltersSection } from '../../components/FiltersSection';
 
 export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, isCustomerView = false, currentAgent }) => {
+  // Clear active ticket when component mounts or when setActiveTicket changes
+  useEffect(() => {
+    window.history.pushState({}, '', '/tickets');
+    setActiveTicket(null);
+  }, [setActiveTicket]);
+
   const [agentNames, setAgentNames] = useState<Record<AgentId, string>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<{
