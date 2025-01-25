@@ -25,6 +25,105 @@ const generateUniqueSlug = (baseSlug: string) => {
   return `${baseSlug}-${randomSuffix}`;
 };
 
+const deleteUnusedTags = async (supabase: any) => {
+  console.log('Starting deleteUnusedTags function...');
+
+  // First get all existing tags to compare
+  const { data: allTags, error: allTagsError } = await supabase
+    .from('kb_tags')
+    .select('*');
+
+  console.log('All existing tags:', allTags);
+
+  // Get all tag relationships
+  const { data: allRelationships, error: relError } = await supabase
+    .from('kb_article_tags')
+    .select('*');
+
+  console.log('All tag relationships:', allRelationships);
+
+  // First get the used tag IDs
+  const { data: usedTags, error: usedError } = await supabase
+    .from('kb_article_tags')
+    .select('tag_id')
+    .not('tag_id', 'is', null);
+
+  console.log('Used tags:', usedTags);
+
+  if (usedError) {
+    console.log('Error getting used tags:', usedError);
+    return;
+  }
+
+  const usedTagIds = usedTags?.map(t => t.tag_id) || [];
+  console.log('Used tag IDs:', usedTagIds);
+
+  // Then get tags that aren't in the used tags list
+  let unusedTagsQuery = supabase
+    .from('kb_tags')
+    .select('*');
+
+  // Only apply the NOT IN filter if there are used tags
+  if (usedTagIds.length > 0) {
+    unusedTagsQuery = unusedTagsQuery.not('id', 'in', `(${usedTagIds.join(',')})`);
+  }
+
+  const { data: unusedTags, error } = await unusedTagsQuery;
+
+  console.log('Query for unused tags completed');
+  console.log('Error if any:', error);
+  console.log('Unused tags found:', unusedTags);
+
+  if (error) {
+    console.log('Error checking for unused tags:', error);
+    console.log('Error details:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint
+    });
+    return;
+  }
+
+  if (unusedTags && unusedTags.length > 0) {
+    console.log('Found unused tags:', {
+      count: unusedTags.length,
+      tags: unusedTags
+    });
+
+    const tagsToDelete = unusedTags.map(tag => tag.id);
+    console.log('Attempting to delete tag IDs:', tagsToDelete);
+
+    const { data: deletedData, error: deleteError } = await supabase
+      .from('kb_tags')
+      .delete()
+      .in('id', tagsToDelete)
+      .select();
+
+    if (deleteError) {
+      console.log('Error deleting unused tags:', deleteError);
+      console.log('Delete error details:', {
+        message: deleteError.message,
+        details: deleteError.details,
+        hint: deleteError.hint
+      });
+    } else {
+      console.log('Successfully deleted tags:', {
+        deletedCount: deletedData?.length || 0,
+        deletedTags: deletedData
+      });
+    }
+  } else {
+    console.log('No unused tags found to delete');
+  }
+
+  // Verify the deletion by checking remaining tags
+  const { data: remainingTags } = await supabase
+    .from('kb_tags')
+    .select('*');
+
+  console.log('Remaining tags after operation:', remainingTags);
+};
+
 serve(async (req) => {
   console.log('Request received:', {
     method: req.method,
@@ -320,6 +419,9 @@ serve(async (req) => {
                     }))
                   )
               }
+
+              // Check and delete any tags that are no longer used
+              await deleteUnusedTags(supabase);
               
               // Return updated article
               const { data, error } = await supabase
@@ -375,6 +477,10 @@ serve(async (req) => {
               .eq('id', id)
 
             if (error) throw error
+
+            // Clean up any tags that are no longer used
+            await deleteUnusedTags(supabase);
+
             return new Response(null, {
               headers: corsHeaders,
               status: 204,
