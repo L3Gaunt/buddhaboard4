@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { signIn, getAgentProfile } from '@/lib/auth';
 import { Button } from "@/components/ui/button";
 import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 export function LoginView() {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ export function LoginView() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showSecret, setShowSecret] = useState(false);
+  const [sendingMagicLink, setSendingMagicLink] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +50,34 @@ export function LoginView() {
       setError(err instanceof Error ? err.message : 'Invalid email or password');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleMagicLink = async () => {
+    if (!email) {
+      setError('Please enter your email address');
+      return;
+    }
+
+    setSendingMagicLink(true);
+    setError('');
+
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: window.location.origin,
+        },
+      });
+
+      if (error) throw error;
+      
+      toast.success('Magic link sent! Please check your email.');
+    } catch (err) {
+      console.error('Magic link error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to send magic link');
+    } finally {
+      setSendingMagicLink(false);
     }
   };
 
@@ -93,6 +123,23 @@ export function LoginView() {
             disabled={loading}
           >
             {loading ? 'Signing in...' : 'Sign in'}
+          </Button>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-gray-500">Or</span>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            onClick={handleMagicLink}
+            disabled={sendingMagicLink}
+          >
+            {sendingMagicLink ? 'Sending magic link...' : 'Send magic link to email'}
           </Button>
           <Button
             type="button"
