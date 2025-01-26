@@ -326,6 +326,23 @@ export default function App() {
         currentAgent={currentAgent}
         setCurrentAgent={setCurrentAgent}
         agents={agents}
+        ticketNumber={activeTicket?.number || 0}
+        onTicketReassigned={(ticketNumber, newAgentId) => {
+          // Update the active ticket
+          if (activeTicket) {
+            setActiveTicket({
+              ...activeTicket,
+              assignedTo: createAgentId(newAgentId)
+            });
+          }
+          
+          // Update the ticket in the tickets array
+          setTickets(tickets.map(ticket => 
+            ticket.number === ticketNumber 
+              ? { ...ticket, assignedTo: createAgentId(newAgentId) }
+              : ticket
+          ));
+        }}
       />
       <Layout
         currentView={currentView}
