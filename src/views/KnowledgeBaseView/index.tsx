@@ -187,14 +187,6 @@ export function KnowledgeBaseView() {
     );
   };
 
-  // Clear all filters
-  const clearFilters = () => {
-    setSelectedTags([]);
-    setFilterMode('AND');
-    setSearchQuery('');
-    localStorage.removeItem('kbFilters');
-  };
-
   const handleArticleClick = (article: KBArticle) => {
     const newUrl = `${window.location.pathname}?article=${article.id}`;
     window.history.pushState({}, '', newUrl);
