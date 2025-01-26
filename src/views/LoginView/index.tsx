@@ -122,7 +122,7 @@ export function LoginView() {
             className="w-full"
             disabled={loading}
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? 'Signing in...' : 'Sign in with password'}
           </Button>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
