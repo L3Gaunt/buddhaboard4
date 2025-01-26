@@ -4,24 +4,73 @@ import { getAgentProfile } from '../../lib/auth';
 import { TicketBadge } from '../../components/TicketBadge';
 import { TicketFiltersSection } from '../../components/FiltersSection';
 
+// Helper function to get filters from URL parameters and localStorage
+const getFiltersFromURL = () => {
+  const params = new URLSearchParams(window.location.search);
+  const storedFilters = localStorage.getItem('ticketFilters');
+  const parsedStoredFilters = storedFilters ? JSON.parse(storedFilters) : null;
+
+  // Prioritize URL params over localStorage
+  return {
+    assignedTo: params.get('assignedTo')?.split(',').filter(Boolean) || 
+                parsedStoredFilters?.assignedTo || [],
+    status: params.get('status')?.split(',').filter(Boolean) || 
+            parsedStoredFilters?.status || [],
+    priority: params.get('priority')?.split(',').filter(Boolean) || 
+              parsedStoredFilters?.priority || [],
+    searchQuery: params.get('search') || 
+                parsedStoredFilters?.searchQuery || '',
+  };
+};
+
+// Helper function to update URL parameters and localStorage with current filters
+const updateURLWithFilters = (filters: { assignedTo: string[]; status: string[]; priority: string[]; }, searchQuery: string) => {
+  const params = new URLSearchParams();
+  if (filters.assignedTo.length) params.set('assignedTo', filters.assignedTo.join(','));
+  if (filters.status.length) params.set('status', filters.status.join(','));
+  if (filters.priority.length) params.set('priority', filters.priority.join(','));
+  if (searchQuery) params.set('search', searchQuery);
+  
+  const newURL = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+  window.history.pushState({}, '', newURL);
+
+  // Store in localStorage
+  localStorage.setItem('ticketFilters', JSON.stringify({
+    ...filters,
+    searchQuery
+  }));
+};
+
 export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, isCustomerView = false, currentAgent }) => {
   // Clear active ticket when component mounts or when setActiveTicket changes
   useEffect(() => {
-    window.history.pushState({}, '', '/tickets');
     setActiveTicket(null);
   }, [setActiveTicket]);
 
   const [agentNames, setAgentNames] = useState<Record<AgentId, string>>({});
-  const [searchQuery, setSearchQuery] = useState("");
+  
+  // Get stored filters and search query
+  const savedFilters = getFiltersFromURL();
+  const [searchQuery, setSearchQuery] = useState(savedFilters.searchQuery || "");
+  
+  // Initialize filters from URL or defaults
   const [filters, setFilters] = useState<{
     assignedTo: string[];
     status: string[];
     priority: string[];
-  }>({
-    assignedTo: currentAgent ? [currentAgent.id] : [],
-    status: isCustomerView ? [] : ["open"],
-    priority: [],
+  }>(() => {
+    const defaultFilters = {
+      assignedTo: savedFilters.assignedTo.length ? savedFilters.assignedTo : (currentAgent ? [currentAgent.id] : []),
+      status: savedFilters.status.length ? savedFilters.status : (isCustomerView ? [] : ["open"]),
+      priority: savedFilters.priority,
+    };
+    return defaultFilters;
   });
+
+  // Update URL and localStorage when filters or search query change
+  useEffect(() => {
+    updateURLWithFilters(filters, searchQuery);
+  }, [filters, searchQuery]);
 
   // Helper functions for colors
   const getStatusColor = (status: string): string => {
@@ -124,12 +173,14 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, is
 
   // Clear all filters
   const clearFilters = () => {
-    setFilters({
+    const clearedFilters = {
       assignedTo: [],
       status: [],
       priority: [],
-    });
+    };
+    setFilters(clearedFilters);
     setSearchQuery("");
+    localStorage.removeItem('ticketFilters');
   };
 
   // Filter tickets based on search and filters
