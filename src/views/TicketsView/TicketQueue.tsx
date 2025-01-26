@@ -60,7 +60,7 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, is
     priority: string[];
   }>(() => {
     const defaultFilters = {
-      assignedTo: savedFilters.assignedTo.length ? savedFilters.assignedTo : (currentAgent ? [currentAgent.id] : []),
+      assignedTo: savedFilters.assignedTo,
       status: savedFilters.status.length ? savedFilters.status : (isCustomerView ? [] : ["open"]),
       priority: savedFilters.priority,
     };

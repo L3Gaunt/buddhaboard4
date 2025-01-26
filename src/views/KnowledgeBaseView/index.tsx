@@ -31,13 +31,48 @@ export const getTagStyles = (color: string | null, isSelected: boolean = false) 
   };
 };
 
+// Helper function to get filters from URL parameters and localStorage
+const getFiltersFromURL = () => {
+  const params = new URLSearchParams(window.location.search);
+  const storedFilters = localStorage.getItem('kbFilters');
+  const parsedStoredFilters = storedFilters ? JSON.parse(storedFilters) : null;
+
+  return {
+    tags: params.get('tags')?.split(',').filter(Boolean) || 
+          parsedStoredFilters?.tags || [],
+    filterMode: (params.get('filterMode') || parsedStoredFilters?.filterMode || 'AND') as 'AND' | 'OR',
+    searchQuery: params.get('search') || 
+                parsedStoredFilters?.searchQuery || '',
+  };
+};
+
+// Helper function to update URL parameters and localStorage with current filters
+const updateURLWithFilters = (tags: string[], filterMode: 'AND' | 'OR', searchQuery: string) => {
+  const params = new URLSearchParams();
+  if (tags.length) params.set('tags', tags.join(','));
+  if (filterMode !== 'AND') params.set('filterMode', filterMode);
+  if (searchQuery) params.set('search', searchQuery);
+  
+  const newURL = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+  window.history.pushState({}, '', newURL);
+
+  // Store in localStorage
+  localStorage.setItem('kbFilters', JSON.stringify({
+    tags,
+    filterMode,
+    searchQuery
+  }));
+};
+
 export function KnowledgeBaseView() {
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [filterMode, setFilterMode] = useState<'AND' | 'OR'>('AND');
+  // Get stored filters and search query
+  const savedFilters = getFiltersFromURL();
+  const [selectedTags, setSelectedTags] = useState<string[]>(savedFilters.tags);
+  const [filterMode, setFilterMode] = useState<'AND' | 'OR'>(savedFilters.filterMode);
+  const [searchQuery, setSearchQuery] = useState(savedFilters.searchQuery);
   const [articles, setArticles] = useState<KBArticle[]>([]);
   const [currentArticle, setCurrentArticle] = useState<KBArticle | null>(null);
   const [tags, setTags] = useState<KBTag[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
@@ -77,6 +112,11 @@ export function KnowledgeBaseView() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, [currentPage]);
+
+  // Update URL and localStorage when filters change
+  useEffect(() => {
+    updateURLWithFilters(selectedTags, filterMode, searchQuery);
+  }, [selectedTags, filterMode, searchQuery]);
 
   async function loadArticle(id: string) {
     try {
@@ -145,6 +185,14 @@ export function KnowledgeBaseView() {
         ? prev.filter((id) => id !== tagId)
         : [...prev, tagId]
     );
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSelectedTags([]);
+    setFilterMode('AND');
+    setSearchQuery('');
+    localStorage.removeItem('kbFilters');
   };
 
   const handleArticleClick = (article: KBArticle) => {

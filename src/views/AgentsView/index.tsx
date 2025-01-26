@@ -1,4 +1,4 @@
-import { useState, type FC } from 'react';
+import { useState, type FC, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { type Agent } from '@/types';
 import { EditAgentModal } from '@/components/modals/EditAgentModal';
@@ -15,11 +15,34 @@ interface AgentsViewProps {
   onAgentUpdated: () => void; // Callback to refresh the agents list
 }
 
+// Helper function to get search query from URL
+const getSearchFromURL = () => {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('search') || '';
+};
+
+// Helper function to update URL with search query
+const updateURLWithSearch = (searchQuery: string) => {
+  const params = new URLSearchParams(window.location.search);
+  if (searchQuery) {
+    params.set('search', searchQuery);
+  } else {
+    params.delete('search');
+  }
+  const newURL = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+  window.history.pushState({}, '', newURL);
+};
+
 export const AgentsView: FC<AgentsViewProps> = ({ agents, currentAgent, onAgentUpdated }) => {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(getSearchFromURL());
+
+  // Update URL when search query changes
+  useEffect(() => {
+    updateURLWithSearch(searchQuery);
+  }, [searchQuery]);
 
   const isAdmin = currentAgent?.role === 'admin';
 
