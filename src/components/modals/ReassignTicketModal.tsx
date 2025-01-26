@@ -10,7 +10,6 @@ interface ReassignTicketModalProps {
   showReassignModal: boolean;
   setShowReassignModal: (show: boolean) => void;
   currentAgent: Agent | null;
-  setCurrentAgent: (agent: Agent) => void;
   agents: Agent[];
   ticketNumber: number;
   onTicketReassigned: (ticketNumber: number, newAgentId: string) => void;
@@ -20,7 +19,6 @@ export function ReassignTicketModal({
   showReassignModal,
   setShowReassignModal,
   currentAgent,
-  setCurrentAgent,
   agents,
   ticketNumber,
   onTicketReassigned,

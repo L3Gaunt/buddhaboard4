@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Menu, LogOut, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import Sidebar from "./Sidebar";
 import { type LayoutProps, type Agent, Views } from '@/types';
 import { cn } from "@/lib/utils";
 import { AgentCard } from "@/components/AgentCard";

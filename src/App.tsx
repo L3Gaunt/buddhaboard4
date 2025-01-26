@@ -324,7 +324,6 @@ export default function App() {
         showReassignModal={showReassignModal}
         setShowReassignModal={setShowReassignModal}
         currentAgent={currentAgent}
-        setCurrentAgent={setCurrentAgent}
         agents={agents}
         ticketNumber={activeTicket?.number || 0}
         onTicketReassigned={(ticketNumber, newAgentId) => {
