@@ -207,6 +207,7 @@ export function KnowledgeBaseView() {
   const handleArticleSave = async (updatedArticle: Partial<KBArticle> & { newTags?: Array<{ name: string; slug: string; color: string; }> }) => {
     try {
       setIsLoading(true);
+      setError(null);
       
       // Update article content
       await updateArticle(updatedArticle.id!, {
@@ -222,13 +223,17 @@ export function KnowledgeBaseView() {
         await updateArticleTags(updatedArticle.id!, tagIds, updatedArticle.newTags);
       }
       
-      // Refresh the article
+      // Refresh both the current article and the article list
       if (currentArticle) {
         const article = await getArticle(currentArticle.id);
         setCurrentArticle(article);
       }
+      
+      // Reload the article list to reflect changes
+      await loadData(currentPage);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update article');
+      throw err;
     } finally {
       setIsLoading(false);
     }
