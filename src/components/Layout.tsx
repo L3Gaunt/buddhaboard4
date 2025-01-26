@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Menu, LogOut, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -25,6 +25,27 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
   setIsAvailable,
 }) => {
   const [showProfileCard, setShowProfileCard] = useState(false);
+  const profileCardRef = useRef<HTMLDivElement>(null);
+  const profileButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        showProfileCard &&
+        profileCardRef.current &&
+        profileButtonRef.current &&
+        !profileCardRef.current.contains(event.target as Node) &&
+        !profileButtonRef.current.contains(event.target as Node)
+      ) {
+        setShowProfileCard(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showProfileCard]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -111,6 +132,7 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
                   </div>
                   <div className="relative">
                     <button
+                      ref={profileButtonRef}
                       onClick={() => setShowProfileCard(!showProfileCard)}
                       className="flex items-center space-x-2 rounded-full bg-gray-100 px-3 py-1.5 hover:bg-gray-200"
                     >
@@ -128,7 +150,10 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
                       <span className="text-sm font-medium">{currentAgent.name}</span>
                     </button>
                     {showProfileCard && (
-                      <div className="absolute right-0 mt-2 w-80 z-50 bg-white rounded-lg shadow-lg border border-gray-200">
+                      <div 
+                        ref={profileCardRef}
+                        className="absolute right-0 mt-2 w-80 z-50 bg-white rounded-lg shadow-lg border border-gray-200"
+                      >
                         <AgentCard
                           agent={{
                             ...currentAgent,
