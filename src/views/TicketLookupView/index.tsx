@@ -48,7 +48,7 @@ export function TicketLookupView() {
       const fetchFeedback = async () => {
         try {
           const response = await fetch(
-            `${supabaseUrl}/functions/v1/submit_ticket_feedback?ticketHash=${ticketHash}`,
+            `${supabaseUrl}/functions/v1/submit_ticket_feedback?ticketHash=${encodeURIComponent(ticketHash)}`,
             {
               method: 'GET',
               headers: {
@@ -311,7 +311,7 @@ export function TicketLookupView() {
                             setIsEditingFeedback(false);
                             try {
                               const response = await fetch(
-                                `${supabaseUrl}/functions/v1/submit_ticket_feedback?ticketHash=${ticketHash}`,
+                                `${supabaseUrl}/functions/v1/submit_ticket_feedback?ticketHash=${encodeURIComponent(ticketHash)}`,
                                 {
                                   method: 'GET',
                                   headers: {
