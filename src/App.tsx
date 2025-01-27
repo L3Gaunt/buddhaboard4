@@ -138,8 +138,8 @@ export default function App() {
             metadata: metadata || undefined
           });
 
-          // Set availability based on agent profile status
-          setIsAvailable(agentProfile.status === AgentStatus.ONLINE);
+          // Always set availability to true when logging in
+          setIsAvailable(true);
         }
       } catch (error) {
         console.log('Not an agent profile, continuing as customer');
