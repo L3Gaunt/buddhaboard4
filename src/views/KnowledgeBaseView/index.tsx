@@ -123,6 +123,11 @@ export function KnowledgeBaseView() {
       setIsLoading(true);
       const article = await getArticle(id);
       setCurrentArticle(article);
+      // Update URL to reflect current article
+      const newUrl = `${window.location.pathname}?article=${id}`;
+      if (window.location.search !== `?article=${id}`) {
+        window.history.pushState({}, '', newUrl);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load article');
     } finally {
@@ -188,9 +193,7 @@ export function KnowledgeBaseView() {
   };
 
   const handleArticleClick = (article: KBArticle) => {
-    const newUrl = `${window.location.pathname}?article=${article.id}`;
-    window.history.pushState({}, '', newUrl);
-    setCurrentArticle(article);
+    loadArticle(article.id);
   };
 
   const handleBack = () => {
