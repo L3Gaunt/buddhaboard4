@@ -27,23 +27,18 @@ interface FeedbackQueueProps {
   } | null;
 }
 
-// Helper function to get filters from URL parameters and localStorage
+// Helper function to get filters from URL parameters
 const getFiltersFromURL = () => {
   const params = new URLSearchParams(window.location.search);
-  const storedFilters = localStorage.getItem('feedbackFilters');
-  const parsedStoredFilters = storedFilters ? JSON.parse(storedFilters) : null;
 
   return {
-    assignedTo: params.get('assignedTo')?.split(',').filter(Boolean) || 
-                parsedStoredFilters?.assignedTo || [],
-    rating: params.get('rating')?.split(',').filter(Boolean) || 
-            parsedStoredFilters?.rating || [],
-    searchQuery: params.get('search') || 
-                parsedStoredFilters?.searchQuery || '',
+    assignedTo: params.get('assignedTo')?.split(',').filter(Boolean) || [],
+    rating: params.get('rating')?.split(',').filter(Boolean) || [],
+    searchQuery: params.get('search') || '',
   };
 };
 
-// Helper function to update URL parameters and localStorage with current filters
+// Helper function to update URL parameters
 const updateURLWithFilters = (filters: { assignedTo: string[]; rating: string[]; }, searchQuery: string) => {
   const params = new URLSearchParams();
   if (filters.assignedTo.length) params.set('assignedTo', filters.assignedTo.join(','));
@@ -52,12 +47,6 @@ const updateURLWithFilters = (filters: { assignedTo: string[]; rating: string[];
   
   const newURL = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
   window.history.pushState({}, '', newURL);
-
-  // Store in localStorage
-  localStorage.setItem('feedbackFilters', JSON.stringify({
-    ...filters,
-    searchQuery
-  }));
 };
 
 export const FeedbackQueue: FC<FeedbackQueueProps> = ({ feedbackItems, setActiveTicket, currentAgent }) => {
@@ -80,7 +69,7 @@ export const FeedbackQueue: FC<FeedbackQueueProps> = ({ feedbackItems, setActive
     rating: savedFilters.rating,
   }));
 
-  // Update URL and localStorage when filters or search query change
+  // Update URL when filters or search query change
   useEffect(() => {
     updateURLWithFilters(filters, searchQuery);
   }, [filters, searchQuery]);
@@ -173,7 +162,6 @@ export const FeedbackQueue: FC<FeedbackQueueProps> = ({ feedbackItems, setActive
       rating: [],
     });
     setSearchQuery("");
-    localStorage.removeItem('feedbackFilters');
   };
 
   // Filter feedback items based on search and filters

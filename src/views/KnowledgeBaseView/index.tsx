@@ -31,22 +31,18 @@ export const getTagStyles = (color: string | null, isSelected: boolean = false) 
   };
 };
 
-// Helper function to get filters from URL parameters and localStorage
+// Helper function to get filters from URL parameters
 const getFiltersFromURL = () => {
   const params = new URLSearchParams(window.location.search);
-  const storedFilters = localStorage.getItem('kbFilters');
-  const parsedStoredFilters = storedFilters ? JSON.parse(storedFilters) : null;
 
   return {
-    tags: params.get('tags')?.split(',').filter(Boolean) || 
-          parsedStoredFilters?.tags || [],
-    filterMode: (params.get('filterMode') || parsedStoredFilters?.filterMode || 'AND') as 'AND' | 'OR',
-    searchQuery: params.get('search') || 
-                parsedStoredFilters?.searchQuery || '',
+    tags: params.get('tags')?.split(',').filter(Boolean) || [],
+    filterMode: (params.get('filterMode') || 'AND') as 'AND' | 'OR',
+    searchQuery: params.get('search') || '',
   };
 };
 
-// Helper function to update URL parameters and localStorage with current filters
+// Helper function to update URL parameters
 const updateURLWithFilters = (tags: string[], filterMode: 'AND' | 'OR', searchQuery: string) => {
   const params = new URLSearchParams();
   if (tags.length) params.set('tags', tags.join(','));
@@ -55,13 +51,6 @@ const updateURLWithFilters = (tags: string[], filterMode: 'AND' | 'OR', searchQu
   
   const newURL = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
   window.history.pushState({}, '', newURL);
-
-  // Store in localStorage
-  localStorage.setItem('kbFilters', JSON.stringify({
-    tags,
-    filterMode,
-    searchQuery
-  }));
 };
 
 export function KnowledgeBaseView() {
@@ -113,7 +102,7 @@ export function KnowledgeBaseView() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [currentPage]);
 
-  // Update URL and localStorage when filters change
+  // Update URL when filters change
   useEffect(() => {
     updateURLWithFilters(selectedTags, filterMode, searchQuery);
   }, [selectedTags, filterMode, searchQuery]);
