@@ -50,9 +50,9 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, is
     status: TicketStatus[];
     priority: TicketPriority[];
   }>(() => ({
-    assignedTo: currentAgent ? [currentAgent.id] : [],
-    status: [TicketStatus.OPEN, TicketStatus.WAITING_AGENT_REPLY],
-    priority: [],
+    assignedTo: savedFilters.assignedTo.length > 0 ? savedFilters.assignedTo : (currentAgent ? [currentAgent.id] : []),
+    status: savedFilters.status.length > 0 ? savedFilters.status : [TicketStatus.OPEN, TicketStatus.WAITING_AGENT_REPLY],
+    priority: savedFilters.priority,
   }));
 
   // Update URL when filters or search query change
