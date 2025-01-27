@@ -111,6 +111,12 @@ export default function App() {
       }
 
       setIsAuthenticated(true);
+      
+      // Redirect to tickets view after successful authentication if on root path
+      if (window.location.pathname === '/') {
+        window.history.pushState({}, '', '/tickets');
+        setCurrentView(Views.TICKETS);
+      }
 
       let agentProfile = null;
       // Load all agents only if we're an agent
