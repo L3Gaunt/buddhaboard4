@@ -59,7 +59,7 @@ export default function App() {
     if (isKnowledgeBasePage) return Views.KNOWLEDGE_BASE;
     if (isFeedbackPage) return Views.FEEDBACK;
     if (window.location.pathname === '/tickets') return Views.TICKETS;
-    return Views.KNOWLEDGE_BASE;
+    return Views.TICKETS;
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
