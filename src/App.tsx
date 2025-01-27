@@ -53,13 +53,14 @@ export default function App() {
   }
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentView, setCurrentView] = useState<ViewType>(
-    isAgentsPage ? Views.AGENTS :
-    isChatPage ? Views.CHAT :
-    isKnowledgeBasePage ? Views.KNOWLEDGE_BASE :
-    isFeedbackPage ? Views.FEEDBACK :
-    isAuthenticated ? Views.TICKETS : Views.KNOWLEDGE_BASE
-  );
+  const [currentView, setCurrentView] = useState<ViewType>(() => {
+    if (isAgentsPage) return Views.AGENTS;
+    if (isChatPage) return Views.CHAT;
+    if (isKnowledgeBasePage) return Views.KNOWLEDGE_BASE;
+    if (isFeedbackPage) return Views.FEEDBACK;
+    if (window.location.pathname === '/tickets') return Views.TICKETS;
+    return Views.KNOWLEDGE_BASE;
+  });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
   const [isAvailable, setIsAvailable] = useState(true);
