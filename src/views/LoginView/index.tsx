@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { signIn, getAgentProfile } from '@/lib/auth';
+import { signIn, getAgentProfile, updateAgentStatus } from '@/lib/auth';
 import { Button } from "@/components/ui/button";
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -37,6 +37,8 @@ export function LoginView() {
         if (count && count > 0) {
           const agentProfile = await getAgentProfile(result.user.id);
           if (agentProfile) {
+            // Set agent as available when logging in
+            await updateAgentStatus(result.user.id, 'online');
             window.location.reload();
             return;
           }

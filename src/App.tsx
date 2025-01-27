@@ -144,9 +144,6 @@ export default function App() {
             email: agentProfile.email,
             metadata: metadata || undefined
           });
-
-          // Always set availability to true when logging in
-          setIsAvailable(true);
         }
       } catch (error) {
         console.log('Not an agent profile, continuing as customer');
@@ -254,6 +251,8 @@ export default function App() {
           getTicketById(ticketNumber)
             .then(ticket => {
               setActiveTicket(ticket);
+              setTicketPriority(ticket.priority);
+              setTicketStatus(ticket.status);
               setCurrentView(Views.TICKETS);
             })
             .catch(error => console.error('Error loading ticket:', error));
@@ -285,6 +284,8 @@ export default function App() {
           try {
             const ticket = await getTicketById(ticketNumber);
             setActiveTicket(ticket);
+            setTicketPriority(ticket.priority);
+            setTicketStatus(ticket.status);
             setCurrentView(Views.TICKETS);
           } catch (error) {
             console.error('Error loading ticket:', error);
@@ -376,7 +377,13 @@ export default function App() {
               <div className="w-full overflow-auto">
                 <TicketQueue 
                   tickets={tickets} 
-                  setActiveTicket={setActiveTicket} 
+                  setActiveTicket={(ticket) => {
+                    setActiveTicket(ticket);
+                    if (ticket) {
+                      setTicketPriority(ticket.priority);
+                      setTicketStatus(ticket.status);
+                    }
+                  }} 
                   isCustomerView={!currentAgent}
                   currentAgent={currentAgent}
                 />
