@@ -107,8 +107,8 @@ export async function updateAgentStatus(userId: AgentId | string, status: AgentS
 }
 
 export async function createUserProfile(userData: Omit<Database['public']['Tables']['users']['Insert'], 'id' | 'created_at'>) {
-  // Generate avatar URL using DiceBear API
-  const seed = Math.random().toString(36).substring(7);
+  // Generate avatar URL using DiceBear API with name as seed for consistency
+  const seed = userData.name.toLowerCase().replace(/\s+/g, '');
   const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
 
   const { data, error } = await supabase

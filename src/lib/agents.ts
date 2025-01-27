@@ -101,6 +101,10 @@ export async function createAgent(data: CreateAgentData) {
   if (authError) throw authError;
   if (!authData?.userId) throw new Error('No user ID returned from auth creation');
 
+  // Generate avatar URL using DiceBear API
+  const seed = data.name.toLowerCase().replace(/\s+/g, '');
+  const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+
   // Then create the agent profile
   const { data: agent, error: profileError } = await supabase
     .from('agents')
@@ -110,6 +114,7 @@ export async function createAgent(data: CreateAgentData) {
       email: data.email,
       role: data.role,
       status: 'offline',
+      avatar: avatarUrl,
       metadata: {
         department: data.department,
         skills: data.skills || [],

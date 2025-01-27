@@ -74,28 +74,19 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
                 >
                   Tickets
                 </button>
-                <button
-                  onClick={() => setCurrentView(Views.AGENTS)}
-                  className={cn(
-                    "inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium",
-                    currentView === Views.AGENTS
-                      ? "border-blue-500 text-gray-900"
-                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                  )}
-                >
-                  Agents
-                </button>
-                <button
-                  onClick={() => setCurrentView(Views.CHAT)}
-                  className={cn(
-                    "inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium",
-                    currentView === Views.CHAT
-                      ? "border-blue-500 text-gray-900"
-                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                  )}
-                >
-                  Chat
-                </button>
+                {currentAgent && (
+                  <button
+                    onClick={() => setCurrentView(Views.AGENTS)}
+                    className={cn(
+                      "inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium",
+                      currentView === Views.AGENTS
+                        ? "border-blue-500 text-gray-900"
+                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                    )}
+                  >
+                    Agents
+                  </button>
+                )}
                 <button
                   onClick={() => setCurrentView(Views.KNOWLEDGE_BASE)}
                   className={cn(
@@ -107,22 +98,24 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
                 >
                   Knowledge Base
                 </button>
-                <button
-                  onClick={() => setCurrentView(Views.FEEDBACK)}
-                  className={cn(
-                    "inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium",
-                    currentView === Views.FEEDBACK
-                      ? "border-blue-500 text-gray-900"
-                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                  )}
-                >
-                  Feedback
-                </button>
+                {currentAgent && (
+                  <button
+                    onClick={() => setCurrentView(Views.FEEDBACK)}
+                    className={cn(
+                      "inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium",
+                      currentView === Views.FEEDBACK
+                        ? "border-blue-500 text-gray-900"
+                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                    )}
+                  >
+                    Feedback
+                  </button>
+                )}
               </div>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
-              {currentAgent && (
-                <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-4">
+                {currentAgent && (
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-500">Available</span>
                     <Switch
@@ -130,6 +123,8 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
                       onCheckedChange={setIsAvailable}
                     />
                   </div>
+                )}
+                {currentAgent && (
                   <div className="relative">
                     <button
                       ref={profileButtonRef}
@@ -165,17 +160,17 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
                       </div>
                     )}
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onLogout}
-                    className="flex items-center gap-2"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Log Out
-                  </Button>
-                </div>
-              )}
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onLogout}
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Log Out
+                </Button>
+              </div>
             </div>
             <div className="-mr-2 flex items-center sm:hidden">
               <button
@@ -210,34 +205,22 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
             >
               Tickets
             </button>
-            <button
-              onClick={() => {
-                setCurrentView(Views.AGENTS);
-                setIsMobileMenuOpen(false);
-              }}
-              className={cn(
-                "block border-l-4 py-2 pl-3 pr-4 text-base font-medium",
-                currentView === Views.AGENTS
-                  ? "border-blue-500 bg-blue-50 text-blue-700"
-                  : "border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
-              )}
-            >
-              Agents
-            </button>
-            <button
-              onClick={() => {
-                setCurrentView(Views.CHAT);
-                setIsMobileMenuOpen(false);
-              }}
-              className={cn(
-                "block border-l-4 py-2 pl-3 pr-4 text-base font-medium",
-                currentView === Views.CHAT
-                  ? "border-blue-500 bg-blue-50 text-blue-700"
-                  : "border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
-              )}
-            >
-              Chat
-            </button>
+            {currentAgent && (
+              <button
+                onClick={() => {
+                  setCurrentView(Views.AGENTS);
+                  setIsMobileMenuOpen(false);
+                }}
+                className={cn(
+                  "block border-l-4 py-2 pl-3 pr-4 text-base font-medium",
+                  currentView === Views.AGENTS
+                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
+                )}
+              >
+                Agents
+              </button>
+            )}
             <button
               onClick={() => {
                 setCurrentView(Views.KNOWLEDGE_BASE);
@@ -252,25 +235,27 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
             >
               Knowledge Base
             </button>
-            <button
-              onClick={() => {
-                setCurrentView(Views.FEEDBACK);
-                setIsMobileMenuOpen(false);
-              }}
-              className={cn(
-                "block border-l-4 py-2 pl-3 pr-4 text-base font-medium",
-                currentView === Views.FEEDBACK
-                  ? "border-blue-500 bg-blue-50 text-blue-700"
-                  : "border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
-              )}
-            >
-              Feedback
-            </button>
+            {currentAgent && (
+              <button
+                onClick={() => {
+                  setCurrentView(Views.FEEDBACK);
+                  setIsMobileMenuOpen(false);
+                }}
+                className={cn(
+                  "block border-l-4 py-2 pl-3 pr-4 text-base font-medium",
+                  currentView === Views.FEEDBACK
+                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
+                )}
+              >
+                Feedback
+              </button>
+            )}
           </div>
           <div className="border-t border-gray-200 pb-3 pt-4">
-            {currentAgent && (
-              <div className="space-y-3 px-4">
-                <div className="flex items-center justify-between">
+            <div className="space-y-3 px-4">
+              <div className="flex items-center justify-between">
+                {currentAgent && (
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-500">Available</span>
                     <Switch
@@ -278,18 +263,18 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
                       onCheckedChange={setIsAvailable}
                     />
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onLogout}
-                    className="flex items-center gap-2"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Log Out
-                  </Button>
-                </div>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onLogout}
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Log Out
+                </Button>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </nav>
