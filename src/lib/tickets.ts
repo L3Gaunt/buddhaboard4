@@ -22,7 +22,7 @@ interface DatabaseMessage {
 }
 
 // Transform database ticket to frontend ticket
-function transformTicket(data: TicketData): Ticket {
+export function transformTicket(data: TicketData): Ticket {
   // Ensure conversation is properly initialized and typed
   const conversation = Array.isArray(data.conversation) 
     ? data.conversation.map((msg): Message => {

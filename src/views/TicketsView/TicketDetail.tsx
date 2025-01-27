@@ -4,7 +4,7 @@ import { ArrowLeft, UserPlus, User, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "../../RichTextEditor";
 import CustomerProfileView from '../CustomerProfileView';
-import { addMessageToTicket, updateTicketPriority, updateTicket, getAllCustomerTickets } from '@/lib/tickets';
+import { addMessageToTicket, updateTicketPriority, updateTicket, getAllCustomerTickets, transformTicket } from '@/lib/tickets';
 import { getAgentProfile } from '@/lib/auth';
 import { AgentCard } from '@/components/AgentCard';
 import { 
@@ -13,7 +13,6 @@ import {
   TicketPriority, 
   TicketStatus,
   type Message,
-  type UnwrapReadonly,
   type Agent,
   createMessageId
 } from '@/types';
@@ -167,7 +166,7 @@ export const TicketDetail: FC<TicketDetailProps> = ({
 
     const newMessage: Message = {
       id: createMessageId(`msg_${Date.now()}`),
-      isFromCustomer: isCustomerView, // Set based on viewer type
+      isFromCustomer: isCustomerView,
       message: response,
       timestamp: new Date()
     };
@@ -175,22 +174,50 @@ export const TicketDetail: FC<TicketDetailProps> = ({
     try {
       // Convert TicketId to number using valueOf()
       const numericId = Number(ticket.id.valueOf());
+
+      if (isCustomerView) {
+        // For customers, use the edge function
+        const { data, error } = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/customer_ticket`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+          },
+          body: JSON.stringify({
+            action: 'append_message',
+            ticketNumber: numericId,
+            message: response
+          })
+        }).then(res => res.json());
+
+        if (error) throw error;
+        
+        // Update local state with the response from the edge function
+        setActiveTicket(data);
+        setTicketStatus(data.status);
+      } else {
+        // For agents, continue using direct database access
+        await addMessageToTicket(numericId, {
+          id: newMessage.id,
+          isFromCustomer: newMessage.isFromCustomer,
+          message: newMessage.message,
+          timestamp: newMessage.timestamp.toISOString()
+        });
+
+        // Get the updated ticket data to ensure we have the latest state
+        const { data: updatedTicketData, error: updateError } = await supabase
+          .from('tickets')
+          .select('*')
+          .eq('number', numericId)
+          .single();
+
+        if (updateError) throw updateError;
+
+        // Transform and update local state with the full ticket data
+        const updatedTicket = transformTicket(updatedTicketData);
+        setActiveTicket(updatedTicket);
+      }
       
-      await addMessageToTicket(numericId, {
-        id: newMessage.id,
-        isFromCustomer: newMessage.isFromCustomer,
-        message: newMessage.message,
-        timestamp: newMessage.timestamp.toISOString()
-      });
-
-      // Update local state
-      const updatedTicket = {
-        ...ticket,
-        conversation: [...ticket.conversation, newMessage],
-        lastUpdated: new Date()
-      } as UnwrapReadonly<Ticket>;
-
-      setActiveTicket(updatedTicket);
       setResponse("");
     } catch (error) {
       console.error('Error sending message:', error);

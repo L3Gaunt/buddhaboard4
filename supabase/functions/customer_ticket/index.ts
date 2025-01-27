@@ -150,22 +150,66 @@ serve(async (req) => {
         }
       )
     } else if (action === 'append_message') {
-      const { ticketHash, message } = body
+      const { ticketHash, ticketNumber, message } = body
 
-      // Decode the hash to get ticket number and user ID
-      const decoded = atob(ticketHash)
-      const [ticketNumber, userId] = decoded.split(':')
+      let ticket;
+      if (ticketHash) {
+        // Decode the hash to get ticket number and user ID
+        const decoded = atob(ticketHash)
+        const [decodedTicketNumber, userId] = decoded.split(':')
 
-      // Verify the ticket belongs to this user
-      const { data: ticket, error: ticketError } = await supabaseAdmin
-        .from('tickets')
-        .select('*')
-        .eq('number', ticketNumber)
-        .eq('customer_id', userId)
-        .single()
+        // Verify the ticket belongs to this user
+        const { data: ticketData, error: ticketError } = await supabaseAdmin
+          .from('tickets')
+          .select('*')
+          .eq('number', decodedTicketNumber)
+          .eq('customer_id', userId)
+          .single()
 
-      if (ticketError || !ticket) {
-        throw new Error('Invalid ticket hash or ticket not found')
+        if (ticketError || !ticketData) {
+          throw new Error('Invalid ticket hash or ticket not found')
+        }
+
+        ticket = ticketData;
+      } else if (ticketNumber) {
+        // For authenticated users, verify ownership through auth token
+        const authHeader = req.headers.get('Authorization')
+        if (!authHeader) {
+          throw new Error('Authorization header required')
+        }
+
+        // Create a client with the user's token
+        const supabaseClient = createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+          {
+            global: {
+              headers: { Authorization: authHeader },
+            },
+          }
+        )
+
+        // Get the authenticated user
+        const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
+        if (userError || !user) {
+          throw new Error('Authentication required')
+        }
+
+        // Verify the ticket belongs to this user
+        const { data: ticketData, error: ticketError } = await supabaseAdmin
+          .from('tickets')
+          .select('*')
+          .eq('number', ticketNumber)
+          .eq('customer_id', user.id)
+          .single()
+
+        if (ticketError || !ticketData) {
+          throw new Error('Ticket not found or unauthorized')
+        }
+
+        ticket = ticketData;
+      } else {
+        throw new Error('Either ticketHash or ticketNumber is required')
       }
 
       // Append the message to the conversation
@@ -182,9 +226,10 @@ serve(async (req) => {
         .from('tickets')
         .update({ 
           conversation: updatedConversation,
-          last_updated: new Date().toISOString()
+          last_updated: new Date().toISOString(),
+          status: 'open'
         })
-        .eq('number', ticketNumber)
+        .eq('number', ticket.number)
         .select()
         .single()
 
