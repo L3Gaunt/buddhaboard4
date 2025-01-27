@@ -11,6 +11,7 @@ interface ExtendedLayoutProps extends LayoutProps {
   onLogout: () => Promise<void>;
   isAvailable: boolean;
   setIsAvailable: (available: boolean) => void;
+  isAuthenticated: boolean;
 }
 
 const Layout: React.FC<ExtendedLayoutProps> = ({
@@ -23,6 +24,7 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
   onLogout,
   isAvailable,
   setIsAvailable,
+  isAuthenticated,
 }) => {
   const [showProfileCard, setShowProfileCard] = useState(false);
   const profileCardRef = useRef<HTMLDivElement>(null);
@@ -56,24 +58,26 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
             <div className="flex">
               <div className="flex flex-shrink-0 items-center">
                 <button
-                  onClick={() => setCurrentView(Views.TICKETS)}
+                  onClick={() => setCurrentView(isAuthenticated ? Views.TICKETS : Views.KNOWLEDGE_BASE)}
                   className="text-xl font-bold text-blue-600"
                 >
                   BuddhaBoard
                 </button>
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <button
-                  onClick={() => setCurrentView(Views.TICKETS)}
-                  className={cn(
-                    "inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium",
-                    currentView === Views.TICKETS
-                      ? "border-blue-500 text-gray-900"
-                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                  )}
-                >
-                  Tickets
-                </button>
+                {isAuthenticated && (
+                  <button
+                    onClick={() => setCurrentView(Views.TICKETS)}
+                    className={cn(
+                      "inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium",
+                      currentView === Views.TICKETS
+                        ? "border-blue-500 text-gray-900"
+                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                    )}
+                  >
+                    Tickets
+                  </button>
+                )}
                 {currentAgent && (
                   <button
                     onClick={() => setCurrentView(Views.AGENTS)}
@@ -115,7 +119,7 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
               <div className="flex items-center space-x-4">
-                {!currentAgent && (
+                {(!currentAgent || !isAuthenticated) && (
                   <Button
                     onClick={() => window.location.href = '/submit-ticket'}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -169,15 +173,24 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
                     )}
                   </div>
                 )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onLogout}
-                  className="flex items-center gap-2"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Log Out
-                </Button>
+                {!isAuthenticated ? (
+                  <Button
+                    onClick={() => window.location.href = '/login'}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Log In
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onLogout}
+                    className="flex items-center gap-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Log Out
+                  </Button>
+                )}
               </div>
             </div>
             <div className="-mr-2 flex items-center sm:hidden">
@@ -199,20 +212,22 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
         {/* Mobile menu */}
         <div className={cn("sm:hidden", isMobileMenuOpen ? "block" : "hidden")}>
           <div className="space-y-1 pb-3 pt-2">
-            <button
-              onClick={() => {
-                setCurrentView(Views.TICKETS);
-                setIsMobileMenuOpen(false);
-              }}
-              className={cn(
-                "block border-l-4 py-2 pl-3 pr-4 text-base font-medium",
-                currentView === Views.TICKETS
-                  ? "border-blue-500 bg-blue-50 text-blue-700"
-                  : "border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
-              )}
-            >
-              Tickets
-            </button>
+            {isAuthenticated && (
+              <button
+                onClick={() => {
+                  setCurrentView(Views.TICKETS);
+                  setIsMobileMenuOpen(false);
+                }}
+                className={cn(
+                  "block border-l-4 py-2 pl-3 pr-4 text-base font-medium",
+                  currentView === Views.TICKETS
+                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
+                )}
+              >
+                Tickets
+              </button>
+            )}
             {currentAgent && (
               <button
                 onClick={() => {
@@ -261,35 +276,52 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
             )}
           </div>
           <div className="border-t border-gray-200 pb-3 pt-4">
-            <div className="space-y-3 px-4">
-              <div className="flex items-center justify-between">
-                {!currentAgent && (
-                  <Button
-                    onClick={() => window.location.href = '/submit-ticket'}
-                    className="bg-blue-600 hover:bg-blue-700 text-white w-full"
-                  >
-                    Submit a Ticket
-                  </Button>
-                )}
-                {currentAgent && (
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-500">Available</span>
-                    <Switch
-                      checked={isAvailable}
-                      onCheckedChange={setIsAvailable}
-                    />
+            <div className="flex items-center px-4">
+              {currentAgent ? (
+                <>
+                  <div className="flex-shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                      {currentAgent.avatar.startsWith('http') ? (
+                        <img 
+                          src={currentAgent.avatar} 
+                          alt={currentAgent.name}
+                          className="h-10 w-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        currentAgent.name.substring(0, 2).toUpperCase()
+                      )}
+                    </div>
                   </div>
-                )}
+                  <div className="ml-3">
+                    <div className="text-base font-medium text-gray-800">{currentAgent.name}</div>
+                    <div className="text-sm font-medium text-gray-500">{currentAgent.role}</div>
+                  </div>
+                </>
+              ) : (
+                <div className="text-sm font-medium text-gray-500">
+                  {isAuthenticated ? 'Customer' : 'Not logged in'}
+                </div>
+              )}
+            </div>
+            <div className="mt-3 space-y-1 px-2">
+              {!isAuthenticated ? (
+                <Button
+                  onClick={() => window.location.href = '/login'}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Log In
+                </Button>
+              ) : (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={onLogout}
-                  className="flex items-center gap-2"
+                  className="w-full flex items-center gap-2 justify-center"
                 >
                   <LogOut className="h-4 w-4" />
                   Log Out
                 </Button>
-              </div>
+              )}
             </div>
           </div>
         </div>

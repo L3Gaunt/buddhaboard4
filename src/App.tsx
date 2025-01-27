@@ -52,12 +52,13 @@ export default function App() {
     return <TicketLookupView />;
   }
 
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState<ViewType>(
     isAgentsPage ? Views.AGENTS :
     isChatPage ? Views.CHAT :
     isKnowledgeBasePage ? Views.KNOWLEDGE_BASE :
     isFeedbackPage ? Views.FEEDBACK :
-    Views.TICKETS
+    isAuthenticated ? Views.TICKETS : Views.KNOWLEDGE_BASE
   );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
@@ -71,7 +72,6 @@ export default function App() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [customer, setCustomer] = useState<Customer | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleViewChange = (view: ViewType) => {
     setCurrentView(view);
@@ -316,36 +316,42 @@ export default function App() {
     return <div>Loading...</div>;
   }
 
-  if (!isAuthenticated) {
+  // Allow access to public routes and knowledge base without authentication
+  if (!isAuthenticated && 
+      !isSubmitTicketPage && 
+      !isTicketLookupPage && 
+      !isKnowledgeBasePage) {
     return <LoginView />;
   }
 
   return (
     <>
       <Toaster position="top-right" />
-      <ReassignTicketModal
-        showReassignModal={showReassignModal}
-        setShowReassignModal={setShowReassignModal}
-        currentAgent={currentAgent}
-        agents={agents}
-        ticketNumber={activeTicket?.number || 0}
-        onTicketReassigned={(ticketNumber, newAgentId) => {
-          // Update the active ticket
-          if (activeTicket) {
-            setActiveTicket({
-              ...activeTicket,
-              assignedTo: createAgentId(newAgentId)
-            });
-          }
-          
-          // Update the ticket in the tickets array
-          setTickets(tickets.map(ticket => 
-            ticket.number === ticketNumber 
-              ? { ...ticket, assignedTo: createAgentId(newAgentId) }
-              : ticket
-          ));
-        }}
-      />
+      {isAuthenticated && (
+        <ReassignTicketModal
+          showReassignModal={showReassignModal}
+          setShowReassignModal={setShowReassignModal}
+          currentAgent={currentAgent}
+          agents={agents}
+          ticketNumber={activeTicket?.number || 0}
+          onTicketReassigned={(ticketNumber, newAgentId) => {
+            // Update the active ticket
+            if (activeTicket) {
+              setActiveTicket({
+                ...activeTicket,
+                assignedTo: createAgentId(newAgentId)
+              });
+            }
+            
+            // Update the ticket in the tickets array
+            setTickets(tickets.map(ticket => 
+              ticket.number === ticketNumber 
+                ? { ...ticket, assignedTo: createAgentId(newAgentId) }
+                : ticket
+            ));
+          }}
+        />
+      )}
       <Layout
         currentView={currentView}
         setCurrentView={handleViewChange}
@@ -355,8 +361,9 @@ export default function App() {
         isAvailable={isAvailable}
         setIsAvailable={setIsAvailable}
         currentAgent={currentAgent}
+        isAuthenticated={isAuthenticated}
       >
-        {currentView === Views.TICKETS && (
+        {currentView === Views.TICKETS && isAuthenticated && (
           <div className="flex flex-1 overflow-hidden">
             {!activeTicket ? (
               <div className="w-full overflow-auto">
@@ -387,7 +394,7 @@ export default function App() {
             )}
           </div>
         )}
-        {currentView === Views.AGENTS && (
+        {currentView === Views.AGENTS && isAuthenticated && (
           <AgentsView 
             agents={agents}
             currentAgent={currentAgent}
@@ -397,14 +404,14 @@ export default function App() {
             }} 
           />
         )}
-        {currentView === Views.CHAT && <ChatView />}
+        {currentView === Views.CHAT && isAuthenticated && <ChatView />}
         {currentView === Views.KNOWLEDGE_BASE && <KnowledgeBaseView />}
-        {currentView === Views.FEEDBACK && !currentAgent?.role && (
+        {currentView === Views.FEEDBACK && !currentAgent?.role && isAuthenticated && (
           <div className="flex items-center justify-center min-h-screen">
             <div className="text-red-600">You don't have permission to view this page.</div>
           </div>
         )}
-        {currentView === Views.FEEDBACK && currentAgent?.role && (
+        {currentView === Views.FEEDBACK && currentAgent?.role && isAuthenticated && (
           <FeedbackView 
             currentAgent={currentAgent} 
             setActiveTicket={(ticket) => {

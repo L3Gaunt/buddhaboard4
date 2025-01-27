@@ -18,6 +18,7 @@ export function UserTicketView() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [ticketHash, setTicketHash] = useState<string>("");
   const [currentUser, setCurrentUser] = useState<Customer | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<UserTicketFormData>({
     title: "",
     firstMessage: "",
@@ -51,6 +52,7 @@ export function UserTicketView() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     try {
       let result;
       if (currentUser) {
@@ -77,7 +79,7 @@ export function UserTicketView() {
       setShowSuccess(true);
     } catch (error) {
       console.error('Error submitting ticket:', error);
-      alert(error instanceof Error ? error.message : 'Failed to submit ticket. Please try again.');
+      setError(error instanceof Error ? error.message : 'Failed to submit ticket. Please try again.');
     }
   };
 
@@ -187,6 +189,11 @@ export function UserTicketView() {
         >
           Help yourself: Our knowledge base
         </Button>
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-red-800">{error}</p>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {!currentUser ? (

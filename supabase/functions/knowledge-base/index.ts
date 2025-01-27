@@ -139,24 +139,20 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey)
     console.log('Supabase client created with URL:', supabaseUrl);
 
+    let user: { id: string } | null = null;
     const authHeader = req.headers.get('Authorization')
     console.log('Auth header present:', !!authHeader);
     
-    if (!authHeader) {
-      console.log('No Authorization header found');
-      throw new Error('Unauthorized - No auth header');
-    }
-
-    const user = await supabase.auth.getUser(authHeader.replace('Bearer ', ''))
-    console.log('User auth result:', {
-      success: !!user.data.user,
-      userId: user.data.user?.id,
-      error: user.error
-    });
-    
-    if (!user.data.user) {
-      console.log('No user found in auth response');
-      throw new Error('Unauthorized - Invalid token');
+    // Only try to authenticate if there's an auth header
+    if (authHeader) {
+      const authResult = await supabase.auth.getUser(authHeader.replace('Bearer ', ''))
+      if (authResult.data.user) {
+        user = authResult.data.user;
+      }
+      console.log('User auth result:', {
+        success: !!user,
+        userId: user?.id
+      });
     }
 
     const body = await req.json()
@@ -170,11 +166,16 @@ serve(async (req) => {
 
     // For write operations, verify user is an agent
     if (method !== 'GET') {
-      console.log('Checking agent status for user:', user.data.user.id);
+      if (!user) {
+        console.log('No authenticated user for write operation');
+        throw new Error('Authentication required for write operations');
+      }
+
+      console.log('Checking agent status for user:', user.id);
       const { data: agent, error: agentError } = await supabase
         .from('agents')
         .select('id')
-        .eq('id', user.data.user.id)
+        .eq('id', user.id)
         .single()
 
       if (agentError) {
@@ -195,7 +196,7 @@ serve(async (req) => {
             if (id) {
               console.log('Fetching single article:', id);
               // Get single article
-              const { data, error } = await supabase
+              const query = supabase
                 .from('kb_articles')
                 .select(`
                   id,
@@ -215,8 +216,14 @@ serve(async (req) => {
                     )
                   )
                 `)
-                .eq('id', id)
-                .single()
+                .eq('id', id);
+              
+              // Only show published articles to unauthenticated users
+              if (!user) {
+                query.eq('status', 'published');
+              }
+
+              const { data, error } = await query.single();
 
               if (error) {
                 console.log('Error fetching article:', error);
@@ -232,13 +239,6 @@ serve(async (req) => {
               console.log('Fetching articles list with params:', params);
               const { page = 1, limit = 10 } = params
               const offset = (page - 1) * limit
-
-              // Check if user is an agent
-              const { data: agent } = await supabase
-                .from('agents')
-                .select('id')
-                .eq('id', user.data.user.id)
-                .single()
 
               let query = supabase
                 .from('kb_articles')
@@ -259,11 +259,11 @@ serve(async (req) => {
                       color
                     )
                   )
-                `, { count: 'exact' })
-                
-              // Only filter by published status for non-agents
-              if (!agent) {
-                query = query.eq('status', 'published')
+                `);
+
+              // Only show published articles to unauthenticated users
+              if (!user) {
+                query = query.eq('status', 'published');
               }
 
               const { data, error, count } = await query

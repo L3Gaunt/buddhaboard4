@@ -44,7 +44,7 @@ serve(async (req) => {
         })
 
         if (signInError) {
-          throw new Error('Invalid credentials')
+          throw new Error('User already registered, please sign in with correct password')
         }
 
         userId = existingUser.id
@@ -56,8 +56,31 @@ serve(async (req) => {
           email_confirm: true
         })
 
-        if (authError) throw authError
-        userId = authUser.user.id
+        if (authError) {
+          // If user already exists, try to sign in instead
+          if (authError.message?.includes('User already registered')) {
+            const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+              email,
+              password
+            })
+
+            if (signInError) {
+              throw new Error('User already registered, please sign in with correct password')
+            }
+
+            // Get the existing user's ID
+            const { data: { users }, error: usersError } = await supabaseAdmin.auth.admin.listUsers()
+            const existingUser = users.find(user => user.email === email)
+            if (!existingUser) {
+              throw new Error('Failed to retrieve user information')
+            }
+            userId = existingUser.id
+          } else {
+            throw authError
+          }
+        } else {
+          userId = authUser.user.id
+        }
       }
 
       // Create or update user in public.users table

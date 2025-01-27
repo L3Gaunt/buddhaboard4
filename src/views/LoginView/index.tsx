@@ -157,12 +157,11 @@ export function LoginView() {
         </form>
         <div className="mt-6 text-center border-t pt-6">
           <p className="text-sm text-gray-600">
-            Need help? {' '}
             <a 
-              href="/submit-ticket" 
+              href="/knowledge-base" 
               className="text-blue-600 hover:text-blue-800 font-medium"
             >
-              Submit your first Support Ticket
+              Go to our support page
             </a>
           </p>
         </div>
