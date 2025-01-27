@@ -51,7 +51,7 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, is
     priority: TicketPriority[];
   }>(() => ({
     assignedTo: isCustomerView ? [] : (savedFilters.assignedTo.length > 0 ? savedFilters.assignedTo : (currentAgent ? [currentAgent.id] : [])),
-    status: isCustomerView ? [] : (savedFilters.status.length > 0 ? savedFilters.status : [TicketStatus.OPEN, TicketStatus.WAITING_AGENT_REPLY]),
+    status: isCustomerView ? [] : (savedFilters.status.length > 0 ? savedFilters.status : [TicketStatus.OPEN]),
     priority: isCustomerView ? [] : savedFilters.priority,
   }));
 
@@ -88,7 +88,6 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, is
   const statusOptions = [
     { value: TicketStatus.OPEN, label: "Open" },
     { value: TicketStatus.WAITING_CUSTOMER_REPLY, label: "Waiting for Customer Reply" },
-    { value: TicketStatus.WAITING_AGENT_REPLY, label: "Waiting for Agent Reply" },
     { value: TicketStatus.RESOLVED, label: "Resolved" },
     { value: TicketStatus.CLOSED, label: "Closed" },
   ];
