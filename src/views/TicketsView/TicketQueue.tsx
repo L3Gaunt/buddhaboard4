@@ -10,14 +10,18 @@ const getFiltersFromURL = () => {
 
   return {
     assignedTo: params.get('assignedTo')?.split(',').filter(Boolean) || [],
-    status: params.get('status')?.split(',').filter(Boolean) || [],
-    priority: params.get('priority')?.split(',').filter(Boolean) || [],
+    status: (params.get('status')?.split(',').filter(Boolean) || []) as TicketStatus[],
+    priority: (params.get('priority')?.split(',').filter(Boolean) || []) as TicketPriority[],
     searchQuery: params.get('search') || '',
   };
 };
 
 // Helper function to update URL parameters
-const updateURLWithFilters = (filters: { assignedTo: string[]; status: string[]; priority: string[]; }, searchQuery: string) => {
+const updateURLWithFilters = (filters: { 
+  assignedTo: string[]; 
+  status: TicketStatus[]; 
+  priority: TicketPriority[]; 
+}, searchQuery: string) => {
   const params = new URLSearchParams();
   if (filters.assignedTo.length) params.set('assignedTo', filters.assignedTo.join(','));
   if (filters.status.length) params.set('status', filters.status.join(','));
@@ -41,13 +45,15 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, is
   const [searchQuery, setSearchQuery] = useState(savedFilters.searchQuery || "");
   
   // Initialize filters from URL or defaults
-  const [filters, setFilters] = useState(() => {
-    return {
-      assignedTo: currentAgent ? [currentAgent.id] : [],
-      status: [TicketStatus.OPEN, TicketStatus.WAITING_AGENT_REPLY],
-      priority: [],
-    };
-  });
+  const [filters, setFilters] = useState<{
+    assignedTo: string[];
+    status: TicketStatus[];
+    priority: TicketPriority[];
+  }>(() => ({
+    assignedTo: currentAgent ? [currentAgent.id] : [],
+    status: [TicketStatus.OPEN, TicketStatus.WAITING_AGENT_REPLY],
+    priority: [],
+  }));
 
   // Update URL when filters or search query change
   useEffect(() => {
