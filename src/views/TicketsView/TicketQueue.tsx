@@ -41,19 +41,12 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, is
   const [searchQuery, setSearchQuery] = useState(savedFilters.searchQuery || "");
   
   // Initialize filters from URL or defaults
-  const [filters, setFilters] = useState<{
-    assignedTo: string[];
-    status: string[];
-    priority: string[];
-  }>(() => {
-    const defaultFilters = {
-      assignedTo: savedFilters.assignedTo.length ? savedFilters.assignedTo : 
-                 (!isCustomerView && currentAgent ? [currentAgent.id] : []),
-      status: savedFilters.status.length ? savedFilters.status : 
-             (isCustomerView ? [] : [TicketStatus.OPEN, TicketStatus.WAITING_AGENT_REPLY]),
-      priority: savedFilters.priority,
+  const [filters, setFilters] = useState(() => {
+    return {
+      assignedTo: currentAgent ? [currentAgent.id] : [],
+      status: [TicketStatus.OPEN, TicketStatus.WAITING_AGENT_REPLY],
+      priority: [],
     };
-    return defaultFilters;
   });
 
   // Update URL when filters or search query change
