@@ -50,15 +50,17 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, is
     status: TicketStatus[];
     priority: TicketPriority[];
   }>(() => ({
-    assignedTo: savedFilters.assignedTo.length > 0 ? savedFilters.assignedTo : (currentAgent ? [currentAgent.id] : []),
-    status: savedFilters.status.length > 0 ? savedFilters.status : [TicketStatus.OPEN, TicketStatus.WAITING_AGENT_REPLY],
-    priority: savedFilters.priority,
+    assignedTo: isCustomerView ? [] : (savedFilters.assignedTo.length > 0 ? savedFilters.assignedTo : (currentAgent ? [currentAgent.id] : [])),
+    status: isCustomerView ? [] : (savedFilters.status.length > 0 ? savedFilters.status : [TicketStatus.OPEN, TicketStatus.WAITING_AGENT_REPLY]),
+    priority: isCustomerView ? [] : savedFilters.priority,
   }));
 
   // Update URL when filters or search query change
   useEffect(() => {
-    updateURLWithFilters(filters, searchQuery);
-  }, [filters, searchQuery]);
+    if (!isCustomerView) {
+      updateURLWithFilters(filters, searchQuery);
+    }
+  }, [filters, searchQuery, isCustomerView]);
 
   // Helper functions for colors
   const getStatusColor = (status: string): string => {
@@ -225,6 +227,18 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, is
           getPriorityColor={getPriorityColor}
           FilterChips={FilterChips}
         />
+      )}
+
+      {isCustomerView && (
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search tickets..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
       )}
 
       <div className="space-y-4 overflow-auto">
