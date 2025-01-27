@@ -126,6 +126,12 @@ export function UserTicketView() {
             <div className="space-x-4">
               <Button
                 variant="outline"
+                onClick={() => window.history.back()}
+              >
+                Go Back
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() => {
                   setShowSuccess(false);
                   setFormData({
