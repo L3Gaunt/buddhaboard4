@@ -115,6 +115,14 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
               <div className="flex items-center space-x-4">
+                {!currentAgent && (
+                  <Button
+                    onClick={() => window.location.href = '/submit-ticket'}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Submit a Ticket
+                  </Button>
+                )}
                 {currentAgent && (
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-500">Available</span>
@@ -255,6 +263,14 @@ const Layout: React.FC<ExtendedLayoutProps> = ({
           <div className="border-t border-gray-200 pb-3 pt-4">
             <div className="space-y-3 px-4">
               <div className="flex items-center justify-between">
+                {!currentAgent && (
+                  <Button
+                    onClick={() => window.location.href = '/submit-ticket'}
+                    className="bg-blue-600 hover:bg-blue-700 text-white w-full"
+                  >
+                    Submit a Ticket
+                  </Button>
+                )}
                 {currentAgent && (
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-500">Available</span>

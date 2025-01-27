@@ -221,12 +221,6 @@ export const TicketQueue: FC<TicketQueueProps> = ({ tickets, setActiveTicket, is
           <span className="text-sm text-gray-500">
             {filteredTickets.length} tickets
           </span>
-          <button
-            onClick={() => window.location.href = '/submit-ticket'}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium"
-          >
-            Submit New Ticket
-          </button>
         </div>
       </div>
 
