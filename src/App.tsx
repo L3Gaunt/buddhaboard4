@@ -301,6 +301,9 @@ export default function App() {
   // Add handleLogout function
   const handleLogout = async () => {
     try {
+      if (currentAgent) {
+        await updateAgentStatus(currentAgent.id, AgentStatus.OFFLINE);
+      }
       await signOut();
       setIsAuthenticated(false);
       setCurrentAgent(null);
