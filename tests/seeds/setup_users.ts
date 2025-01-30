@@ -1,36 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 import { beforeAll } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../src/types/supabase';
+import type { Database } from '../../src/types/supabase';
 
 let supabase: SupabaseClient<Database>;
 
-async function cleanupTestData() {
-  try {
-    // First clean up database records
-    await supabase.from('tickets').delete().neq('number', 0);
-    await supabase.from('users').delete().neq('id', '');
-    await supabase.from('agents').delete().neq('id', '');
-
-    // Then clean up auth users
-    const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
-    if (listError) {
-      console.error('Error listing users:', listError);
-      return;
-    }
-
-    for (const user of users || []) {
-      if (user.email?.includes('@example.com') || user.email?.includes('@buddhaboard.com')) {
-        const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id);
-        if (deleteError) {
-          console.error(`Error deleting user ${user.email}:`, deleteError);
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Error in cleanupTestData:', error);
-  }
-}
 
 beforeAll(async () => {
   // Make sure to use service role key for admin operations
@@ -44,9 +18,6 @@ beforeAll(async () => {
       }
     }
   );
-  
-  // Clean up any existing test data before starting
-  await cleanupTestData();
 });
 
 export const testUsers = {

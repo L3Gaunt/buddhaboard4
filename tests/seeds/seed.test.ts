@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { supabase, testUsers, createConfirmedUser } from './setup';
+import { supabase, testUsers, createConfirmedUser } from './setup_users';
 import type { Database, Json } from '../../src/types/supabase';
 
 type TicketInsert = Database['public']['Tables']['tickets']['Insert'];

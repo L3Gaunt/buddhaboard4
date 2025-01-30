@@ -7,7 +7,7 @@ dotenv.config();
 export default defineConfig({
   test: {
     environment: 'node',
-    setupFiles: process.env.SEED ? ['./tests/seeds/setup.ts'] : ['./tests/setup.ts'],
+    setupFiles: process.env.SEED ? ['./tests/seeds/setup_users.ts'] : ['./tests/setup.ts'],
     include: process.env.SEED ? ['./tests/seeds/**/*.test.ts'] : ['./tests/**/*.test.ts'],
     exclude: process.env.SEED ? [] : ['./tests/seeds/**/*'],
     globals: true,
