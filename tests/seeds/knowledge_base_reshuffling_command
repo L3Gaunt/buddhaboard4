@@ -1,0 +1,1 @@
+head -n 1 tests/seeds/knowledge_base_with_conversations.csv > temp_shuffled.csv && tail -n +2 tests/seeds/knowledge_base_with_conversations.csv | sort -R >> temp_shuffled.csv && mv temp_shuffled.csv tests/seeds/knowledge_base_with_conversations_reshuffled.csv
