@@ -1,6 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { corsHeaders } from '../_shared/cors.ts'
+import { generateArticleEmbeddings } from './embeddings.ts'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -111,7 +112,7 @@ const deleteUnusedTags = async (supabase: any) => {
         deletedCount: deletedData?.length || 0,
         deletedTags: deletedData
       });
-    }
+  }
   } else {
     console.log('No unused tags found to delete');
   }
@@ -336,6 +337,10 @@ serve(async (req) => {
               throw articleError;
             }
 
+            // Start processing embeddings asynchronously in the background
+            console.log('Starting background embeddings generation for article:', createdArticle.id);
+            generateArticleEmbeddings(supabase, createdArticle.id);
+
             // Create new tags if any
             let allTagIds = tags || [];
             if (newTags && newTags.length > 0) {
@@ -448,6 +453,8 @@ serve(async (req) => {
                 .single()
 
               if (error) throw error
+
+              // Remove unnecessary embeddings check since we're only updating tags
               return new Response(JSON.stringify(data), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 200,
@@ -463,6 +470,14 @@ serve(async (req) => {
               .select()
 
             if (error) throw error
+
+            // Only process embeddings if content, title, or description were actually updated
+            const hasContentChanges = 'content' in article || 'title' in article || 'description' in article
+            if (hasContentChanges) {
+              console.log('Starting background embeddings generation for updated article:', id);
+              generateArticleEmbeddings(supabase, id);
+            }
+
             return new Response(JSON.stringify(data[0]), {
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
               status: 200,
