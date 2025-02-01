@@ -1,7 +1,7 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { corsHeaders } from '../_shared/cors.ts'
-import { generateArticleEmbeddings } from './embeddings.ts'
+import { generateArticleEmbeddings, searchArticlesByEmbeddings } from './embeddings.ts'
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -536,6 +536,30 @@ serve(async (req) => {
             }
             console.log('Tag created:', data);
             return new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } });
+          }
+        }
+      }
+
+      case 'search': {
+        switch (method) {
+          case 'POST': {
+            const { query, limit = 10, similarityThreshold = 0.5 } = body.body;
+            
+            if (!query) {
+              throw new Error('Search query is required');
+            }
+
+            const results = await searchArticlesByEmbeddings(
+              supabase,
+              query,
+              limit,
+              similarityThreshold
+            );
+
+            return new Response(JSON.stringify(results), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              status: 200,
+            });
           }
         }
       }

@@ -1,29 +1,23 @@
-import { beforeAll } from 'vitest'
-import { createClient } from '@supabase/supabase-js'
+import { config } from 'dotenv';
+import { resolve } from 'path';
 
-beforeAll(async () => {
-  // Verify environment variables
-  const requiredEnvVars = [
-    'SUPABASE_URL',
-    'SUPABASE_SERVICE_ROLE_KEY',
-    'SUPABASE_ANON_KEY'
-  ]
+// Load environment variables from .env file
+config({ path: resolve(__dirname, '../.env') });
 
-  for (const envVar of requiredEnvVars) {
-    if (!process.env[envVar]) {
-      throw new Error(`Missing required environment variable: ${envVar}`)
-    }
+// Ensure required environment variables are set
+const requiredEnvVars = [
+  'VITE_SUPABASE_URL',
+  'VITE_SUPABASE_ANON_KEY',
+  'SUPABASE_SERVICE_ROLE_KEY',
+  'OPENAI_API_KEY'
+];
+
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    throw new Error(`Missing required environment variable: ${envVar}`);
   }
+}
 
-  // Initialize Supabase client with service role key
-  const supabase = createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-
-  // Verify database connection
-  const { error } = await supabase.from('kb_articles').select('id').limit(1)
-  if (error) {
-    throw new Error(`Failed to connect to database: ${error.message}`)
-  }
-}) 
+// Set default timeout for tests
+const TIMEOUT = 30000;
+export { TIMEOUT }; 

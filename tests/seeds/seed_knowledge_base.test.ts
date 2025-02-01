@@ -19,6 +19,28 @@ interface Article {
 }
 
 describe('Knowledge Base Seeding', () => {
+  beforeAll(async () => {
+    // Verify that the database is ready by checking for required tables
+    const { error: tableError } = await supabase
+      .from('agents')
+      .select('id')
+      .limit(1);
+
+    if (tableError) {
+      throw new Error(`Database not ready: ${tableError.message}. Make sure to run seed.test.ts first.`);
+    }
+
+    // Also verify kb_articles table exists
+    const { error: kbError } = await supabase
+      .from('kb_articles')
+      .select('id')
+      .limit(1);
+
+    if (kbError) {
+      throw new Error(`Knowledge base tables not ready: ${kbError.message}. Make sure to run seed.test.ts first.`);
+    }
+  });
+
   it('should seed the knowledge base with articles', async () => {
     try {
       // Create an admin if not exists
@@ -67,12 +89,15 @@ describe('Knowledge Base Seeding', () => {
         throw profileError;
       }
 
-      // Get the session for authentication
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) throw sessionError;
+      // Get a fresh session token
+      const { data: { session }, error: sessionError } = await supabase.auth.signInWithPassword({
+        email: adminEmail,
+        password: adminPassword,
+      });
 
-      if (!session?.access_token) {
-        throw new Error('No access token available');
+      if (sessionError || !session?.access_token) {
+        console.error('Error getting session:', sessionError);
+        throw new Error(sessionError?.message || 'Failed to get access token');
       }
 
       // Read and parse CSV file
@@ -93,7 +118,7 @@ describe('Knowledge Base Seeding', () => {
 
       // Insert articles using the API
       for (const article of articles) {
-        const response = await fetch(`${process.env.SUPABASE_URL}/functions/v1/knowledge-base`, {
+        const response = await fetch(`${process.env.VITE_SUPABASE_URL}/functions/v1/knowledge-base`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
@@ -117,7 +142,7 @@ describe('Knowledge Base Seeding', () => {
       }
 
       // Verify articles were inserted using the API
-      const response = await fetch(`${process.env.SUPABASE_URL}/functions/v1/knowledge-base`, {
+      const response = await fetch(`${process.env.VITE_SUPABASE_URL}/functions/v1/knowledge-base`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,

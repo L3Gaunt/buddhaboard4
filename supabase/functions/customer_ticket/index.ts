@@ -1,6 +1,7 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
+import { generateAgentResponse } from './langchain.ts'
 
 serve(async (req) => {
   // Handle CORS
@@ -109,7 +110,14 @@ serve(async (req) => {
         console.log('Current open tickets:', leastBusyAgent[0].open_tickets)
       }
 
-      // Create the ticket
+      // Generate AI response using knowledge base
+      const agentResponse = await generateAgentResponse(
+        supabaseAdmin,
+        title,
+        firstMessage
+      );
+
+      // Create the ticket with both customer message and AI response
       const { data, error } = await supabaseAdmin
         .from('tickets')
         .insert({
@@ -117,12 +125,28 @@ serve(async (req) => {
           priority,
           status: 'open',
           customer_id: user.id,
-          conversation: [{
-            id: `msg_${Date.now()}`,
-            isFromCustomer: true,
-            message: firstMessage,
-            timestamp: new Date().toISOString()
-          }],
+          conversation: [
+            {
+              id: `msg_${Date.now()}`,
+              isFromCustomer: true,
+              message: firstMessage,
+              timestamp: new Date().toISOString()
+            },
+            {
+              id: `msg_${Date.now() + 1}`,
+              isFromCustomer: false,
+              message: agentResponse.message,
+              timestamp: new Date().toISOString(),
+              metadata: {
+                is_ai_response: true,
+                relevant_articles: agentResponse.relevantArticles.map(article => ({
+                  id: article.id,
+                  title: article.title,
+                  similarity: article.similarity
+                }))
+              }
+            }
+          ],
           assigned_to: leastBusyAgent?.[0]?.agent_id || null
         })
         .select()
