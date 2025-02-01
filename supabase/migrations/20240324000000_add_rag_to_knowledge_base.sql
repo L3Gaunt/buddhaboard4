@@ -20,7 +20,7 @@ WHERE is_metadata_embedding_in_progress = true;
 -- Create a function to search knowledge base by metadata similarity
 CREATE OR REPLACE FUNCTION search_kb_articles(
   query_embedding vector(1536),
-  similarity_threshold float DEFAULT 0.5,
+  similarity_threshold float DEFAULT 0.5, -- not active anymore
   match_count int DEFAULT 10
 )
 RETURNS TABLE (
@@ -44,7 +44,7 @@ BEGIN
     1 - (kb.metadata_embedding <=> query_embedding) as similarity
   FROM kb_articles kb
   WHERE 
-    TRUE kb.metadata_embedding IS NOT NULL AND
+    TRUE kb.metadata_embedding IS NOT NULL
     --AND 1 - (kb.metadata_embedding <=> query_embedding) > similarity_threshold
     --AND kb.status = 'published'
   ORDER BY kb.metadata_embedding <=> query_embedding
