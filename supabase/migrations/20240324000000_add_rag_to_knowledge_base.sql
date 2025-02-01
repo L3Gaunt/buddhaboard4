@@ -44,7 +44,7 @@ BEGIN
     1 - (kb.metadata_embedding <=> query_embedding) as similarity
   FROM kb_articles kb
   WHERE 
-    TRUE --kb.metadata_embedding IS NOT NULL AND
+    TRUE kb.metadata_embedding IS NOT NULL AND
     --AND 1 - (kb.metadata_embedding <=> query_embedding) > similarity_threshold
     --AND kb.status = 'published'
   ORDER BY kb.metadata_embedding <=> query_embedding
